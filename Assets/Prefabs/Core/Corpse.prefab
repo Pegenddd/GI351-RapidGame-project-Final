@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8981457676303853838}
+  - component: {fileID: 8773767622249869969}
   - component: {fileID: 6904623048361921854}
   - component: {fileID: 5839847048826768709}
-  - component: {fileID: 8773767622249869969}
   m_Layer: 0
   m_Name: Corpse
   m_TagString: Untagged
@@ -34,6 +34,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8773767622249869969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9098124007835951650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 930368463c106ae40a73f7bfe04f2ecf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NecroDefense::NecroDefense.Characters.Enemies.Corpse
+  entityName: Entity
+  sourceType: 0
+  soulCost: 20
+  decayDuration: 25
 --- !u!212 &6904623048361921854
 SpriteRenderer:
   serializedVersion: 3
@@ -130,19 +146,3 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.6
---- !u!114 &8773767622249869969
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9098124007835951650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 930368463c106ae40a73f7bfe04f2ecf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: NecroDefense::NecroDefense.Characters.Enemies.Corpse
-  entityName: Entity
-  sourceType: 0
-  soulCost: 5
-  decayDuration: 25

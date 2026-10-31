@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -14,11 +15,8 @@ namespace NecroDefense.Characters.Player
 {
     /// <summary>
     /// The Player Character: Necromancer Mage.
-    /// Demonstrates:
-    /// - Inheritance: Inherits from Unit.
-    /// - Encapsulation: Souls resource, attack cooldowns, input bindings.
-    /// - Polymorphism: Overrides ExecuteAttack (Survivor-like auto bolt) and Die().
-    /// - Core Mechanic: Raises fallen enemies from corpses into allied minions.
+    /// Features: Click to cast, locks position on initial click, stops moving and casts for exact duration, 
+    /// and automatically regenerates souls over time (+1 every 1 second).
     /// </summary>
     public class PlayerNecromancer : Unit
     {
@@ -32,25 +30,39 @@ namespace NecroDefense.Characters.Player
         [Tooltip("If enabled, automatically raises dead when standing near a corpse")]
         [SerializeField] private bool autoResurrect = false;
 
-        [Header("Combat & Spells (Editable in Inspector)")]
-        [Tooltip("Prefab for Homing Dark Bolt (leave empty for procedural fallback)")]
-        [SerializeField] private GameObject darkBoltPrefab;
-        [Tooltip("Maximum range for auto-targeting and firing Dark Bolt")]
+        [Header("Necromancy Regeneration Settings")]
+        [Tooltip("Amount of soul regenerated per interval")]
+        [SerializeField] private int soulRegenAmount = 1;
+        [Tooltip("Time interval in seconds for soul regeneration")]
+        [SerializeField] private float regenInterval = 1.0f;
+
+        [Header("Necromancy Risk Settings")]
+        [Tooltip("Success rate probability for resurrection (0.0 to 1.0, e.g., 0.4 = 40% chance)")]
+        [Range(0f, 1f)]
+        [SerializeField] private float resurrectionSuccessRate = 0.4f;
+
+        [Header("Area of Effect (AoE) Wave Spell Settings")]
+        [Tooltip("Prefab for AoE explosion effect (leave empty for procedural wave fallback)")]
+        [SerializeField] private GameObject aoeExplosionPrefab;
+        [Tooltip("Maximum range for casting AoE spell")]
         [SerializeField] private float spellRange = 8f;
-        [Tooltip("Visual scale multiplier for Dark Bolt (Ball)")]
-        [SerializeField] private float boltVisualScale = 1.3f;
-        [Tooltip("Enable manual click-to-fire on Left Click")]
-        [SerializeField] private bool allowManualFire = true;
+        [Tooltip("Radius of the AoE explosion damage and visual wave")]
+        [SerializeField] private float aoeRadius = 3.5f;
+        [Tooltip("Exact time required to stop and cast the spell before triggering")]
+        [SerializeField] private float castDuration = 1.0f;
 
         private int _currentSouls;
-        private ITargetingStrategy _targetStrategy;
         private Vector2 _inputDirection;
+
+        // AoE casting states
+        private bool isCasting = false;
+        private Vector2 targetCastPosition;
 
         public int CurrentSouls => _currentSouls;
         public int MaxSouls => maxSouls;
         public float ResurrectionRadius => resurrectionRadius;
 
-        public event Action<int, int> OnSoulsChanged; // current, max
+        public event Action<int, int> OnSoulsChanged;
         public event Action<IResurrectable> OnMinionResurrected;
 
         protected override void Awake()
@@ -58,20 +70,15 @@ namespace NecroDefense.Characters.Player
             base.Awake();
             SetFaction(Faction.Player);
             _currentSouls = Mathf.Clamp(initialSouls, 0, maxSouls);
-            _targetStrategy = new TargetNearestHostileStrategy();
-
-#if UNITY_EDITOR
-            if (darkBoltPrefab == null)
-            {
-                darkBoltPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Projectiles/Proj_DarkBolt.prefab");
-            }
-#endif
         }
 
         protected override void Start()
         {
             base.Start();
             OnSoulsChanged?.Invoke(_currentSouls, maxSouls);
+
+            // เริ่มต้นระบบรีมานารายวินาที
+            StartCoroutine(SoulRegenerationRoutine());
         }
 
         private void Update()
@@ -79,14 +86,20 @@ namespace NecroDefense.Characters.Player
             if (!IsAlive) return;
 
             ReadInput();
-            HandleManualFireInput();
-            HandleAutoAttack();
+            HandleAoeSpellInput();
             HandleResurrectionInput();
         }
 
         private void FixedUpdate()
         {
             if (!IsAlive) return;
+
+            // ล็อกห้ามเดินเด็ดขาดในระหว่างร่ายเวท
+            if (isCasting)
+            {
+                StopMovement();
+                return;
+            }
 
             if (_inputDirection.sqrMagnitude > 0.01f)
             {
@@ -143,9 +156,6 @@ namespace NecroDefense.Characters.Player
             }
         }
 
-        /// <summary>
-        /// Scans for nearby corpses and resurrects them if player has enough souls.
-        /// </summary>
         public void TryRaiseDead()
         {
             Collider2D[] hits = Physics2D.OverlapCircleAll(Position, resurrectionRadius);
@@ -153,143 +163,178 @@ namespace NecroDefense.Characters.Player
             {
                 if (hit.TryGetComponent<Corpse>(out var corpse))
                 {
+                    // เช็กเงื่อนไขมานาตาม SoulCost ของซากศพตัวนั้นๆ (ซึ่งรับค่ามาจาก Resurrection Cost ของศัตรูแล้ว)
                     if (corpse.CanBeResurrected && _currentSouls >= corpse.SoulCost)
                     {
                         SpendSouls(corpse.SoulCost);
+                        bool isSuccess = UnityEngine.Random.value <= resurrectionSuccessRate;
 
-                        // Polymorphic factory creates the appropriate Minion for the corpse type
-                        if (MinionFactory.Instance != null)
+                        if (isSuccess)
                         {
-                            MinionFactory.Instance.CreateMinionFromCorpse(corpse);
+                            if (MinionFactory.Instance != null)
+                            {
+                                MinionFactory.Instance.CreateMinionFromCorpse(corpse);
+                            }
+                            OnMinionResurrected?.Invoke(corpse);
+                        }
+                        else
+                        {
+                            Debug.Log("<color=red>[Necromancy]</color> Resurrection failed! The corpse disintegrated into dust.");
                         }
 
                         corpse.OnResurrected();
-                        OnMinionResurrected?.Invoke(corpse);
-                        break; // Resurrect one per pulse/press for pacing
+                        break;
                     }
                 }
             }
         }
 
-        private void HandleManualFireInput()
+        /// <summary>
+        /// Coroutine to automatically regenerate souls over time.
+        /// </summary>
+        private IEnumerator SoulRegenerationRoutine()
         {
-            if (!allowManualFire || !CanAttack) return;
-
-            bool firePressed = false;
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            while (true)
             {
-                firePressed = true;
+                yield return new WaitForSeconds(regenInterval);
+
+                if (IsAlive && _currentSouls < maxSouls)
+                {
+                    AddSouls(soulRegenAmount);
+                }
+            }
+        }
+
+        private void HandleAoeSpellInput()
+        {
+            if (isCasting) return;
+
+#if ENABLE_INPUT_SYSTEM
+            bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+#else
+            bool mousePressed = Input.GetMouseButtonDown(0);
+#endif
+
+            if (mousePressed)
+            {
+                targetCastPosition = GetMouseWorldPosition();
+                StartCoroutine(CastSpellRoutine());
+            }
+        }
+
+        private Vector2 GetMouseWorldPosition()
+        {
+            Vector3 mouseWorld = Vector3.zero;
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null && Camera.main != null)
+            {
+                Vector2 screenPos = Mouse.current.position.ReadValue();
+                mouseWorld = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
             }
 #else
-            if (Input.GetMouseButtonDown(0))
+            if (Camera.main != null)
             {
-                firePressed = true;
+                mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             }
 #endif
-            if (firePressed)
-            {
-                Vector3 mouseWorld = Vector3.zero;
-#if ENABLE_INPUT_SYSTEM
-                if (Mouse.current != null && Camera.main != null)
-                {
-                    Vector2 screenPos = Mouse.current.position.ReadValue();
-                    mouseWorld = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
-                }
-#else
-                if (Camera.main != null)
-                {
-                    mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                }
-#endif
-                mouseWorld.z = 0f;
-                Vector2 dir = ((Vector2)mouseWorld - (Vector2)Position).normalized;
-                if (dir.sqrMagnitude > 0.001f)
-                {
-                    // Target clicked hostile if any, else fire straight bolt in click direction
-                    ITargetable clickedTarget = null;
-                    Collider2D hit = Physics2D.OverlapPoint(mouseWorld);
-                    if (hit != null && hit.TryGetComponent<ITargetable>(out var targetable))
-                    {
-                        if (targetable.Team != Team && targetable.IsValidTarget)
-                        {
-                            clickedTarget = targetable;
-                        }
-                    }
+            mouseWorld.z = 0f;
+            return mouseWorld;
+        }
 
-                    _lastAttackTime = Time.time;
-                    FireDarkBolt(dir, clickedTarget);
-                }
+        private IEnumerator CastSpellRoutine()
+        {
+            isCasting = true;
+            float timer = 0f;
+
+            while (timer < castDuration)
+            {
+                timer += Time.deltaTime;
+                yield return null;
             }
+
+            TriggerAoeExplosion(targetCastPosition);
+
+            isCasting = false;
+            _lastAttackTime = Time.time;
         }
 
-        /// <summary>
-        /// Survivor-like auto-attack: finds nearest hostile and fires Dark Bolt.
-        /// </summary>
-        private void HandleAutoAttack()
+        private void TriggerAoeExplosion(Vector2 centerPosition)
         {
-            if (!CanAttack) return;
-
-            ITargetable target = _targetStrategy.FindTarget(this, spellRange);
-            if (target != null && target.IsValidTarget)
+            if (aoeExplosionPrefab != null)
             {
-                Attack(target);
-            }
-        }
-
-        /// <summary>
-        /// Polymorphic attack implementation: Spawns Homing Dark Bolt towards target.
-        /// </summary>
-        protected override void ExecuteAttack(ITargetable target)
-        {
-            Vector2 direction = (target.Position - Position).normalized;
-            FireDarkBolt(direction, target);
-        }
-
-        public void FireDarkBolt(Vector2 direction, ITargetable target)
-        {
-            GameObject boltObj;
-            if (darkBoltPrefab != null)
-            {
-                boltObj = Instantiate(darkBoltPrefab, Position, Quaternion.identity);
+                Instantiate(aoeExplosionPrefab, centerPosition, Quaternion.identity);
             }
             else
             {
-                // Procedural projectile fallback if no prefab assigned
-                boltObj = Utils.ProceduralVisuals.CreateProjectileGameObject("DarkBolt", Color.white);
-                boltObj.transform.position = Position;
-            }
+                GameObject waveObj = new GameObject("AoeWave_ProceduralCircle");
+                waveObj.transform.position = centerPosition;
+                waveObj.transform.localScale = Vector3.zero;
 
-            // Ensure 1-bit visual sprite is guaranteed to render
-            if (boltObj.TryGetComponent<SpriteRenderer>(out var sr))
-            {
-                if (sr.sprite == null)
-                {
-                    sr.sprite = Utils.ProceduralVisuals.GetProjectileSprite("DarkBolt");
-                }
+                SpriteRenderer sr = waveObj.AddComponent<SpriteRenderer>();
+                sr.sprite = CreateProceduralCircleSprite();
                 sr.color = Color.white;
-                sr.sortingOrder = 12;
+                sr.sortingOrder = 15;
+
+                var waveVisual = waveObj.AddComponent<AoeWaveVisual>();
+                waveVisual.Initialize(aoeRadius * 2f, 0.4f);
             }
 
-            if (boltVisualScale > 0.05f)
+            Collider2D[] hits = Physics2D.OverlapCircleAll(centerPosition, aoeRadius);
+            foreach (var hit in hits)
             {
-                boltObj.transform.localScale = Vector3.one * boltVisualScale;
-            }
-
-            if (boltObj.TryGetComponent<HomingProjectile>(out var homing))
-            {
-                homing.EnsureVisuals();
-                homing.Initialize(direction, AttackPower, DamageType.Necrotic, Team, this);
-                if (target != null) homing.SetTarget(target);
-            }
-            else if (boltObj.TryGetComponent<Projectile>(out var proj))
-            {
-                proj.EnsureVisuals();
-                proj.Initialize(direction, AttackPower, DamageType.Necrotic, Team, this);
+                if (hit.TryGetComponent<IDamageable>(out var damageable) &&
+                    hit.TryGetComponent<ITargetable>(out var targetable))
+                {
+                    if (targetable.Team != Team && targetable.IsValidTarget)
+                    {
+                        DamageInfo info = new DamageInfo(AttackPower, DamageType.Necrotic, this, centerPosition, 0.5f);
+                        damageable.TakeDamage(info);
+                    }
+                }
             }
         }
 
-        public void ConfigureStats(float hp, float speed, float power, float cooldown, float range, int maxSoul, int initSoul, float resurrectRadius, float boltScale, bool manualFire)
+        private Sprite CreateProceduralCircleSprite()
+        {
+            int textureSize = 64;
+            Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
+            texture.filterMode = FilterMode.Bilinear;
+
+            Color transparentColor = new Color(0, 0, 0, 0);
+            Color whiteColor = Color.white;
+            float center = textureSize / 2f;
+            float radius = center - 2f;
+
+            for (int x = 0; x < textureSize; x++)
+            {
+                for (int y = 0; y < textureSize; y++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                    if (dist <= radius && dist >= radius - 4f)
+                    {
+                        texture.SetPixel(x, y, whiteColor);
+                    }
+                    else
+                    {
+                        texture.SetPixel(x, y, transparentColor);
+                    }
+                }
+            }
+            texture.Apply();
+
+            return Sprite.Create(texture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        protected override void ExecuteAttack(ITargetable target)
+        {
+            if (target != null)
+            {
+                targetCastPosition = target.Position;
+                StartCoroutine(CastSpellRoutine());
+            }
+        }
+
+        public void ConfigureStats(float hp, float speed, float power, float cooldown, float range, int maxSoul, int initSoul, float resurrectRadius, float boltScale)
         {
             SetMaxHealth(hp);
             SetMoveSpeed(speed);
@@ -299,8 +344,6 @@ namespace NecroDefense.Characters.Player
             maxSouls = maxSoul;
             _currentSouls = Mathf.Clamp(initSoul, 0, maxSouls);
             resurrectionRadius = resurrectRadius;
-            boltVisualScale = boltScale;
-            allowManualFire = manualFire;
             OnSoulsChanged?.Invoke(_currentSouls, maxSouls);
         }
 
@@ -325,7 +368,6 @@ namespace NecroDefense.Characters.Player
         protected override void Die()
         {
             base.Die();
-            // Let GameManager handle Game Over
         }
 
         private void OnDrawGizmosSelected()
@@ -336,5 +378,41 @@ namespace NecroDefense.Characters.Player
             Gizmos.DrawWireSphere(transform.position, spellRange);
         }
     }
-}
 
+    public class AoeWaveVisual : MonoBehaviour
+    {
+        private float targetScale;
+        private float duration;
+        private float elapsed;
+        private SpriteRenderer sr;
+
+        public void Initialize(float maxScale, float animDuration)
+        {
+            targetScale = maxScale;
+            duration = animDuration;
+            elapsed = 0f;
+            sr = GetComponent<SpriteRenderer>();
+        }
+
+        private void Update()
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            float currentScale = Mathf.Lerp(0f, targetScale, t);
+            transform.localScale = Vector3.one * currentScale;
+
+            if (sr != null)
+            {
+                Color c = sr.color;
+                c.a = Mathf.Lerp(1f, 0f, t);
+                sr.color = c;
+            }
+
+            if (elapsed >= duration)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+}

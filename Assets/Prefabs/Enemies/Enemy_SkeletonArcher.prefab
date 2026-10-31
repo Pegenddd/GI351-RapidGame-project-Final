@@ -181,6 +181,6 @@ MonoBehaviour:
   damageFlashDuration: 0.08
   enemyType: 1
   soulYield: 2
-  resurrectionCost: 5
+  resurrectionCost: 20
   corpsePrefab: {fileID: 9098124007835951650, guid: 9e2bf4dac0a58264291ad4b11a3adf35, type: 3}
   arrowPrefab: {fileID: 4951839615318127066, guid: 5c79a7e078e9e3148a30f96b025f7dd5, type: 3}

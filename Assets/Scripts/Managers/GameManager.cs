@@ -44,7 +44,7 @@ namespace NecroDefense.Managers
         [SerializeField] private float playerBoltPower = 15f;
         [Tooltip("Attack cooldown interval (seconds between Dark Bolt casts)")]
         [SerializeField] private float playerAttackInterval = 0.8f;
-        [Tooltip("Range within which Dark Bolt auto-targets enemies")]
+        [Tooltip("Range within which Dark Bolt targets enemies")]
         [SerializeField] private float playerSpellRange = 8.5f;
         [Tooltip("Maximum soul essence capacity")]
         [SerializeField] private int playerMaxSouls = 100;
@@ -54,8 +54,6 @@ namespace NecroDefense.Managers
         [SerializeField] private float playerResurrectRadius = 5f;
         [Tooltip("Size scale of the Dark Bolt magical ball")]
         [SerializeField] private float playerBoltScale = 1.3f;
-        [Tooltip("Allow firing Dark Bolt with Left Click towards mouse position")]
-        [SerializeField] private bool playerManualFire = true;
 
         [Header("=== 3. CITADEL CORE (DEFENSIVE BASE) ===")]
         [Tooltip("Citadel Core hit points")]
@@ -74,7 +72,7 @@ namespace NecroDefense.Managers
         [SerializeField] private float zombieAttackRange = 1.4f;
         [SerializeField] private float zombieAttackInterval = 1.0f;
         [SerializeField] private int zombieSoulYield = 2;
-        [SerializeField] private int zombieResurrectCost = 4;
+        // (ตัด zombieResurrectCost ออก เพื่อให้ดึงค่าจาก Inspector ของตัวศัตรูโดยตรง ไม่โดนทับ)
 
         [Header("=== 5. ENEMY: SKELETON ARCHER (RANGED) ===")]
         [SerializeField] private float archerMaxHealth = 30f;
@@ -83,7 +81,6 @@ namespace NecroDefense.Managers
         [SerializeField] private float archerAttackRange = 6.5f;
         [SerializeField] private float archerAttackInterval = 1.3f;
         [SerializeField] private int archerSoulYield = 3;
-        [SerializeField] private int archerResurrectCost = 6;
 
         [Header("=== 6. MINION: ALLIED ZOMBIE (MELEE GUARDIAN) ===")]
         [SerializeField] private float minionZombieMaxHealth = 60f;
@@ -195,14 +192,11 @@ namespace NecroDefense.Managers
         }
 #endif
 
-        /// <summary>
-        /// Updates stats of all currently active Enemy and Minion units in the scene in real-time.
-        /// </summary>
         public void UpdateExistingUnits()
         {
             if (!Application.isPlaying || !overrideAllSettings) return;
 
-            var enemies = FindObjectsByType<EnemyUnit>();
+            var enemies = FindObjectsByType<EnemyUnit>(FindObjectsSortMode.None);
             foreach (var enemy in enemies)
             {
                 if (enemy != null && enemy.IsAlive)
@@ -211,7 +205,7 @@ namespace NecroDefense.Managers
                 }
             }
 
-            var minions = FindObjectsByType<MinionUnit>();
+            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
             foreach (var minion in minions)
             {
                 if (minion != null && minion.IsAlive)
@@ -222,9 +216,6 @@ namespace NecroDefense.Managers
             }
         }
 
-        /// <summary>
-        /// Applies centralized GameManager configuration across all live components.
-        /// </summary>
         public void ApplyAllSettings()
         {
             if (!overrideAllSettings) return;
@@ -240,8 +231,7 @@ namespace NecroDefense.Managers
                     playerMaxSouls,
                     playerStartingSouls,
                     playerResurrectRadius,
-                    playerBoltScale,
-                    playerManualFire
+                    playerBoltScale
                 );
             }
 
@@ -266,9 +256,6 @@ namespace NecroDefense.Managers
             }
         }
 
-        /// <summary>
-        /// Centralized configuration applied whenever an Enemy is spawned by EnemyFactory.
-        /// </summary>
         public void ApplyEnemyStats(EnemyUnit enemy, EnemyType type)
         {
             if (!overrideAllSettings || enemy == null) return;
@@ -281,7 +268,7 @@ namespace NecroDefense.Managers
                     enemy.SetAttackPower(zombieAttackPower);
                     enemy.SetAttackRange(zombieAttackRange);
                     enemy.SetAttackInterval(zombieAttackInterval);
-                    enemy.SetSoulParameters(zombieSoulYield, zombieResurrectCost);
+                    // ตัด SetSoulParameters ออก ปล่อยให้ศัตรูใช้ค่า Resurrection Cost จากหน้า Inspector ของตัวเองโดยตรง
                     break;
 
                 case EnemyType.SkeletonArcher:
@@ -290,14 +277,10 @@ namespace NecroDefense.Managers
                     enemy.SetAttackPower(archerAttackPower);
                     enemy.SetAttackRange(archerAttackRange);
                     enemy.SetAttackInterval(archerAttackInterval);
-                    enemy.SetSoulParameters(archerSoulYield, archerResurrectCost);
                     break;
             }
         }
 
-        /// <summary>
-        /// Centralized configuration applied whenever a Minion is resurrected by MinionFactory.
-        /// </summary>
         public void ApplyMinionStats(MinionUnit minion, EnemyType type)
         {
             if (!overrideAllSettings || minion == null) return;
@@ -364,7 +347,7 @@ namespace NecroDefense.Managers
         {
             _currentState = GameState.GameOver;
             OnGameStateChanged?.Invoke(GameState.GameOver, reason);
-            Time.timeScale = gameOverSlowdownScale; // Dramatic slow motion
+            Time.timeScale = gameOverSlowdownScale;
         }
 
         public void SetVictory(string reason)

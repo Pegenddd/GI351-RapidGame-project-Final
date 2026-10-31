@@ -6,11 +6,6 @@ using NecroDefense.Factories;
 
 namespace NecroDefense.Characters.Enemies
 {
-    /// <summary>
-    /// Represents the remains of a fallen enemy on the battlefield.
-    /// Implements IResurrectable for Polymorphic Minion Creation.
-    /// Demonstrates Abstraction & Interface Realization.
-    /// </summary>
     [RequireComponent(typeof(CircleCollider2D))]
     public class Corpse : Entity, IResurrectable
     {
@@ -18,7 +13,7 @@ namespace NecroDefense.Characters.Enemies
         [Tooltip("Original monster type this corpse represents")]
         [SerializeField] private EnemyType sourceType = EnemyType.Zombie;
         [Tooltip("Soul cost required for the Necromancer to reanimate this corpse")]
-        [SerializeField] private int soulCost = 5;
+        [SerializeField] private int soulCost = 20; // <--- ปรับค่า Default ตรงนี้ให้เป็น 20 เผื่อเหนียวไว้ก่อนเลยครับ!
         [Tooltip("Seconds before this corpse decays and disappears from the arena")]
         [SerializeField] private float decayDuration = 25f;
 
@@ -55,7 +50,6 @@ namespace NecroDefense.Characters.Enemies
 
         private void Update()
         {
-            // Visual fade over decay duration
             float elapsed = Time.time - _spawnTime;
             if (elapsed >= decayDuration && !_isResurrected)
             {
@@ -63,7 +57,6 @@ namespace NecroDefense.Characters.Enemies
             }
             else if (_spriteRenderer != null)
             {
-                // Pulsing necromantic soul glow
                 float alpha = Mathf.Lerp(1f, 0.2f, elapsed / decayDuration);
                 float pulse = 0.8f + 0.2f * Mathf.Sin(Time.time * 4f);
                 Color c = _spriteRenderer.color;
@@ -72,28 +65,25 @@ namespace NecroDefense.Characters.Enemies
             }
         }
 
-        public void Initialize(EnemyType type, int cost, Sprite sprite = null)
+        public void Initialize(EnemyType type, int cost, Sprite sprite = null, Color? customColor = null)
         {
             sourceType = type;
-            soulCost = cost;
+
+            // บังคับใช้ค่า cost ที่ส่งมาจากศัตรูทันที ถ้า cost เป็น 0 หรือต่ำกว่า ให้ใช้ 20 แทน
+            soulCost = cost > 0 ? cost : 20;
+
             if (_spriteRenderer != null)
             {
                 _spriteRenderer.sprite = (sprite != null) ? sprite : Utils.ProceduralVisuals.GetCorpseSprite();
-                _spriteRenderer.color = Color.white; // 2-color monochrome
+                _spriteRenderer.color = customColor ?? Color.gray;
             }
         }
 
-        /// <summary>
-        /// Polymorphic trigger called when the Necromancer casts resurrection on this corpse.
-        /// </summary>
         public void OnResurrected()
         {
             if (_isResurrected) return;
             _isResurrected = true;
-
-            // Spawn particle / feedback if desired, then cleanup corpse
             Destroy(gameObject);
         }
     }
 }
-

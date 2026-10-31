@@ -89,7 +89,7 @@ namespace NecroDefense.Managers
 
         private IEnumerator WaveLoop()
         {
-            yield return new WaitForSeconds(initialWaveDelay); // Brief prep time
+            yield return new WaitForSeconds(initialWaveDelay);
 
             while (GameManager.Instance == null || GameManager.Instance.IsGameActive)
             {
@@ -108,7 +108,6 @@ namespace NecroDefense.Managers
                 yield return StartCoroutine(SpawnWaveRoutine(currentConfig));
                 _isSpawningWave = false;
 
-                // Wait until active enemies are cleared
                 while (_activeEnemiesCount > 0)
                 {
                     yield return new WaitForSeconds(0.5f);
@@ -123,11 +122,9 @@ namespace NecroDefense.Managers
         {
             List<EnemyType> spawnQueue = new List<EnemyType>();
 
-            // Strictly 2 enemy archetypes: Zombie (Melee Swarm) and SkeletonArcher (Ranged Attacker)
             for (int i = 0; i < config.zombieCount; i++) spawnQueue.Add(EnemyType.Zombie);
             for (int i = 0; i < config.archerCount; i++) spawnQueue.Add(EnemyType.SkeletonArcher);
 
-            // Shuffle spawn queue
             for (int i = 0; i < spawnQueue.Count; i++)
             {
                 int r = UnityEngine.Random.Range(i, spawnQueue.Count);
@@ -166,13 +163,11 @@ namespace NecroDefense.Managers
 
         private WaveConfig GetWaveConfig(int waveNum)
         {
-            // If defined in custom list, use it
             if (waveNum - 1 < customWaves.Count)
             {
                 return customWaves[waveNum - 1];
             }
 
-            // Otherwise procedural algorithmic scaling for infinite waves (Zombie + Archer only)
             return new WaveConfig
             {
                 waveNumber = waveNum,
@@ -185,4 +180,3 @@ namespace NecroDefense.Managers
         }
     }
 }
-

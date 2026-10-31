@@ -20,7 +20,7 @@ namespace NecroDefense.Characters.Enemies
         [Tooltip("Amount of soul essence granted to player upon defeat")]
         [SerializeField] private int soulYield = 2;
         [Tooltip("Amount of souls required to resurrect this corpse into a minion")]
-        [SerializeField] private int resurrectionCost = 5;
+        [SerializeField] private int resurrectionCost = 20;
         [Tooltip("Corpse prefab spawned upon death (leave empty for procedural fallback)")]
         [SerializeField] private GameObject corpsePrefab;
 
@@ -41,27 +41,23 @@ namespace NecroDefense.Characters.Enemies
         {
             base.Awake();
             SetFaction(Faction.Enemy);
-            // Default strategy: Advance toward Base Crystal or attack Player if near
             _targetingStrategy = new TargetBasePriorityStrategy();
 
-            // Auto-assign 2-color palette sprite if prefab sprite is missing (runtime procedural fallback)
             if (_spriteRenderer != null && _spriteRenderer.sprite == null)
             {
                 _spriteRenderer.sprite = Utils.ProceduralVisuals.GetEnemySprite(enemyType);
-                _spriteRenderer.color = Color.white;
+                _spriteRenderer.color = Color.gray;
             }
         }
 
         protected virtual void Update()
         {
             if (!IsAlive) return;
-
             UpdateAI();
         }
 
         protected virtual void UpdateAI()
         {
-            // Acquire or update target
             if (_currentTarget == null || !_currentTarget.IsValidTarget)
             {
                 _currentTarget = _targetingStrategy.FindTarget(this, 30f);
@@ -96,10 +92,6 @@ namespace NecroDefense.Characters.Enemies
             }
         }
 
-        /// <summary>
-        /// Polymorphic death: Overrides Unit.Die to instantiate a Corpse on the battlefield.
-        /// The corpse can then be resurrected by the Necromancer into a Minion!
-        /// </summary>
         protected override void Die()
         {
             SpawnCorpse();
@@ -116,14 +108,14 @@ namespace NecroDefense.Characters.Enemies
             }
             else
             {
-                // Fallback procedural corpse
                 corpseObj = Utils.ProceduralVisuals.CreateCorpseGameObject(enemyType, resurrectionCost);
                 corpseObj.transform.position = Position;
             }
 
             if (corpseObj.TryGetComponent<Corpse>(out var corpse))
             {
-                corpse.Initialize(enemyType, resurrectionCost, _spriteRenderer != null ? _spriteRenderer.sprite : null);
+                // ส่งค่า resurrectionCost และสีเทา (Color.gray) ไปยังซากศพ
+                corpse.Initialize(enemyType, resurrectionCost, _spriteRenderer != null ? _spriteRenderer.sprite : null, Color.gray);
             }
         }
 
@@ -137,4 +129,3 @@ namespace NecroDefense.Characters.Enemies
         }
     }
 }
-
