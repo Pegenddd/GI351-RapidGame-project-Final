@@ -76,8 +76,6 @@ namespace NecroDefense.Characters.Player
         {
             base.Start();
             OnSoulsChanged?.Invoke(_currentSouls, maxSouls);
-
-            // เริ่มต้นระบบรีมานารายวินาที
             StartCoroutine(SoulRegenerationRoutine());
         }
 
@@ -94,7 +92,6 @@ namespace NecroDefense.Characters.Player
         {
             if (!IsAlive) return;
 
-            // ล็อกห้ามเดินเด็ดขาดในระหว่างร่ายเวท
             if (isCasting)
             {
                 StopMovement();
@@ -156,42 +153,74 @@ namespace NecroDefense.Characters.Player
             }
         }
 
+        /// <summary>
+        /// ตรวจสอบและชุบชีวิตซากศพ โดยเช็กระยะทางเทียบกับ resurrectionRadius อย่างแม่นยำ
+        /// </summary>
         public void TryRaiseDead()
         {
             Collider2D[] hits = Physics2D.OverlapCircleAll(Position, resurrectionRadius);
+
+            Corpse targetCorpse = null;
+            float minDistance = float.MaxValue;
+
             foreach (var hit in hits)
             {
                 if (hit.TryGetComponent<Corpse>(out var corpse))
                 {
-                    // เช็กเงื่อนไขมานาตาม SoulCost ของซากศพตัวนั้นๆ (ซึ่งรับค่ามาจาก Resurrection Cost ของศัตรูแล้ว)
                     if (corpse.CanBeResurrected && _currentSouls >= corpse.SoulCost)
                     {
-                        SpendSouls(corpse.SoulCost);
-                        bool isSuccess = UnityEngine.Random.value <= resurrectionSuccessRate;
-
-                        if (isSuccess)
+                        float distance = Vector2.Distance(Position, corpse.Position);
+                        if (distance <= resurrectionRadius && distance < minDistance)
                         {
-                            if (MinionFactory.Instance != null)
-                            {
-                                MinionFactory.Instance.CreateMinionFromCorpse(corpse);
-                            }
-                            OnMinionResurrected?.Invoke(corpse);
+                            minDistance = distance;
+                            targetCorpse = corpse;
                         }
-                        else
-                        {
-                            Debug.Log("<color=red>[Necromancy]</color> Resurrection failed! The corpse disintegrated into dust.");
-                        }
-
-                        corpse.OnResurrected();
-                        break;
                     }
                 }
             }
+
+            if (targetCorpse != null)
+            {
+                SpendSouls(targetCorpse.SoulCost);
+
+                // เปลี่ยนมาสร้างเอฟเฟกต์คลื่นวงกลมที่ตัวพ่อมด (Position ของ Player) แทน
+                TriggerResurrectionVisual(Position);
+
+                bool isSuccess = UnityEngine.Random.value <= resurrectionSuccessRate;
+
+                if (isSuccess)
+                {
+                    if (MinionFactory.Instance != null)
+                    {
+                        MinionFactory.Instance.CreateMinionFromCorpse(targetCorpse);
+                    }
+                    OnMinionResurrected?.Invoke(targetCorpse);
+                }
+                else
+                {
+                    Debug.Log("<color=red>[Necromancy]</color> Resurrection failed! The corpse disintegrated into dust.");
+                }
+
+                targetCorpse.OnResurrected();
+            }
         }
 
-        /// <summary>
-        /// Coroutine to automatically regenerate souls over time.
-        /// </summary>
+        private void TriggerResurrectionVisual(Vector2 centerPosition)
+        {
+            GameObject waveObj = new GameObject("ResurrectWave_ProceduralCircle");
+            waveObj.transform.position = centerPosition;
+            waveObj.transform.localScale = Vector3.zero;
+
+            SpriteRenderer sr = waveObj.AddComponent<SpriteRenderer>();
+            sr.sprite = CreateProceduralCircleSprite();
+            sr.color = Color.white;
+            sr.sortingOrder = 15;
+
+            var waveVisual = waveObj.AddComponent<AoeWaveVisual>();
+            // ขยายคลื่นให้กว้างเท่ากับรัศมนวงกลมสกิลชุบชีวิต (resurrectionRadius)
+            waveVisual.Initialize(resurrectionRadius * 2f, 0.4f);
+        }
+
         private IEnumerator SoulRegenerationRoutine()
         {
             while (true)
@@ -217,8 +246,17 @@ namespace NecroDefense.Characters.Player
 
             if (mousePressed)
             {
-                targetCastPosition = GetMouseWorldPosition();
-                StartCoroutine(CastSpellRoutine());
+                Vector2 mouseWorldPos = GetMouseWorldPosition();
+
+                if (Vector2.Distance(transform.position, mouseWorldPos) <= spellRange)
+                {
+                    targetCastPosition = mouseWorldPos;
+                    StartCoroutine(CastSpellRoutine());
+                }
+                else
+                {
+                    Debug.Log("<color=yellow>[Spell]</color> Out of range! Move closer to cast.");
+                }
             }
         }
 
@@ -329,8 +367,12 @@ namespace NecroDefense.Characters.Player
         {
             if (target != null)
             {
-                targetCastPosition = target.Position;
-                StartCoroutine(CastSpellRoutine());
+                Vector2 targetPos = target.Position;
+                if (Vector2.Distance(transform.position, targetPos) <= spellRange)
+                {
+                    targetCastPosition = targetPos;
+                    StartCoroutine(CastSpellRoutine());
+                }
             }
         }
 

@@ -46,7 +46,7 @@ namespace NecroDefense.Characters.Enemies
             if (_spriteRenderer != null && _spriteRenderer.sprite == null)
             {
                 _spriteRenderer.sprite = Utils.ProceduralVisuals.GetEnemySprite(enemyType);
-                _spriteRenderer.color = Color.gray;
+                _spriteRenderer.color = Color.black;
             }
         }
 
@@ -114,8 +114,8 @@ namespace NecroDefense.Characters.Enemies
 
             if (corpseObj.TryGetComponent<Corpse>(out var corpse))
             {
-                // ส่งค่า resurrectionCost และสีเทา (Color.gray) ไปยังซากศพ
-                corpse.Initialize(enemyType, resurrectionCost, _spriteRenderer != null ? _spriteRenderer.sprite : null, Color.gray);
+                // ส่งค่า resurrectionCost และสีเทา (Color.black) ไปยังซากศพ
+                corpse.Initialize(enemyType, resurrectionCost, _spriteRenderer != null ? _spriteRenderer.sprite : null, Color.black);
             }
         }
 

@@ -75,7 +75,7 @@ namespace NecroDefense.Characters.Enemies
             if (_spriteRenderer != null)
             {
                 _spriteRenderer.sprite = (sprite != null) ? sprite : Utils.ProceduralVisuals.GetCorpseSprite();
-                _spriteRenderer.color = customColor ?? Color.gray;
+                _spriteRenderer.color = customColor ?? Color.black;
             }
         }
 

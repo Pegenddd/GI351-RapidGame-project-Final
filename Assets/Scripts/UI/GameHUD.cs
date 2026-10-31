@@ -69,7 +69,7 @@ namespace NecroDefense.UI
 
         private void BroadcastMinionOrder(MinionOrder order)
         {
-            var minions = FindObjectsByType<MinionUnit>();
+            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
             foreach (var m in minions)
             {
                 m.SetOrder(order);
@@ -88,26 +88,26 @@ namespace NecroDefense.UI
             _boxStyle = new GUIStyle(GUI.skin.box)
             {
                 normal = { background = _boxBgTex },
-                padding = new RectOffset(10, 10, 10, 10)
+                padding = new RectOffset(8, 8, 8, 8)
             };
 
             _titleStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 17,
+                fontSize = 13,
                 fontStyle = FontStyle.Bold,
                 normal = { textColor = titleTextColor }
             };
 
             _subStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 13,
+                fontSize = 11,
                 fontStyle = FontStyle.Normal,
                 normal = { textColor = Color.white }
             };
 
             _btnStyle = new GUIStyle(GUI.skin.button)
             {
-                fontSize = 15,
+                fontSize = 13,
                 fontStyle = FontStyle.Bold,
                 normal = { background = _btnNormalTex, textColor = Color.white },
                 hover = { background = _btnHoverTex, textColor = Color.black },
@@ -142,67 +142,66 @@ namespace NecroDefense.UI
             InitStyles();
 
             // --- Top Status Panel ---
-            GUILayout.BeginArea(new Rect(15, 15, 340, 240), _boxStyle);
+            GUILayout.BeginArea(new Rect(15, 15, 270, 195), _boxStyle);
             GUILayout.Label("[*] NECROMANCER DEFENSE", _titleStyle);
-            GUILayout.Space(4);
+            GUILayout.Space(2);
 
             // Citadel Base Health
             if (_baseCrystal != null)
             {
                 float pct = _baseCrystal.CurrentHealth / _baseCrystal.MaxHealth;
-                DrawBar("CITADEL CORE HP", _baseCrystal.CurrentHealth, _baseCrystal.MaxHealth, pct);
+                DrawBar("CITADEL HP", _baseCrystal.CurrentHealth, _baseCrystal.MaxHealth, pct);
             }
 
             // Player Necromancer Health
             if (_player != null)
             {
                 float pct = _player.CurrentHealth / _player.MaxHealth;
-                DrawBar("NECROMANCER HP", _player.CurrentHealth, _player.MaxHealth, pct);
+                DrawBar("MAGE HP", _player.CurrentHealth, _player.MaxHealth, pct);
 
-                // Souls Bar
+                // Souls Bar (เปิดใช้งานและส่งค่าถูกต้องแล้ว)
                 float soulPct = (float)_player.CurrentSouls / _player.MaxSouls;
-                DrawBar($"SOUL ESSENCE ({_player.CurrentSouls}/{_player.MaxSouls})", _player.CurrentSouls, _player.MaxSouls, soulPct);
+                DrawBar($"SOULS ({_player.CurrentSouls}/{_player.MaxSouls})", _player.CurrentSouls, _player.MaxSouls, soulPct);
             }
 
-            GUILayout.Space(4);
+            GUILayout.Space(2);
             // Wave & Stats
             int wave = _waveSpawner != null ? _waveSpawner.CurrentWave : 1;
             int kills = GameManager.Instance != null ? GameManager.Instance.TotalKills : 0;
             float time = GameManager.Instance != null ? GameManager.Instance.SurvivalTimer : 0f;
-            GUILayout.Label($"WAVE: {wave}  |  KILLS: {kills}  |  TIME: {time:F0}s", _subStyle);
+            GUILayout.Label($"WAVE: {wave} | KILLS: {kills} | TIME: {time:F0}s", _subStyle);
 
             GUILayout.EndArea();
 
             // --- Bottom Controls & Strategy Order Panel ---
-            GUILayout.BeginArea(new Rect(15, Screen.height - 110, 520, 95), _boxStyle);
-            GUILayout.Label("COMMAND & CONTROLS (1-BIT MONOCHROME):", _titleStyle);
-            GUILayout.Label("• [WASD]: Move | [Left Click / Auto]: Cast Dark Bolt Ball", _subStyle);
-            GUILayout.Label("• [SPACE / Right Click]: Resurrect corpse into allied Minion!", _subStyle);
-            GUILayout.Label("• Orders: [1] Defend Citadel  [2] Follow Mage  [3] Free Hunt", _subStyle);
+            GUILayout.BeginArea(new Rect(15, Screen.height - 85, 450, 75), _boxStyle);
+            GUILayout.Label("COMMANDS:", _titleStyle);
+            GUILayout.Label("[WASD]: Move | [Click]: Cast Bolt | [Space/R-Click]: Resurrect", _subStyle);
+            GUILayout.Label("Orders: [1] Defend  [2] Follow  [3] Free Hunt", _subStyle);
             GUILayout.EndArea();
 
             // --- Game Over / Victory Screen ---
             if (GameManager.Instance != null && (GameManager.Instance.CurrentState == GameState.GameOver || GameManager.Instance.CurrentState == GameState.Victory))
             {
                 bool isWin = GameManager.Instance.CurrentState == GameState.Victory;
-                float w = 400;
-                float h = 220;
+                float w = 350;
+                float h = 180;
                 Rect rect = new Rect((Screen.width - w) / 2, (Screen.height - h) / 2, w, h);
                 GUILayout.BeginArea(rect, _boxStyle);
-                GUILayout.Space(15);
-                GUIStyle bannerStyle = new GUIStyle(_titleStyle) 
-                { 
-                    fontSize = 26, 
-                    alignment = TextAnchor.MiddleCenter, 
-                    normal = { textColor = Color.white } 
+                GUILayout.Space(10);
+                GUIStyle bannerStyle = new GUIStyle(_titleStyle)
+                {
+                    fontSize = 20,
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = Color.white }
                 };
                 GUILayout.Label(isWin ? "[+] VICTORY [+]" : "[X] GAME OVER [X]", bannerStyle);
-                GUILayout.Space(10);
+                GUILayout.Space(5);
                 GUIStyle statStyle = new GUIStyle(_subStyle) { alignment = TextAnchor.MiddleCenter };
                 GUILayout.Label($"Waves Survived: {wave} | Foes Slain: {kills}", statStyle);
-                GUILayout.Space(20);
+                GUILayout.Space(10);
 
-                if (GUILayout.Button(">> PLAY AGAIN <<", _btnStyle, GUILayout.Height(45)))
+                if (GUILayout.Button(">> PLAY AGAIN <<", _btnStyle, GUILayout.Height(35)))
                 {
                     GameManager.Instance.RestartGame();
                 }
@@ -210,10 +209,11 @@ namespace NecroDefense.UI
             }
         }
 
-        private void DrawBar(string label, float current, float max, float pct)
+        private void DrawBar(string label, float current, float max, float pct, float soulPos = -1f)
         {
+            float targetPct = soulPos >= 0f ? soulPos : pct;
             GUILayout.Label($"{label}: {current:F0} / {max:F0}", _subStyle);
-            Rect r = GUILayoutUtility.GetRect(300, 14);
+            Rect r = GUILayoutUtility.GetRect(240, 10);
 
             // 1-bit crisp border: 1px white border outline
             GUI.color = Color.white;
@@ -225,7 +225,7 @@ namespace NecroDefense.UI
             GUI.DrawTexture(inner, Texture2D.whiteTexture);
 
             // Solid White fill
-            float fillWidth = (inner.width) * Mathf.Clamp01(pct);
+            float fillWidth = (inner.width) * Mathf.Clamp01(targetPct);
             if (fillWidth > 0)
             {
                 Rect fillR = new Rect(inner.x, inner.y, fillWidth, inner.height);
@@ -234,7 +234,7 @@ namespace NecroDefense.UI
             }
 
             GUI.color = Color.white;
-            GUILayout.Space(2);
+            GUILayout.Space(1);
         }
     }
 }
