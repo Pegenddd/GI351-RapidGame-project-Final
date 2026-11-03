@@ -15,8 +15,7 @@ namespace NecroDefense.Characters.Player
 {
     /// <summary>
     /// The Player Character: Necromancer Mage.
-    /// Features: Click to cast, locks position on initial click, stops moving and casts for exact duration, 
-    /// and automatically regenerates souls over time (+1 every 1 second).
+    /// Features: Automatically regenerates souls over time and resurrection mechanics.
     /// </summary>
     public class PlayerNecromancer : Unit
     {
@@ -41,22 +40,8 @@ namespace NecroDefense.Characters.Player
         [Range(0f, 1f)]
         [SerializeField] private float resurrectionSuccessRate = 0.4f;
 
-        [Header("Area of Effect (AoE) Wave Spell Settings")]
-        [Tooltip("Prefab for AoE explosion effect (leave empty for procedural wave fallback)")]
-        [SerializeField] private GameObject aoeExplosionPrefab;
-        [Tooltip("Maximum range for casting AoE spell")]
-        [SerializeField] private float spellRange = 8f;
-        [Tooltip("Radius of the AoE explosion damage and visual wave")]
-        [SerializeField] private float aoeRadius = 3.5f;
-        [Tooltip("Exact time required to stop and cast the spell before triggering")]
-        [SerializeField] private float castDuration = 1.0f;
-
         private int _currentSouls;
         private Vector2 _inputDirection;
-
-        // AoE casting states
-        private bool isCasting = false;
-        private Vector2 targetCastPosition;
 
         public int CurrentSouls => _currentSouls;
         public int MaxSouls => maxSouls;
@@ -93,19 +78,12 @@ namespace NecroDefense.Characters.Player
             if (!IsAlive) return;
 
             ReadInput();
-            HandleAoeSpellInput();
             HandleResurrectionInput();
         }
 
         private void FixedUpdate()
         {
             if (!IsAlive) return;
-
-            if (isCasting)
-            {
-                StopMovement();
-                return;
-            }
 
             if (_inputDirection.sqrMagnitude > 0.01f)
             {
@@ -199,7 +177,6 @@ namespace NecroDefense.Characters.Player
                 if (sm != null && sm.SoulCostDiscount > 0f) spendCost = Mathf.Max(1, Mathf.RoundToInt(spendCost * (1f - sm.SoulCostDiscount)));
                 SpendSouls(spendCost);
 
-                // เปลี่ยนมาสร้างเอฟเฟกต์คลื่นวงกลมที่ตัวพ่อมด (Position ของ Player) แทน
                 TriggerResurrectionVisual(Position);
 
                 bool isSuccess = UnityEngine.Random.value <= resurrectionSuccessRate;
@@ -233,7 +210,6 @@ namespace NecroDefense.Characters.Player
             sr.sortingOrder = 15;
 
             var waveVisual = waveObj.AddComponent<AoeWaveVisual>();
-            // ขยายคลื่นให้กว้างเท่ากับรัศมนวงกลมสกิลชุบชีวิต (resurrectionRadius)
             waveVisual.Initialize(resurrectionRadius * 2f, 0.4f);
         }
 
@@ -246,104 +222,6 @@ namespace NecroDefense.Characters.Player
                 if (IsAlive && _currentSouls < maxSouls)
                 {
                     AddSouls(soulRegenAmount);
-                }
-            }
-        }
-
-        private void HandleAoeSpellInput()
-        {
-            if (isCasting) return;
-
-#if ENABLE_INPUT_SYSTEM
-            bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
-#else
-            bool mousePressed = Input.GetMouseButtonDown(0);
-#endif
-
-            if (mousePressed)
-            {
-                Vector2 mouseWorldPos = GetMouseWorldPosition();
-
-                if (Vector2.Distance(transform.position, mouseWorldPos) <= spellRange)
-                {
-                    targetCastPosition = mouseWorldPos;
-                    StartCoroutine(CastSpellRoutine());
-                }
-                else
-                {
-                    Debug.Log("<color=yellow>[Spell]</color> Out of range! Move closer to cast.");
-                }
-            }
-        }
-
-        private Vector2 GetMouseWorldPosition()
-        {
-            Vector3 mouseWorld = Vector3.zero;
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Camera.main != null)
-            {
-                Vector2 screenPos = Mouse.current.position.ReadValue();
-                mouseWorld = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
-            }
-#else
-            if (Camera.main != null)
-            {
-                mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            }
-#endif
-            mouseWorld.z = 0f;
-            return mouseWorld;
-        }
-
-        private IEnumerator CastSpellRoutine()
-        {
-            isCasting = true;
-            float timer = 0f;
-
-            while (timer < castDuration)
-            {
-                timer += Time.deltaTime;
-                yield return null;
-            }
-
-            TriggerAoeExplosion(targetCastPosition);
-
-            isCasting = false;
-            _lastAttackTime = Time.time;
-        }
-
-        private void TriggerAoeExplosion(Vector2 centerPosition)
-        {
-            if (aoeExplosionPrefab != null)
-            {
-                Instantiate(aoeExplosionPrefab, centerPosition, Quaternion.identity);
-            }
-            else
-            {
-                GameObject waveObj = new GameObject("AoeWave_ProceduralCircle");
-                waveObj.transform.position = centerPosition;
-                waveObj.transform.localScale = Vector3.zero;
-
-                SpriteRenderer sr = waveObj.AddComponent<SpriteRenderer>();
-                sr.sprite = CreateProceduralCircleSprite();
-                sr.color = Color.white;
-                sr.sortingOrder = 15;
-
-                var waveVisual = waveObj.AddComponent<AoeWaveVisual>();
-                waveVisual.Initialize(aoeRadius * 2f, 0.4f);
-            }
-
-            Collider2D[] hits = Physics2D.OverlapCircleAll(centerPosition, aoeRadius);
-            foreach (var hit in hits)
-            {
-                if (hit.TryGetComponent<IDamageable>(out var damageable) &&
-                    hit.TryGetComponent<ITargetable>(out var targetable))
-                {
-                    if (targetable.Team != Team && targetable.IsValidTarget)
-                    {
-                        DamageInfo info = new DamageInfo(AttackPower, DamageType.Necrotic, this, centerPosition, 0.5f);
-                        damageable.TakeDamage(info);
-                    }
                 }
             }
         }
@@ -379,17 +257,12 @@ namespace NecroDefense.Characters.Player
             return Sprite.Create(texture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f), 100f);
         }
 
+        /// <summary>
+        /// บังคับใส่ตามสัญญาของคลาสแม่ (Unit) เพื่อให้ผ่านคอมไพล์
+        /// </summary>
         protected override void ExecuteAttack(ITargetable target)
         {
-            if (target != null)
-            {
-                Vector2 targetPos = target.Position;
-                if (Vector2.Distance(transform.position, targetPos) <= spellRange)
-                {
-                    targetCastPosition = targetPos;
-                    StartCoroutine(CastSpellRoutine());
-                }
-            }
+            // ปล่อยว่างไว้เพราะยกเลิกระบบโจมตีคลิกซ้ายแล้ว
         }
 
         public void ConfigureStats(float hp, float speed, float power, float cooldown, float range, int maxSoul, int initSoul, float resurrectRadius, float boltScale)
@@ -398,7 +271,6 @@ namespace NecroDefense.Characters.Player
             SetMoveSpeed(speed);
             SetAttackPower(power);
             SetAttackInterval(cooldown);
-            spellRange = range;
             maxSouls = maxSoul;
             _currentSouls = Mathf.Clamp(initSoul, 0, maxSouls);
             resurrectionRadius = resurrectRadius;
@@ -432,8 +304,6 @@ namespace NecroDefense.Characters.Player
         {
             Gizmos.color = new Color(0.5f, 0f, 0.8f, 0.2f);
             Gizmos.DrawWireSphere(transform.position, resurrectionRadius);
-            Gizmos.color = new Color(1f, 0.8f, 0f, 0.15f);
-            Gizmos.DrawWireSphere(transform.position, spellRange);
         }
     }
 

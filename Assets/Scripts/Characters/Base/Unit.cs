@@ -6,11 +6,6 @@ namespace NecroDefense.Characters.Base
 {
     /// <summary>
     /// Abstract base class for all combatants (Player, Enemies, Minions).
-    /// Demonstrates:
-    /// 1. Inheritance (inherits from Entity)
-    /// 2. Abstraction & Interface Realization (IDamageable, ITargetable, IAttacker)
-    /// 3. Encapsulation (protected fields with public read-only properties)
-    /// 4. Polymorphism (virtual methods for Die, TakeDamage, Attack, Move)
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public abstract class Unit : Entity, IDamageable, ITargetable, IAttacker
@@ -108,9 +103,6 @@ namespace NecroDefense.Characters.Base
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
         }
 
-        /// <summary>
-        /// Polymorphic damage reception. Subclasses can override to apply damage reduction, shields, or counters.
-        /// </summary>
         public virtual void TakeDamage(DamageInfo damageInfo)
         {
             if (!IsAlive) return;
@@ -127,7 +119,6 @@ namespace NecroDefense.Characters.Base
                 _rb.AddForce(damageInfo.HitDirection.normalized * damageInfo.KnockbackForce, ForceMode2D.Impulse);
             }
 
-            // Visual flash feedback
             TriggerDamageFlash();
 
             if (_currentHealth <= 0f)
@@ -136,9 +127,6 @@ namespace NecroDefense.Characters.Base
             }
         }
 
-        /// <summary>
-        /// Encapsulated healing method.
-        /// </summary>
         public virtual void Heal(float amount)
         {
             if (!IsAlive || amount <= 0f) return;
@@ -146,19 +134,12 @@ namespace NecroDefense.Characters.Base
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
         }
 
-        /// <summary>
-        /// Polymorphic death handling. Overridden by Enemies to drop corpses,
-        /// and by Player to trigger defeat.
-        /// </summary>
         protected virtual void Die()
         {
             OnDied?.Invoke();
             gameObject.SetActive(false);
         }
 
-        /// <summary>
-        /// Polymorphic attack method. Overridden by Melee vs Ranged implementations.
-        /// </summary>
         public virtual void Attack(ITargetable target)
         {
             if (!CanAttack || target == null || !target.IsValidTarget) return;
@@ -167,21 +148,17 @@ namespace NecroDefense.Characters.Base
             ExecuteAttack(target);
         }
 
-        /// <summary>
-        /// Template method pattern: concrete subclasses implement the specific offensive action.
-        /// </summary>
         protected abstract void ExecuteAttack(ITargetable target);
 
-        /// <summary>
-        /// Movement logic using Rigidbody2D velocity.
-        /// </summary>
         public virtual void MoveTowards(Vector2 targetPosition)
         {
             if (_rb == null || !IsAlive) return;
 
             Vector2 currentPos = _rb.position;
             Vector2 direction = (targetPosition - currentPos).normalized;
-            _rb.linearVelocity = direction * moveSpeed;
+
+            // แก้ไขตรงนี้ให้รองรับ Unity ทุกเวอร์ชัน (ใช้ .velocity แทน .linearVelocity)
+            _rb.velocity = direction * moveSpeed;
 
             // Flip sprite based on direction
             if (_spriteRenderer != null && direction.x != 0)
@@ -194,7 +171,8 @@ namespace NecroDefense.Characters.Base
         {
             if (_rb != null)
             {
-                _rb.linearVelocity = Vector2.zero;
+                // แก้ไขตรงนี้ให้รองรับ Unity ทุกเวอร์ชัน
+                _rb.velocity = Vector2.zero;
             }
         }
 
@@ -218,7 +196,6 @@ namespace NecroDefense.Characters.Base
             _flashCoroutine = null;
         }
 
-        // Set faction programmatically (e.g., when converting corpse to ally)
         public void SetFaction(Faction newTeam)
         {
             team = newTeam;
@@ -237,4 +214,3 @@ namespace NecroDefense.Characters.Base
         public void SetAttackInterval(float newInterval) => attackInterval = Mathf.Max(0.01f, newInterval);
     }
 }
-
