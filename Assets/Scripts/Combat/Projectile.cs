@@ -36,6 +36,8 @@ namespace NecroDefense.Combat
 
         public float Speed => speed;
         public float MaxLifetime => maxLifetime;
+        public void SetPierce(int pierce) => maxPierce = Mathf.Max(1, pierce);
+        public void SetSpeed(float s) => speed = s;
 
         protected override void Awake()
         {

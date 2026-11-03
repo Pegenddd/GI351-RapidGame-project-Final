@@ -30,6 +30,9 @@ namespace NecroDefense.UI
         private PlayerNecromancer _player;
         private BaseCrystal _baseCrystal;
         private WaveSpawner _waveSpawner;
+        private Skills.PlayerProgression _progression;
+        private System.Collections.Generic.List<Skills.SkillBase> _currentChoices;
+        private GUIStyle _cardBtnStyle;
         private GUIStyle _titleStyle;
         private GUIStyle _subStyle;
         private GUIStyle _boxStyle;
@@ -44,6 +47,15 @@ namespace NecroDefense.UI
             _player = FindAnyObjectByType<PlayerNecromancer>();
             _baseCrystal = FindAnyObjectByType<BaseCrystal>();
             _waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (_player != null)
+            {
+                _progression = _player.GetComponent<Skills.PlayerProgression>();
+                if (_progression != null)
+                {
+                    _progression.OnShowLevelUpMenu += choices => _currentChoices = choices;
+                    _progression.OnCloseLevelUpMenu += () => _currentChoices = null;
+                }
+            }
         }
 
         private void Update()
@@ -62,6 +74,14 @@ namespace NecroDefense.UI
             key2 = Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2);
             key3 = Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3);
 #endif
+            if (_progression != null && _progression.IsLevelingUp)
+            {
+                if (key1 && _currentChoices != null && _currentChoices.Count > 0) _progression.SelectUpgrade(_currentChoices[0]);
+                else if (key2 && _currentChoices != null && _currentChoices.Count > 1) _progression.SelectUpgrade(_currentChoices[1]);
+                else if (key3 && _currentChoices != null && _currentChoices.Count > 2) _progression.SelectUpgrade(_currentChoices[2]);
+                return;
+            }
+
             if (key1) BroadcastMinionOrder(MinionOrder.DefendBase);
             if (key2) BroadcastMinionOrder(MinionOrder.FollowNecromancer);
             if (key3) BroadcastMinionOrder(MinionOrder.FreeHunt);
@@ -69,7 +89,7 @@ namespace NecroDefense.UI
 
         private void BroadcastMinionOrder(MinionOrder order)
         {
-            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
+            var minions = FindObjectsByType<MinionUnit>();
             foreach (var m in minions)
             {
                 m.SetOrder(order);
@@ -114,6 +134,17 @@ namespace NecroDefense.UI
                 active = { background = _btnHoverTex, textColor = Color.black }
             };
 
+            _cardBtnStyle = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 11,
+                fontStyle = FontStyle.Normal,
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(12, 12, 8, 8),
+                normal = { background = _btnNormalTex, textColor = Color.white },
+                hover = { background = _btnHoverTex, textColor = Color.black },
+                active = { background = _btnHoverTex, textColor = Color.black }
+            };
+
             _stylesInitialized = true;
         }
 
@@ -142,7 +173,7 @@ namespace NecroDefense.UI
             InitStyles();
 
             // --- Top Status Panel ---
-            GUILayout.BeginArea(new Rect(15, 15, 270, 195), _boxStyle);
+            GUILayout.BeginArea(new Rect(15, 15, 270, 235), _boxStyle);
             GUILayout.Label("[*] NECROMANCER DEFENSE", _titleStyle);
             GUILayout.Space(2);
 
@@ -162,6 +193,13 @@ namespace NecroDefense.UI
                 // Souls Bar (เปิดใช้งานและส่งค่าถูกต้องแล้ว)
                 float soulPct = (float)_player.CurrentSouls / _player.MaxSouls;
                 DrawBar($"SOULS ({_player.CurrentSouls}/{_player.MaxSouls})", _player.CurrentSouls, _player.MaxSouls, soulPct);
+
+                // EXP Bar
+                if (_progression != null)
+                {
+                    float expPct = _progression.ExpToNextLevel > 0 ? (float)_progression.CurrentExp / _progression.ExpToNextLevel : 0f;
+                    DrawBar($"LV.{_progression.CurrentLevel} EXP ({_progression.CurrentExp}/{_progression.ExpToNextLevel})", _progression.CurrentExp, _progression.ExpToNextLevel, expPct);
+                }
             }
 
             GUILayout.Space(2);
@@ -207,6 +245,57 @@ namespace NecroDefense.UI
                 }
                 GUILayout.EndArea();
             }
+
+            // --- Vampire Survivors Level Up Choice Screen ---
+            if (_progression != null && _progression.IsLevelingUp && _currentChoices != null && _currentChoices.Count > 0)
+            {
+                DrawLevelUpScreen();
+            }
+        }
+
+        private void DrawLevelUpScreen()
+        {
+            float w = 540;
+            float h = 42 + _currentChoices.Count * 76;
+            Rect rect = new Rect((Screen.width - w) / 2, (Screen.height - h) / 2, w, h);
+
+            GUILayout.BeginArea(rect, _boxStyle);
+            GUILayout.Space(6);
+
+            GUIStyle titleStyle = new GUIStyle(_titleStyle)
+            {
+                fontSize = 16,
+                alignment = TextAnchor.MiddleCenter
+            };
+            GUILayout.Label($"★ LEVEL UP! (LEVEL {_progression.CurrentLevel}) ★", titleStyle);
+
+            GUIStyle tipStyle = new GUIStyle(_subStyle)
+            {
+                fontSize = 11,
+                alignment = TextAnchor.MiddleCenter
+            };
+            GUILayout.Label("SELECT AN UPGRADE [CLICK OR PRESS 1 - 3]", tipStyle);
+            GUILayout.Space(6);
+
+            for (int i = 0; i < _currentChoices.Count; i++)
+            {
+                var choice = _currentChoices[i];
+                string hotkey = $"[{i + 1}]";
+                string status = choice.CurrentLevel == 0 ? "[NEW!]" : $"Lv.{choice.CurrentLevel} -> Lv.{choice.CurrentLevel + 1}";
+                string categoryTag = $"[{choice.Category.ToString().ToUpper()}]";
+
+                string cardText = $"{hotkey}  {choice.DisplayName}  {status}  {categoryTag}\n" +
+                                  $"     {choice.GetNextLevelDescription()}";
+
+                if (GUILayout.Button(cardText, _cardBtnStyle, GUILayout.Height(62)))
+                {
+                    _progression.SelectUpgrade(choice);
+                    break;
+                }
+                GUILayout.Space(4);
+            }
+
+            GUILayout.EndArea();
         }
 
         private void DrawBar(string label, float current, float max, float pct, float soulPos = -1f)

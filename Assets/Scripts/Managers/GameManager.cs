@@ -122,6 +122,14 @@ namespace NecroDefense.Managers
         [Tooltip("Delay in seconds before triggering Game Over after Citadel falls")]
         [SerializeField] private float gameOverDelay = 0f;
 
+        [Header("=== 11. VAMPIRE SURVIVORS SKILLS & LEVELING ===")]
+        [Tooltip("Base EXP required for Level 1 -> Level 2")]
+        [SerializeField] private int baseExpRequirement = 5;
+        [Tooltip("Growth rate of EXP needed for each subsequent level")]
+        [SerializeField] private float expGrowthRate = 1.35f;
+        [Tooltip("Base collection magnet radius (units)")]
+        [SerializeField] private float baseMagnetRadius = 3.0f;
+
         private GameState _currentState = GameState.Playing;
         private int _totalKills = 0;
         private float _survivalTimer = 0f;
@@ -196,7 +204,7 @@ namespace NecroDefense.Managers
         {
             if (!Application.isPlaying || !overrideAllSettings) return;
 
-            var enemies = FindObjectsByType<EnemyUnit>(FindObjectsSortMode.None);
+            var enemies = FindObjectsByType<EnemyUnit>();
             foreach (var enemy in enemies)
             {
                 if (enemy != null && enemy.IsAlive)
@@ -205,7 +213,7 @@ namespace NecroDefense.Managers
                 }
             }
 
-            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
+            var minions = FindObjectsByType<MinionUnit>();
             foreach (var minion in minions)
             {
                 if (minion != null && minion.IsAlive)

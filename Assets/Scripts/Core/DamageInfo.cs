@@ -23,4 +23,4 @@ namespace NecroDefense.Core
             KnockbackForce = knockbackForce;
         }
     }
-}
+}                       

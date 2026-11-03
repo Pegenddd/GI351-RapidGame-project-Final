@@ -95,7 +95,7 @@ namespace NecroDefense.Characters.Enemies
         protected override void Die()
         {
             SpawnCorpse();
-            AwardSoulsToPlayer();
+            SpawnExpOrb(); AwardSoulsToPlayer();
             base.Die();
         }
 
@@ -119,9 +119,18 @@ namespace NecroDefense.Characters.Enemies
             }
         }
 
+        protected virtual void SpawnExpOrb()
+        {
+            GameObject orb = new GameObject($"ExpOrb_{enemyType}");
+            orb.transform.position = Position;
+            var expComp = orb.AddComponent<Skills.CombatEntities.ExperienceOrb>();
+            int expAmount = (enemyType == EnemyType.Zombie) ? 1 : 2;
+            expComp.Initialize(expAmount);
+        }
+
         private void AwardSoulsToPlayer()
         {
-            var player = Object.FindAnyObjectByType<Player.PlayerNecromancer>();
+            var player = UnityEngine.Object.FindAnyObjectByType<Player.PlayerNecromancer>();
             if (player != null && player.IsAlive)
             {
                 player.AddSouls(soulYield);

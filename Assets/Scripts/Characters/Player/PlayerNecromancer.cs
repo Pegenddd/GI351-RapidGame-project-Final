@@ -70,6 +70,15 @@ namespace NecroDefense.Characters.Player
             base.Awake();
             SetFaction(Faction.Player);
             _currentSouls = Mathf.Clamp(initialSouls, 0, maxSouls);
+
+            if (GetComponent<Skills.PlayerSkillManager>() == null)
+            {
+                gameObject.AddComponent<Skills.PlayerSkillManager>();
+            }
+            if (GetComponent<Skills.PlayerProgression>() == null)
+            {
+                gameObject.AddComponent<Skills.PlayerProgression>();
+            }
         }
 
         protected override void Start()
@@ -167,7 +176,11 @@ namespace NecroDefense.Characters.Player
             {
                 if (hit.TryGetComponent<Corpse>(out var corpse))
                 {
-                    if (corpse.CanBeResurrected && _currentSouls >= corpse.SoulCost)
+                    int reqCost = corpse.SoulCost;
+                    var sm = GetComponent<Skills.PlayerSkillManager>();
+                    if (sm != null && sm.SoulCostDiscount > 0f) reqCost = Mathf.Max(1, Mathf.RoundToInt(reqCost * (1f - sm.SoulCostDiscount)));
+
+                    if (corpse.CanBeResurrected && _currentSouls >= reqCost)
                     {
                         float distance = Vector2.Distance(Position, corpse.Position);
                         if (distance <= resurrectionRadius && distance < minDistance)
@@ -181,7 +194,10 @@ namespace NecroDefense.Characters.Player
 
             if (targetCorpse != null)
             {
-                SpendSouls(targetCorpse.SoulCost);
+                int spendCost = targetCorpse.SoulCost;
+                var sm = GetComponent<Skills.PlayerSkillManager>();
+                if (sm != null && sm.SoulCostDiscount > 0f) spendCost = Mathf.Max(1, Mathf.RoundToInt(spendCost * (1f - sm.SoulCostDiscount)));
+                SpendSouls(spendCost);
 
                 // เปลี่ยนมาสร้างเอฟเฟกต์คลื่นวงกลมที่ตัวพ่อมด (Position ของ Player) แทน
                 TriggerResurrectionVisual(Position);

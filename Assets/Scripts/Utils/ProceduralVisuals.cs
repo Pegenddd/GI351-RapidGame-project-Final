@@ -434,6 +434,110 @@ namespace NecroDefense.Utils
                 tex.SetPixel(2, half + 2, White);
                 tex.SetPixel(2, half - 3, White);
             }
+            else if (name.Contains("BoneScythe"))
+            {
+                // 1-Bit Bone Scythe: Curved sharp crescent blade & shaft
+                for (int a = 0; a < 180; a += 10)
+                {
+                    float rad = a * Mathf.Deg2Rad;
+                    int cx = half + (int)(Mathf.Cos(rad) * 7f);
+                    int cy = half + (int)(Mathf.Sin(rad) * 7f);
+                    tex.SetPixel(cx, cy, White);
+                    tex.SetPixel(cx + 1, cy, White);
+                    tex.SetPixel(cx, cy + 1, White);
+                }
+                // Handle shaft
+                for (int i = 0; i <= 8; i++)
+                {
+                    tex.SetPixel(half - 4 + i, half - 4 + i, White);
+                }
+            }
+            else if (name.Contains("ShadowSpike"))
+            {
+                // Sharp obsidian/bone ground spikes pointing up
+                for (int x = 4; x <= 16; x++)
+                {
+                    int peak = 18 - Mathf.Abs(x - half) * 2;
+                    for (int y = 2; y <= peak; y++)
+                    {
+                        tex.SetPixel(x, y, White);
+                    }
+                }
+                // Dark internal notch for sharp 3D contrast
+                for (int y = 4; y <= 12; y++) tex.SetPixel(half, y, Black);
+            }
+            else if (name.Contains("ShadowRift"))
+            {
+                // Ground telegraph rune ring
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(half, half));
+                        if (dist >= 6f && dist <= 8f && (x + y) % 2 == 0)
+                        {
+                            tex.SetPixel(x, y, White);
+                        }
+                    }
+                }
+            }
+            else if (name.Contains("OrbitSkull"))
+            {
+                // Mini 1-bit Floating Skull (16x16 inside 20x20)
+                for (int y = 4; y <= 16; y++)
+                {
+                    int hw = (y > 12) ? 6 - (y - 12) : 6;
+                    if (y < 7) hw = 4; // jaw
+                    for (int x = half - hw; x <= half + hw; x++)
+                    {
+                        tex.SetPixel(x, y, White);
+                    }
+                }
+                // Eye sockets (Black)
+                tex.SetPixel(half - 2, 10, Black);
+                tex.SetPixel(half - 3, 10, Black);
+                tex.SetPixel(half + 2, 10, Black);
+                tex.SetPixel(half + 3, 10, Black);
+                // Teeth slits (Black)
+                tex.SetPixel(half - 2, 5, Black);
+                tex.SetPixel(half, 5, Black);
+                tex.SetPixel(half + 2, 5, Black);
+            }
+            else if (name.Contains("MistPool"))
+            {
+                // Dithered misty circular ground puddle
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(half, half));
+                        if (dist <= 8f)
+                        {
+                            if ((x + y) % 2 == 0 || dist <= 4f)
+                            {
+                                tex.SetPixel(x, y, White);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (name.Contains("ExpOrb"))
+            {
+                // Sparkling 1-bit Soul Shard / EXP Gem (Diamond shape)
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        int manhattan = Mathf.Abs(x - half) + Mathf.Abs(y - half);
+                        if (manhattan <= 5)
+                        {
+                            tex.SetPixel(x, y, White);
+                        }
+                    }
+                }
+                // Center core dark spark for sparkle
+                tex.SetPixel(half, half, Black);
+            }
             else
             {
                 // Spectral Arrow (Luminous magical arrow)

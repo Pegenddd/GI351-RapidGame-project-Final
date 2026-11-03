@@ -89,6 +89,17 @@ namespace NecroDefense.Factories
                 Managers.GameManager.Instance.ApplyMinionStats(minion, type);
             }
 
+            var necroPlayer = UnityEngine.Object.FindAnyObjectByType<Characters.Player.PlayerNecromancer>();
+            if (necroPlayer != null)
+            {
+                var sm = necroPlayer.GetComponent<Skills.PlayerSkillManager>();
+                if (sm != null && (sm.MinionSpeedMultiplier > 1f || sm.MinionAttackSpeedMultiplier > 1f))
+                {
+                    minion.SetMoveSpeed(minion.MoveSpeed * sm.MinionSpeedMultiplier);
+                    minion.SetAttackInterval(minion.AttackInterval / sm.MinionAttackSpeedMultiplier);
+                }
+            }
+
             return minion;
         }
 

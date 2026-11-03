@@ -100,6 +100,23 @@ namespace NecroDefense.Base
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
         }
 
+        public void ApplyMaxHealthBonus(float bonusPercent, float baseMaxHp)
+        {
+            float targetMax = baseMaxHp * (1f + bonusPercent);
+            float diff = targetMax - maxHealth;
+            maxHealth = targetMax;
+            if (diff > 0)
+            {
+                _currentHealth = Mathf.Min(maxHealth, _currentHealth + diff);
+            }
+            OnHealthChanged?.Invoke(_currentHealth, maxHealth);
+        }
+
+        public void ApplyAuraRadiusBonus(float bonusPercent, float baseRadius)
+        {
+            auraRadius = baseRadius * (1f + bonusPercent);
+        }
+
         public void Heal(float amount)
         {
             if (!IsAlive || amount <= 0f) return;
