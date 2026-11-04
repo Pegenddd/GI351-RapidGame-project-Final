@@ -61,7 +61,6 @@ namespace NecroDefense.UI
 
             if (toggleShopButton != null)
             {
-                // ลบ Listener เก่ากันเหนียว แล้วผูกใหม่
                 toggleShopButton.onClick.RemoveAllListeners();
                 toggleShopButton.onClick.AddListener(ToggleShop);
             }
@@ -78,10 +77,10 @@ namespace NecroDefense.UI
 
             if (placingBannerPanel != null) placingBannerPanel.SetActive(false);
 
-            // กำหนดสถานะเริ่มต้นให้ตรงกับตัวแปร
             if (shopPanel != null) shopPanel.SetActive(_isShopOpen);
             UpdateToggleText();
 
+            InitializeShopIcons(); // เซ็ตไอคอนรูปภาพจาก Prefab หรือที่ลากใส่
             UpdateShopDisplay();
         }
 
@@ -90,6 +89,24 @@ namespace NecroDefense.UI
             if (prefab != null && prefab.TryGetComponent<Towers.TowerBehavior>(out var tb))
                 return tb.BuildCost;
             return 0;
+        }
+
+        // ดึงรูป Sprite จาก Prefab มาแสดงที่ไอคอนอัตโนมัติ (ถ้าไม่ได้ลากรูปใส่ไว้)
+        private void InitializeShopIcons()
+        {
+            for (int i = 0; i < towerSlots.Length; i++)
+            {
+                if (i >= _prefabs.Length) continue;
+                var slotUI = towerSlots[i];
+                if (slotUI.towerIconImage != null && slotUI.towerIconImage.sprite == null && _prefabs[i] != null)
+                {
+                    if (_prefabs[i].TryGetComponent<SpriteRenderer>(out var sr) && sr.sprite != null)
+                    {
+                        slotUI.towerIconImage.sprite = sr.sprite;
+                        slotUI.towerIconImage.gameObject.SetActive(true);
+                    }
+                }
+            }
         }
 
         private void Update()
@@ -122,7 +139,6 @@ namespace NecroDefense.UI
             }
 
             UpdateToggleText();
-            Debug.Log($"<color=cyan>[TowerShop]</color> Shop State: {(_isShopOpen ? "OPEN" : "CLOSED")}");
         }
 
         private void UpdateToggleText()

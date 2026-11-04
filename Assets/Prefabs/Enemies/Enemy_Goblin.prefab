@@ -171,8 +171,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NecroDefense::NecroDefense.Characters.Enemies.ZombieEnemy
   entityName: Entity
-  maxHealth: 100
-  moveSpeed: 3
+  maxHealth: 40
+  moveSpeed: 5
   attackPower: 8
   attackRange: 1.4
   attackInterval: 1

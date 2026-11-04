@@ -1,17 +1,11 @@
-using UnityEngine;
-using NecroDefense.Core;
+using NecroDefense.Base;
 using NecroDefense.Characters.Base;
-using NecroDefense.Combat.Strategies;
+using NecroDefense.Characters.Player;
+using NecroDefense.Core;
+using UnityEngine;
 
 namespace NecroDefense.Characters.Enemies
 {
-    /// <summary>
-    /// Abstract base class for all enemy monsters.
-    /// Demonstrates:
-    /// - Inheritance: Inherits from Unit.
-    /// - Abstraction & Strategy Pattern: Uses ITargetingStrategy for dynamic target selection.
-    /// - Polymorphic Death: Overrides Die() to spawn a Corpse and grant souls.
-    /// </summary>
     public abstract class EnemyUnit : Unit
     {
         [Header("Enemy Classification & Loot (Editable in Inspector)")]
@@ -24,7 +18,6 @@ namespace NecroDefense.Characters.Enemies
         [Tooltip("Corpse prefab spawned upon death (leave empty for procedural fallback)")]
         [SerializeField] private GameObject corpsePrefab;
 
-        protected ITargetingStrategy _targetingStrategy;
         protected ITargetable _currentTarget;
 
         public EnemyType EnemyType => enemyType;
@@ -41,7 +34,6 @@ namespace NecroDefense.Characters.Enemies
         {
             base.Awake();
             SetFaction(Faction.Enemy);
-            _targetingStrategy = new TargetBasePriorityStrategy();
 
             if (_spriteRenderer != null && _spriteRenderer.sprite == null)
             {
@@ -58,9 +50,10 @@ namespace NecroDefense.Characters.Enemies
 
         protected virtual void UpdateAI()
         {
+            // ถ้ายังไม่มีเป้าหมาย หรือเป้าหมายเดิมตาย/ใช้การไม่ได้แล้ว ให้สุ่มหาใหม่
             if (_currentTarget == null || !_currentTarget.IsValidTarget)
             {
-                _currentTarget = _targetingStrategy.FindTarget(this, 30f);
+                _currentTarget = FindRandomTarget(30f);
             }
 
             if (_currentTarget != null && _currentTarget.IsValidTarget)
@@ -92,10 +85,44 @@ namespace NecroDefense.Characters.Enemies
             }
         }
 
+        /// <summary>
+        /// ค้นหาและสุ่มเลือกระหว่าง Player (ผู้เล่น) หรือ BaseCrystal (ฐานหลัก) ในระยะที่กำหนด
+        /// </summary>
+        protected virtual ITargetable FindRandomTarget(float maxRange)
+        {
+            Collider2D[] hits = Physics2D.OverlapCircleAll(Position, maxRange);
+            System.Collections.Generic.List<ITargetable> validTargets = new System.Collections.Generic.List<ITargetable>();
+
+            foreach (var hit in hits)
+            {
+                if (!hit.TryGetComponent<ITargetable>(out var targetable)) continue;
+
+                // เช็กว่าเป็นฝ่ายผู้เล่นและใช้งานได้
+                if (targetable.Team == Faction.Player && targetable.IsValidTarget)
+                {
+                    // กรองเอาเฉพาะ Player หรือ BaseCrystal เท่านั้น
+                    if (targetable is PlayerNecromancer || targetable is BaseCrystal)
+                    {
+                        validTargets.Add(targetable);
+                    }
+                }
+            }
+
+            // ถ้าเจอเป้าหมาย ให้สุ่มเลือกมา 1 ตัว
+            if (validTargets.Count > 0)
+            {
+                int randomIndex = Random.Range(0, validTargets.Count);
+                return validTargets[randomIndex];
+            }
+
+            return null;
+        }
+
         protected override void Die()
         {
             SpawnCorpse();
-            SpawnExpOrb(); AwardSoulsToPlayer();
+            SpawnExpOrb();
+            AwardSoulsToPlayer();
             base.Die();
         }
 
@@ -114,7 +141,6 @@ namespace NecroDefense.Characters.Enemies
 
             if (corpseObj.TryGetComponent<Corpse>(out var corpse))
             {
-                // ส่งค่า resurrectionCost และสีเทา (Color.black) ไปยังซากศพ
                 corpse.Initialize(enemyType, resurrectionCost, _spriteRenderer != null ? _spriteRenderer.sprite : null, Color.black);
             }
         }
@@ -130,7 +156,7 @@ namespace NecroDefense.Characters.Enemies
 
         private void AwardSoulsToPlayer()
         {
-            var player = UnityEngine.Object.FindAnyObjectByType<Player.PlayerNecromancer>();
+            var player = UnityEngine.Object.FindAnyObjectByType<PlayerNecromancer>();
             if (player != null && player.IsAlive)
             {
                 player.AddSouls(soulYield);

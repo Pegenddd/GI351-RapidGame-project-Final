@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.05894, y: -0.25518, z: 0}
-  m_LocalScale: {x: 1, y: 2, z: 1}
+  m_LocalScale: {x: 2, y: 4, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -112,8 +112,8 @@ MonoBehaviour:
   buildCost: 30
   aoeExplosionRadius: 3
   aoeExplosionVfxPrefab: {fileID: 0}
-  slowPercent: 1
-  slowDuration: 3
+  slowPercent: 0.387
+  slowDuration: 2
   projectilePrefab: {fileID: 3833815027838027707, guid: 81c4da346f7bb9a448a54075e427067e, type: 3}
   goblinMinionPrefab: {fileID: 0}
   maxGoblins: 3
