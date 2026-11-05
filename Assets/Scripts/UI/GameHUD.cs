@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using NecroDefense.Base;
 using NecroDefense.Characters.Player;
 using NecroDefense.Characters.Minions;
@@ -12,6 +13,7 @@ namespace NecroDefense.UI
     /// <summary>
     /// In-game Heads-Up Display (HUD) in 2-Color Palette (1-bit Black & White).
     /// Pure Black backgrounds, 1px White borders, and Pure White text/bars.
+    /// Includes Hybrid Skip Wave Button integration.
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
@@ -29,7 +31,7 @@ namespace NecroDefense.UI
 
         private PlayerNecromancer _player;
         private BaseCrystal _baseCrystal;
-        private WaveSpawner _waveSpawner;
+        private WaveManager _waveManager;
         private Skills.PlayerProgression _progression;
         private System.Collections.Generic.List<Skills.SkillBase> _currentChoices;
         private GUIStyle _cardBtnStyle;
@@ -37,16 +39,19 @@ namespace NecroDefense.UI
         private GUIStyle _subStyle;
         private GUIStyle _boxStyle;
         private GUIStyle _btnStyle;
+        private GUIStyle _skipBtnStyle; // สไตล์สำหรับปุ่ม Skip Wave
         private Texture2D _boxBgTex;
         private Texture2D _btnNormalTex;
         private Texture2D _btnHoverTex;
+        private Texture2D _skipBtnNormalTex;
+        private Texture2D _skipBtnHoverTex;
         private bool _stylesInitialized = false;
 
         private void Start()
         {
             _player = FindAnyObjectByType<PlayerNecromancer>();
             _baseCrystal = FindAnyObjectByType<BaseCrystal>();
-            _waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            _waveManager = FindAnyObjectByType<WaveManager>();
             if (_player != null)
             {
                 _progression = _player.GetComponent<Skills.PlayerProgression>();
@@ -60,6 +65,8 @@ namespace NecroDefense.UI
 
         private void Update()
         {
+            if (_waveManager == null) _waveManager = FindAnyObjectByType<WaveManager>();
+
             // Minion command hotkeys [1], [2], [3]
             bool key1 = false, key2 = false, key3 = false;
 #if ENABLE_INPUT_SYSTEM
@@ -70,9 +77,9 @@ namespace NecroDefense.UI
                 key3 = Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame;
             }
 #else
-            key1 = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1);
-            key2 = Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2);
-            key3 = Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3);
+            key1 = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(Keycode.Keypad1);
+            key2 = Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(Keycode.Keypad2);
+            key3 = Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(Keycode.Keypad3);
 #endif
             if (_progression != null && _progression.IsLevelingUp)
             {
@@ -89,7 +96,7 @@ namespace NecroDefense.UI
 
         private void BroadcastMinionOrder(MinionOrder order)
         {
-            var minions = FindObjectsByType<MinionUnit>();
+            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
             foreach (var m in minions)
             {
                 m.SetOrder(order);
@@ -104,6 +111,10 @@ namespace NecroDefense.UI
             _boxBgTex = MakeBorderedTex(16, 16, Color.black, Color.white);
             _btnNormalTex = MakeBorderedTex(16, 16, Color.black, Color.white);
             _btnHoverTex = MakeBorderedTex(16, 16, Color.white, Color.black);
+
+            // Skip Wave Button Textures (Inverse style to stand out when ready)
+            _skipBtnNormalTex = MakeBorderedTex(16, 16, Color.white, Color.white);
+            _skipBtnHoverTex = MakeBorderedTex(16, 16, Color.black, Color.white);
 
             _boxStyle = new GUIStyle(GUI.skin.box)
             {
@@ -132,6 +143,16 @@ namespace NecroDefense.UI
                 normal = { background = _btnNormalTex, textColor = Color.white },
                 hover = { background = _btnHoverTex, textColor = Color.black },
                 active = { background = _btnHoverTex, textColor = Color.black }
+            };
+
+            _skipBtnStyle = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 12,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { background = _skipBtnNormalTex, textColor = Color.black },
+                hover = { background = _skipBtnHoverTex, textColor = Color.white },
+                active = { background = _skipBtnHoverTex, textColor = Color.white }
             };
 
             _cardBtnStyle = new GUIStyle(GUI.skin.button)
@@ -190,7 +211,7 @@ namespace NecroDefense.UI
                 float pct = _player.CurrentHealth / _player.MaxHealth;
                 DrawBar("MAGE HP", _player.CurrentHealth, _player.MaxHealth, pct);
 
-                // Souls Bar (เปิดใช้งานและส่งค่าถูกต้องแล้ว)
+                // Souls Bar
                 float soulPct = (float)_player.CurrentSouls / _player.MaxSouls;
                 DrawBar($"SOULS ({_player.CurrentSouls}/{_player.MaxSouls})", _player.CurrentSouls, _player.MaxSouls, soulPct);
 
@@ -204,10 +225,20 @@ namespace NecroDefense.UI
 
             GUILayout.Space(2);
             // Wave & Stats
-            int wave = _waveSpawner != null ? _waveSpawner.CurrentWave : 1;
+            int wave = _waveManager != null ? _waveManager.CurrentWave : 1;
             int kills = GameManager.Instance != null ? GameManager.Instance.TotalKills : 0;
             float time = GameManager.Instance != null ? GameManager.Instance.SurvivalTimer : 0f;
             GUILayout.Label($"WAVE: {wave} | KILLS: {kills} | TIME: {time:F0}s", _subStyle);
+
+            // --- SKIP WAVE BUTTON (แสดงขึ้นมาเฉพาะตอนที่มอนสเตอร์สปอนครบแล้ว) ---
+            if (_waveManager != null && _waveManager.CanSkipWave)
+            {
+                GUILayout.Space(6);
+                if (GUILayout.Button(">> SKIP / NEXT WAVE <<", _skipBtnStyle, GUILayout.Height(28)))
+                {
+                    _waveManager.SkipToNextWave();
+                }
+            }
 
             GUILayout.EndArea();
 

@@ -33,7 +33,7 @@ namespace NecroDefense.Managers
         [Header("=== 1. SCENE REFERENCES ===")]
         [SerializeField] private BaseCrystal baseCrystal;
         [SerializeField] private PlayerNecromancer player;
-        [SerializeField] private WaveSpawner waveSpawner;
+        [SerializeField] private WaveManager waveManager;
 
         [Header("=== 2. PLAYER NECROMANCER ===")]
         [Tooltip("Maximum health pool of the Necromancer")]
@@ -72,7 +72,6 @@ namespace NecroDefense.Managers
         [SerializeField] private float zombieAttackRange = 1.4f;
         [SerializeField] private float zombieAttackInterval = 1.0f;
         [SerializeField] private int zombieSoulYield = 2;
-        // (ตัด zombieResurrectCost ออก เพื่อให้ดึงค่าจาก Inspector ของตัวศัตรูโดยตรง ไม่โดนทับ)
 
         [Header("=== 5. ENEMY: SKELETON ARCHER (RANGED) ===")]
         [SerializeField] private float archerMaxHealth = 30f;
@@ -104,17 +103,7 @@ namespace NecroDefense.Managers
         [Tooltip("Detection radius for hunting enemy monsters")]
         [SerializeField] private float minionDetectionRadius = 12f;
 
-        [Header("=== 9. WAVE & ARENA PERIMETER ===")]
-        [Tooltip("Distance from Citadel at which enemies spawn")]
-        [SerializeField] private float waveSpawnRadius = 18f;
-        [Tooltip("Pause duration between waves (seconds)")]
-        [SerializeField] private float timeBetweenWaves = 8f;
-        [Tooltip("Prep delay before the first wave starts")]
-        [SerializeField] private float initialWaveDelay = 2f;
-        [Tooltip("Continue infinite procedural scaling waves after wave list")]
-        [SerializeField] private bool infiniteProceduralWaves = true;
-
-        [Header("=== 10. GAME OVER & PACING ===")]
+        [Header("=== 9. GAME OVER & PACING ===")]
         [Tooltip("Time scale applied on Game Over (0=pause, 1=normal). Dramatic slow-mo effect.")]
         [SerializeField] private float gameOverSlowdownScale = 0.2f;
         [Tooltip("Time scale applied on Victory")]
@@ -122,7 +111,7 @@ namespace NecroDefense.Managers
         [Tooltip("Delay in seconds before triggering Game Over after Citadel falls")]
         [SerializeField] private float gameOverDelay = 0f;
 
-        [Header("=== 11. VAMPIRE SURVIVORS SKILLS & LEVELING ===")]
+        [Header("=== 10. VAMPIRE SURVIVORS SKILLS & LEVELING ===")]
         [Tooltip("Base EXP required for Level 1 -> Level 2")]
         [SerializeField] private int baseExpRequirement = 5;
         [Tooltip("Growth rate of EXP needed for each subsequent level")]
@@ -157,7 +146,7 @@ namespace NecroDefense.Managers
         {
             if (baseCrystal == null) baseCrystal = FindAnyObjectByType<BaseCrystal>();
             if (player == null) player = FindAnyObjectByType<PlayerNecromancer>();
-            if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (waveManager == null) waveManager = FindAnyObjectByType<WaveManager>();
 
             if (baseCrystal != null) baseCrystal.OnDied += HandleBaseDestroyed;
             if (player != null) player.OnDied += HandlePlayerDied;
@@ -188,13 +177,13 @@ namespace NecroDefense.Managers
         {
             if (baseCrystal == null) baseCrystal = FindAnyObjectByType<BaseCrystal>();
             if (player == null) player = FindAnyObjectByType<PlayerNecromancer>();
-            if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (waveManager == null) waveManager = FindAnyObjectByType<WaveManager>();
 
             ApplyAllSettings();
 
             if (player != null) UnityEditor.EditorUtility.SetDirty(player);
             if (baseCrystal != null) UnityEditor.EditorUtility.SetDirty(baseCrystal);
-            if (waveSpawner != null) UnityEditor.EditorUtility.SetDirty(waveSpawner);
+            if (waveManager != null) UnityEditor.EditorUtility.SetDirty(waveManager);
             UnityEditor.EditorUtility.SetDirty(this);
             Debug.Log("<color=green>[GameManager]</color> Successfully applied all master settings to scene objects!");
         }
@@ -204,7 +193,7 @@ namespace NecroDefense.Managers
         {
             if (!Application.isPlaying || !overrideAllSettings) return;
 
-            var enemies = FindObjectsByType<EnemyUnit>();
+            var enemies = FindObjectsByType<EnemyUnit>(FindObjectsSortMode.None);
             foreach (var enemy in enemies)
             {
                 if (enemy != null && enemy.IsAlive)
@@ -213,7 +202,7 @@ namespace NecroDefense.Managers
                 }
             }
 
-            var minions = FindObjectsByType<MinionUnit>();
+            var minions = FindObjectsByType<MinionUnit>(FindObjectsSortMode.None);
             foreach (var minion in minions)
             {
                 if (minion != null && minion.IsAlive)
@@ -252,16 +241,6 @@ namespace NecroDefense.Managers
                     citadelAuraRadius
                 );
             }
-
-            if (waveSpawner != null)
-            {
-                waveSpawner.ConfigureStats(
-                    waveSpawnRadius,
-                    timeBetweenWaves,
-                    initialWaveDelay,
-                    infiniteProceduralWaves
-                );
-            }
         }
 
         public void ApplyEnemyStats(EnemyUnit enemy, EnemyType type)
@@ -276,7 +255,6 @@ namespace NecroDefense.Managers
                     enemy.SetAttackPower(zombieAttackPower);
                     enemy.SetAttackRange(zombieAttackRange);
                     enemy.SetAttackInterval(zombieAttackInterval);
-                    // ตัด SetSoulParameters ออก ปล่อยให้ศัตรูใช้ค่า Resurrection Cost จากหน้า Inspector ของตัวเองโดยตรง
                     break;
 
                 case EnemyType.SkeletonArcher:

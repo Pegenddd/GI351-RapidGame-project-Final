@@ -44,7 +44,7 @@ namespace NecroDefense.Editor
             var gm = GetOrAddComponent<GameManager>(gmObj);
 
             var spawnerObj = GetOrCreateChild(managersParent, "WaveSpawner");
-            var spawner = GetOrAddComponent<WaveSpawner>(spawnerObj);
+            var spawner = GetOrAddComponent<WaveManager>(spawnerObj);
             spawner.PopulateDefaultWaves();
 
             var minionFactObj = GetOrCreateChild(managersParent, "MinionFactory");

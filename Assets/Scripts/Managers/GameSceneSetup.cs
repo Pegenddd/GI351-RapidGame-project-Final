@@ -4,6 +4,9 @@ using NecroDefense.Characters.Player;
 using NecroDefense.Factories;
 using NecroDefense.UI;
 using NecroDefense.Utils;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace NecroDefense.Managers
 {
@@ -20,7 +23,7 @@ namespace NecroDefense.Managers
         private static void AutoInitializeScene()
         {
             // If the developer already has objects placed in the Hierarchy, do not auto-generate anything!
-            if (FindAnyObjectByType<BaseCrystal>() != null || 
+            if (FindAnyObjectByType<BaseCrystal>() != null ||
                 FindAnyObjectByType<PlayerNecromancer>() != null ||
                 FindAnyObjectByType<GameManager>() != null)
             {
@@ -132,10 +135,12 @@ namespace NecroDefense.Managers
                 gmObj.AddComponent<GameManager>();
             }
 
-            if (FindAnyObjectByType<WaveSpawner>() == null)
+            // สร้าง WaveManager อัตโนมัติและกำหนดค่าเริ่มต้น
+            if (FindAnyObjectByType<WaveManager>() == null)
             {
-                var spawnerObj = new GameObject("WaveSpawner");
-                spawnerObj.AddComponent<WaveSpawner>();
+                var managerObj = new GameObject("WaveManager");
+                var waveMgr = managerObj.AddComponent<WaveManager>();
+                waveMgr.PopulateDefaultWaves();
             }
         }
 

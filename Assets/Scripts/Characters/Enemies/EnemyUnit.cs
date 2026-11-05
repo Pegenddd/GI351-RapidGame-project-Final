@@ -2,10 +2,12 @@ using NecroDefense.Base;
 using NecroDefense.Characters.Base;
 using NecroDefense.Characters.Player;
 using NecroDefense.Core;
+using NecroDefense.Enemies;
 using UnityEngine;
 
 namespace NecroDefense.Characters.Enemies
 {
+    [RequireComponent(typeof(EnemyPathController))]
     public abstract class EnemyUnit : Unit
     {
         [Header("Enemy Classification & Loot (Editable in Inspector)")]
@@ -19,6 +21,7 @@ namespace NecroDefense.Characters.Enemies
         [SerializeField] private GameObject corpsePrefab;
 
         protected ITargetable _currentTarget;
+        protected EnemyPathController _pathController;
 
         public EnemyType EnemyType => enemyType;
         public int SoulYield => soulYield;
@@ -35,6 +38,8 @@ namespace NecroDefense.Characters.Enemies
             base.Awake();
             SetFaction(Faction.Enemy);
 
+            _pathController = GetComponent<EnemyPathController>();
+
             if (_spriteRenderer != null && _spriteRenderer.sprite == null)
             {
                 _spriteRenderer.sprite = Utils.ProceduralVisuals.GetEnemySprite(enemyType);
@@ -50,6 +55,18 @@ namespace NecroDefense.Characters.Enemies
 
         protected virtual void UpdateAI()
         {
+            // เช็กก่อนว่ายังอยู่ในช่วงเดินตาม Waypoint ของทางเดิน Tower Defense หรือไม่
+            if (_pathController != null && !_pathController.IsInArena)
+            {
+                // ถ้ายังอยู่ในทางเดิน ให้บังคับเดินตามทางไปเรื่อยๆ จนกว่าจะพ้นจุดสุดท้าย
+                bool reachedEnd;
+                Vector2 nextTargetPos = _pathController.GetNextMovementTarget(Position, MoveSpeed, out reachedEnd);
+                MoveTowards(nextTargetPos);
+                return; // จบการทำงานรอบนี้ ไม่ไปเช็กตีผู้เล่น/ป้อมกลางทาง
+            }
+
+            // === ถ้าพ้นทางเดินแล้ว (เข้าสู่ลานกว้าง / Arena โหมดอิสระ) ถึงจะเริ่มหาเป้าหมายและโจมตี ===
+
             // ถ้ายังไม่มีเป้าหมาย หรือเป้าหมายเดิมตาย/ใช้การไม่ได้แล้ว ให้สุ่มหาใหม่
             if (_currentTarget == null || !_currentTarget.IsValidTarget)
             {
@@ -81,7 +98,10 @@ namespace NecroDefense.Characters.Enemies
             }
             else
             {
-                StopMovement();
+                // ถ้าอยู่ในลานกว้างแต่ไม่มีเป้าหมาย ให้เดินไปยังตำแหน่งสุ่มในลานกว้างต่อ
+                bool reachedEnd;
+                Vector2 roamTarget = _pathController.GetNextMovementTarget(Position, MoveSpeed, out reachedEnd);
+                MoveTowards(roamTarget);
             }
         }
 

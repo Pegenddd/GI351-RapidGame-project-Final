@@ -11,7 +11,7 @@ namespace NecroDefense.UI
         [Header("Player & World References")]
         [SerializeField] private PlayerNecromancer player;
         [SerializeField] private BaseCrystal baseCrystal;
-        [SerializeField] private WaveSpawner waveSpawner;
+        [SerializeField] private WaveManager waveManager;
         private Skills.PlayerProgression _progression;
         private System.Collections.Generic.List<Skills.SkillBase> _currentChoices;
 
@@ -26,6 +26,10 @@ namespace NecroDefense.UI
         [SerializeField] private Slider expSlider;
         [SerializeField] private Text expText;
         [SerializeField] private Text waveStatsText;
+
+        [Header("Wave Control UI")]
+        [Tooltip("ปุ่มสำหรับให้ผู้เล่นกดข้ามเวลาพักและเรียกเวฟถัดไป (Skip Wave)")]
+        [SerializeField] private Button skipWaveButton;
 
         [Header("Game Over / Victory Panel")]
         [SerializeField] private GameObject gameOverPanel;
@@ -43,7 +47,7 @@ namespace NecroDefense.UI
         {
             if (player == null) player = FindAnyObjectByType<PlayerNecromancer>();
             if (baseCrystal == null) baseCrystal = FindAnyObjectByType<BaseCrystal>();
-            if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (waveManager == null) waveManager = FindAnyObjectByType<WaveManager>();
 
             if (player != null)
             {
@@ -68,6 +72,17 @@ namespace NecroDefense.UI
                 });
             }
 
+            // ผูกฟังก์ชันกดปุ่ม Skip Wave เข้ากับ WaveManager โดยอัตโนมัติ
+            if (skipWaveButton != null)
+            {
+                skipWaveButton.onClick.AddListener(() => {
+                    if (waveManager != null)
+                    {
+                        waveManager.SkipToNextWave();
+                    }
+                });
+            }
+
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             if (levelUpPanel != null) levelUpPanel.SetActive(false);
         }
@@ -76,6 +91,7 @@ namespace NecroDefense.UI
         {
             UpdateStatusDisplay();
             CheckGameStates();
+            UpdateSkipWaveButtonUI();
         }
 
         private void UpdateStatusDisplay()
@@ -109,12 +125,25 @@ namespace NecroDefense.UI
                 }
             }
 
-            int wave = waveSpawner != null ? waveSpawner.CurrentWave : 1;
+            int wave = waveManager != null ? waveManager.CurrentWave : 1;
             int kills = GameManager.Instance != null ? GameManager.Instance.TotalKills : 0;
             float time = GameManager.Instance != null ? GameManager.Instance.SurvivalTimer : 0f;
             if (waveStatsText != null)
             {
                 waveStatsText.text = $"WAVE: {wave} | KILLS: {kills} | TIME: {time:F0}s";
+            }
+        }
+
+        private void UpdateSkipWaveButtonUI()
+        {
+            if (skipWaveButton != null && waveManager != null)
+            {
+                // เปิดปุ่มให้กดได้เฉพาะช่วงเวลาที่เวฟสปอนเสร็จแล้วและกำลังรอให้ผู้เล่นกดข้าม (CanSkipWave)
+                bool canSkip = waveManager.CanSkipWave;
+                if (skipWaveButton.gameObject.activeSelf != canSkip)
+                {
+                    skipWaveButton.gameObject.SetActive(canSkip);
+                }
             }
         }
 
@@ -130,7 +159,7 @@ namespace NecroDefense.UI
                     {
                         bool isWin = GameManager.Instance.CurrentState == GameState.Victory;
                         if (gameOverTitleText != null) gameOverTitleText.text = isWin ? "[+] VICTORY [+]" : "[X] GAME OVER [X]";
-                        int wave = waveSpawner != null ? waveSpawner.CurrentWave : 1;
+                        int wave = waveManager != null ? waveManager.CurrentWave : 1;
                         int kills = GameManager.Instance.TotalKills;
                         if (gameOverStatsText != null) gameOverStatsText.text = $"Waves Survived: {wave} | Foes Slain: {kills}";
                     }

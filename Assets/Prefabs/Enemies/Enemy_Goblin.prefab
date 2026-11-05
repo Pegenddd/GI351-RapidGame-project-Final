@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4901856790774912235}
   - component: {fileID: 7577052524076221706}
   - component: {fileID: 6726615120538641756}
+  - component: {fileID: 9101528580306630443}
   m_Layer: 0
   m_Name: Enemy_Goblin
   m_TagString: Enemy
@@ -171,8 +172,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NecroDefense::NecroDefense.Characters.Enemies.ZombieEnemy
   entityName: Entity
-  maxHealth: 40
-  moveSpeed: 5
+  maxHealth: 100
+  moveSpeed: 1
   attackPower: 8
   attackRange: 1.4
   attackInterval: 1
@@ -184,3 +185,21 @@ MonoBehaviour:
   resurrectionCost: 10
   corpsePrefab: {fileID: 9098124007835951650, guid: 9e2bf4dac0a58264291ad4b11a3adf35, type: 3}
   biteDamageMultiplier: 1
+--- !u!114 &9101528580306630443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5325889150894486378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c7971dd6b222e24f90428043c039c8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NecroDefense::NecroDefense.Enemies.EnemyPathController
+  waypoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  arenaCenter: {x: 0, y: 0}
+  arenaRadius: 5

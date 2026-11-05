@@ -8,17 +8,10 @@ using NecroDefense.Characters.Player;
 namespace NecroDefense.Towers
 {
     /// <summary>
-    /// ระบบ Tower Placement แบบ Click-to-Place (รองรับทั้ง Old และ New Input System)
+    /// ระบบ Tower Placement แบบ Click-to-Place (วางเฉพาะบน TowerBaseSlot โดยอ้างอิงตำแหน่ง BuildPosition)
     /// </summary>
     public class TowerPlacer : MonoBehaviour
     {
-        [Header("Placement Validation")]
-        [Tooltip("ระยะขั้นต่ำจาก BaseCrystal ที่ห้ามสร้างทาวเวอร์")]
-        [SerializeField] private float minDistanceFromBase = 3f;
-
-        [Tooltip("ระยะขั้นต่ำระหว่างทาวเวอร์ที่ห้ามสร้างชิดกัน")]
-        [SerializeField] private float minDistanceFromOtherTowers = 1.5f;
-
         [Header("Ghost Visual")]
         [Tooltip("Sorting Layer ที่ Ghost Sprite ควรแสดง")]
         [SerializeField] private int ghostSortingOrder = 20;
@@ -33,9 +26,9 @@ namespace NecroDefense.Towers
         private SpriteRenderer _ghostRenderer;     // Renderer ของ Ghost
         private bool _isPlacing = false;   // กำลัง Place อยู่หรือเปล่า
 
-        private BaseCrystal _baseCrystal;        // ฐาน (อ้างอิง)
         private Camera _mainCam;
         private PlayerNecromancer _player;         // สำหรับหักทรัพยากร Soul
+        private TowerBaseSlot _targetedSlot;       // แท่นวางป้อมที่เมาส์ชี้อยู่ปัจจุบัน
 
         // ──────────────────────────────────────────────────────────────────
         private void Awake()
@@ -45,7 +38,6 @@ namespace NecroDefense.Towers
 
         private void Start()
         {
-            _baseCrystal = Object.FindAnyObjectByType<BaseCrystal>();
             _player = Object.FindAnyObjectByType<PlayerNecromancer>();
         }
 
@@ -58,14 +50,25 @@ namespace NecroDefense.Towers
             // ── อัปเดต Ghost ตามตำแหน่งเมาส์ ──────────────────────────────
             if (_currentGhost != null)
             {
-                _currentGhost.transform.position = mouseWorld;
-                UpdateGhostColor(mouseWorld);
+                _targetedSlot = GetTargetedSlotUnderMouse(mouseWorld);
+
+                if (_targetedSlot != null && !_targetedSlot.IsOccupied)
+                {
+                    // สแนป Ghost ไปที่ตำแหน่งขยับขึ้นบน (GetBuildPosition)
+                    _currentGhost.transform.position = _targetedSlot.GetBuildPosition();
+                    SetGhostColor(Color.white); // วางได้
+                }
+                else
+                {
+                    _currentGhost.transform.position = mouseWorld;
+                    SetGhostColor(Color.black); // วางไม่ได้
+                }
             }
 
             // ── Mouse 0 → ยืนยันวาง ────────────────────────────────────────
             if (IsLeftMouseButtonPressed())
             {
-                TryPlaceTower(mouseWorld);
+                TryPlaceTower();
                 return;
             }
 
@@ -77,7 +80,7 @@ namespace NecroDefense.Towers
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  Input Helper (รองรับทั้ง Old และ New Input System ป้องกัน Error)
+        //  Input Helper 
         // ─────────────────────────────────────────────────────────────────
         private Vector2 GetMouseWorldPosition()
         {
@@ -85,7 +88,6 @@ namespace NecroDefense.Towers
             if (_mainCam == null) return Vector2.zero;
 
             Vector3 screenPos = Vector3.zero;
-
 #if ENABLE_INPUT_SYSTEM
             if (Mouse.current != null)
             {
@@ -129,27 +131,18 @@ namespace NecroDefense.Towers
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  Public API: เรียกจากปุ่ม UI เพื่อเลือก Prefab และเริ่ม Preview
+        //  Public API: เลือก Prefab และเริ่ม Preview
         // ─────────────────────────────────────────────────────────────────
         public void SelectTowerToBuild(GameObject towerPrefab)
         {
-            if (towerPrefab == null)
-            {
-                Debug.LogWarning("[TowerPlacer] SelectTowerToBuild: towerPrefab เป็น null!");
-                return;
-            }
-
+            if (towerPrefab == null) return;
             if (_isPlacing) CancelPlacement();
 
             _selectedPrefab = towerPrefab;
             _isPlacing = true;
-
             SpawnGhost(towerPrefab);
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        //  Ghost Preview
-        // ─────────────────────────────────────────────────────────────────
         private void SpawnGhost(GameObject prefab)
         {
             _currentGhost = Instantiate(prefab, GetMouseWorldPosition(), Quaternion.identity);
@@ -169,52 +162,33 @@ namespace NecroDefense.Towers
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        //  Validation & Color Update
-        // ─────────────────────────────────────────────────────────────────
-        private void UpdateGhostColor(Vector2 position)
-        {
-            if (_ghostRenderer == null) return;
-
-            bool canPlace = IsValidPlacement(position);
-            SetGhostColor(canPlace ? Color.white : Color.black);
-        }
-
         private void SetGhostColor(Color baseColor)
         {
             if (_ghostRenderer == null) return;
             _ghostRenderer.color = new Color(baseColor.r, baseColor.g, baseColor.b, ghostAlpha);
         }
 
-        private bool IsValidPlacement(Vector2 position)
+        private TowerBaseSlot GetTargetedSlotUnderMouse(Vector2 worldPos)
         {
-            if (_baseCrystal != null)
+            Collider2D hit = Physics2D.OverlapPoint(worldPos);
+            if (hit != null)
             {
-                float distFromBase = Vector2.Distance(position, (Vector2)_baseCrystal.Position);
-                if (distFromBase < minDistanceFromBase) return false;
+                if (hit.TryGetComponent<TowerBaseSlot>(out var slot))
+                {
+                    return slot;
+                }
             }
-
-            Collider2D[] nearby = Physics2D.OverlapCircleAll(position, minDistanceFromOtherTowers);
-            foreach (var col in nearby)
-            {
-                if (_currentGhost != null && col.transform.IsChildOf(_currentGhost.transform)) continue;
-                if (col.gameObject == _currentGhost) continue;
-
-                if (col.CompareTag("Tower") || col.GetComponent<TowerBehavior>() != null)
-                    return false;
-            }
-
-            return true;
+            return null;
         }
 
         // ─────────────────────────────────────────────────────────────────
-        //  Try Place: ยืนยันการวาง Tower จริง
+        //  Try Place: ยืนยันการวาง Tower บน Slot
         // ─────────────────────────────────────────────────────────────────
-        private void TryPlaceTower(Vector2 position)
+        private void TryPlaceTower()
         {
-            if (!IsValidPlacement(position))
+            if (_targetedSlot == null || _targetedSlot.IsOccupied)
             {
-                Debug.Log("<color=red>[TowerPlacer]</color> ตำแหน่งนี้วางไม่ได้!");
+                Debug.Log("<color=red>[TowerPlacer]</color> ต้องวางบนแท่นสร้างป้อม (Tower Base) ที่ว่างอยู่เท่านั้น!");
                 return;
             }
 
@@ -225,18 +199,23 @@ namespace NecroDefense.Towers
                 return;
             }
 
-            GameObject tower = Instantiate(_selectedPrefab, position, Quaternion.identity);
+            // สร้างป้อมที่ตำแหน่ง GetBuildPosition() เพื่อให้ลอยขึ้นไปอยู่บนแท่น
+            Vector3 placePos = _targetedSlot.GetBuildPosition();
+            GameObject tower = Instantiate(_selectedPrefab, placePos, Quaternion.identity);
             tower.name = _selectedPrefab.name;
-            tower.tag = "Tower"; // กำหนด Tag ให้เป็น Tower เพื่อใช้เช็กระยะรอบหน้า
+            tower.tag = "Tower";
 
             if (tower.TryGetComponent<TowerBehavior>(out var tb))
                 tb.enabled = true;
 
-            Debug.Log($"<color=lime>[TowerPlacer]</color> สร้าง Tower '{tower.name}' ที่ {position} (ใช้ {cost} Souls)");
+            _targetedSlot.AssignTower(tower);
+
+            Debug.Log($"<color=lime>[TowerPlacer]</color> สร้าง Tower บนแท่นสำเร็จ! (ใช้ {cost} Souls)");
 
             DestroyGhost();
             _isPlacing = false;
             _selectedPrefab = null;
+            _targetedSlot = null;
         }
 
         private void CancelPlacement()
@@ -244,11 +223,11 @@ namespace NecroDefense.Towers
             DestroyGhost();
             _isPlacing = false;
             _selectedPrefab = null;
+            _targetedSlot = null;
             Debug.Log("<color=grey>[TowerPlacer]</color> ยกเลิกการวาง Tower");
         }
 
         public void CancelPlacementPublic() => CancelPlacement();
-
         public bool IsPlacing => _isPlacing;
 
         private void DestroyGhost()
@@ -267,15 +246,6 @@ namespace NecroDefense.Towers
             if (_selectedPrefab.TryGetComponent<TowerBehavior>(out var tb))
                 return tb.BuildCost;
             return 0;
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (_baseCrystal != null)
-            {
-                Gizmos.color = new Color(0f, 0.5f, 1f, 0.15f);
-                Gizmos.DrawWireSphere(_baseCrystal.Position, minDistanceFromBase);
-            }
         }
     }
 }
