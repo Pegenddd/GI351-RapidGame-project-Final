@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NecroDefense
@@ -11,6 +12,11 @@ namespace NecroDefense
         [SerializeField] private Color selectedColor = new Color(1f, 0.85f, 0.2f);
         [Tooltip("ป้อมที่สร้างแล้วจะไปอยู่เป็นลูกของ Transform นี้ (ว่าง = ตัวเอง)")]
         [SerializeField] private Transform towerAnchor;
+        [Tooltip("สร้างป้อมแล้วซ่อนรูปจุดสร้างป้อม (วงรี) / ขายป้อมแล้วโชว์กลับมา")]
+        [SerializeField] private bool hideWhenBuilt = true;
+
+        // รูปของจุดสร้างป้อมเอง (เก็บตอนเริ่ม ก่อนมีป้อมมาเป็นลูก)
+        private readonly List<SpriteRenderer> _slotVisuals = new List<SpriteRenderer>();
 
         public int SlotNumber => slotNumber;
         public Tower CurrentTower { get; private set; }
@@ -20,10 +26,31 @@ namespace NecroDefense
         private void OnEnable() => Registry.TowerSlots.Add(this);
         private void OnDisable() => Registry.TowerSlots.Remove(this);
 
+        private void Awake()
+        {
+            foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>(true))
+                if (sr.GetComponentInParent<Tower>() == null) _slotVisuals.Add(sr);
+        }
+
         private void Start() => SetSelected(false);
 
-        public void SetTower(Tower tower) => CurrentTower = tower;
-        public void ClearTower() => CurrentTower = null;
+        public void SetTower(Tower tower)
+        {
+            CurrentTower = tower;
+            ShowSlot(tower == null || !hideWhenBuilt);
+        }
+
+        public void ClearTower()
+        {
+            CurrentTower = null;
+            ShowSlot(true);
+        }
+
+        private void ShowSlot(bool show)
+        {
+            for (int i = 0; i < _slotVisuals.Count; i++)
+                if (_slotVisuals[i] != null) _slotVisuals[i].enabled = show;
+        }
 
         public void SetSelected(bool selected)
         {

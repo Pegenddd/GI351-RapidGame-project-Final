@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace NecroDefense
 {
@@ -51,6 +53,8 @@ namespace NecroDefense
         [SerializeField] private bool canHitFlying = true;
         [Tooltip("จุดปล่อยกระสุน (ว่าง = กลางป้อม)")]
         [SerializeField] private Transform firePoint;
+        [Tooltip("ศัตรูน้อยกว่าจำนวนลูกที่ยิงต่อครั้ง (เช่น Tier 2 ยิง 2 ลูกแต่มีศัตรูตัวเดียว) -> ลูกที่เหลือยิงใส่ตัวเดิม (ปิด = ยิงแค่เท่าจำนวนศัตรู)")]
+        [SerializeField] private bool extraShotsHitSameTarget = true;
         [Tooltip("ระยะกระโดดของลำแสง (Chain)")]
         [SerializeField] private float chainRange = 3f;
         [SerializeField] private DamageZone poisonPoolPrefab;
@@ -58,12 +62,26 @@ namespace NecroDefense
         [Header("Levels (0 = สร้าง, 1-3 = อัปเกรด)")]
         [SerializeField] private List<TowerLevel> levels = new List<TowerLevel>();
 
+        [Header("Depth & Footprint (ผู้เล่นเดินหลังป้อม / ชนฐาน)")]
+        [Tooltip("วาดป้อมทั้งต้นเป็นก้อนเดียว เรียงหน้า-หลังกับตัวผู้เล่นตามแกน Y (ผู้เล่นอยู่สูงกว่า = ถูกป้อมบัง)")]
+        [SerializeField] private bool sortAsOneObject = true;
+        [Tooltip("ลำดับการวาดของป้อมทั้งก้อน (ตัวผู้เล่น = 5 ต้องเท่ากันถึงจะเรียงตามแกน Y)")]
+        [SerializeField] private int sortingOrder = 5;
+        [Tooltip("ผู้เล่นเดินทะลุฐานป้อมไม่ได้")]
+        [SerializeField] private bool blockPlayer = true;
+        [Tooltip("ขนาดฐานที่ชน (กว้าง x สูง) เป็นวงรี - ดูเส้นเขียวใน Scene View")]
+        [SerializeField] private Vector2 footprintSize = new Vector2(1.25f, 0.5f);
+        [Tooltip("ตำแหน่งกลางฐานเทียบกับจุดสร้างป้อม")]
+        [SerializeField] private Vector2 footprintOffset = new Vector2(0f, -0.4f);
+
         [Header("Construction")]
         [Tooltip("เวลาก่อสร้าง/อัปเกรด (วินาที) ระหว่างนี้ป้อมยังไม่ยิง")]
         [SerializeField] private float constructionTime = 1f;
         [SerializeField] private WorldHealthBar constructionBar;
 
         [Header("Visual")]
+        [Tooltip("ภาพเคลื่อนไหวของป้อม (เช่น MagicOrbTowerVisual) - ว่าง = ใช้ Body รูปเดียวแบบเดิม")]
+        [SerializeField] private TowerVisual visual;
         [SerializeField] private SpriteRenderer bodyRenderer;
         [Tooltip("รูปที่ใช้ในเมนูสร้างป้อม (ว่าง = ใช้รูปของ Body)")]
         [SerializeField] private Sprite icon;
@@ -90,14 +108,30 @@ namespace NecroDefense
         /// <summary>Souls ที่จ่ายไปทั้งหมด (สร้าง + อัปเกรด) ใช้คิดเงินคืน</summary>
         public int TotalSpent { get; private set; }
         public TowerSlot Slot { get; private set; }
+        public bool BlocksPlayer => blockPlayer && isActiveAndEnabled;
+        public Vector2 FootprintCenter => (Vector2)transform.position + footprintOffset;
+        public Vector2 FootprintSize => footprintSize;
         public bool IsConstructing => _buildTimer > 0f;
-        public Sprite Icon => icon != null ? icon : (bodyRenderer != null ? bodyRenderer.sprite : null);
-        public Color IconColor => icon != null || bodyRenderer == null ? Color.white : bodyRenderer.color;
+        public Sprite Icon
+        {
+            get
+            {
+                Sprite v = visual != null ? visual.GetIcon(_levelIndex) : null;
+                if (v != null) return v;
+                return icon != null ? icon : (bodyRenderer != null ? bodyRenderer.sprite : null);
+            }
+        }
+        public Color IconColor => (visual != null && visual.GetIcon(_levelIndex) != null) || icon != null || bodyRenderer == null ? Color.white : bodyRenderer.color;
 
         private void Awake()
         {
             _baseScale = transform.localScale;
-            RefreshVisual();
+            if (sortAsOneObject && GetComponent<SortingGroup>() == null)
+            {
+                SortingGroup g = gameObject.AddComponent<SortingGroup>();
+                g.sortingOrder = sortingOrder;
+            }
+            RefreshVisual(false);
         }
 
         public void Initialize(TowerSlot slot, int paid)
@@ -105,7 +139,7 @@ namespace NecroDefense
             Slot = slot;
             _levelIndex = 0;
             TotalSpent = paid;
-            RefreshVisual();
+            RefreshVisual(false);
             StartConstruction();
         }
 
@@ -114,13 +148,14 @@ namespace NecroDefense
             if (!CanUpgrade) return;
             _levelIndex++;
             TotalSpent += paid;
-            RefreshVisual();
+            RefreshVisual(true);
             StartConstruction();
         }
 
-        private void RefreshVisual()
+        private void RefreshVisual(bool isUpgrade)
         {
             transform.localScale = _baseScale * (1f + scalePerLevel * _levelIndex);
+            if (visual != null) visual.OnLevelChanged(_levelIndex, isUpgrade);
             for (int i = 0; i < levelPips.Length; i++)
                 if (levelPips[i] != null) levelPips[i].SetActive(i < _levelIndex);
         }
@@ -131,6 +166,7 @@ namespace NecroDefense
             if (_buildTimer > 0f)
             {
                 SetBodyAlpha(0.35f);
+                if (visual != null) visual.OnConstruction(0f);
                 if (constructionBar != null) constructionBar.SetValue(0f);
             }
         }
@@ -152,6 +188,7 @@ namespace NecroDefense
                 _buildTimer -= Time.deltaTime;
                 float t = constructionTime > 0f ? 1f - Mathf.Clamp01(_buildTimer / constructionTime) : 1f;
                 if (constructionBar != null) constructionBar.SetValue(t);
+                if (visual != null) visual.OnConstruction(_buildTimer <= 0f ? 1f : t);
                 if (_buildTimer <= 0f) SetBodyAlpha(1f);
                 return;
             }
@@ -160,15 +197,59 @@ namespace NecroDefense
             if (_timer > 0f) return;
 
             TowerLevel lv = Current;
-            FindTargets(lv.range, Mathf.Max(1, lv.targetsPerShot));
+            int shotCount = Mathf.Max(1, lv.targetsPerShot);
+            FindTargets(lv.range, shotCount);
             if (_targets.Count == 0) return;
+            if (extraShotsHitSameTarget && attackType == TowerAttackType.Projectile)
+                for (int i = _targets.Count; i < shotCount; i++) _targets.Add(_targets[i % _targets.Count]);
+
+            _timer = lv.attackInterval;
+
+            if (visual != null)
+            {
+                // มีภาพเคลื่อนไหว: ตั้งท่า (เช่น อ้าปาก) ก่อน แล้วค่อยยิงออก
+                List<Unit> shots = new List<Unit>(_targets);
+                visual.OnAttackStart(shots);
+                float delay = visual.FireDelay;
+                if (delay > 0f) { StartCoroutine(FireAfterDelay(shots, delay)); return; }
+                for (int i = 0; i < shots.Count; i++) FireShot(i, shots[i], lv);
+                return;
+            }
 
             for (int i = 0; i < _targets.Count; i++)
             {
-                if (attackType == TowerAttackType.Beam) FireBeam(_targets[i], lv);
-                else FireProjectile(_targets[i], lv);
+                if (attackType == TowerAttackType.Beam) FireBeam(_targets[i], lv, FirePosition);
+                else FireProjectile(_targets[i], lv, FirePosition);
             }
-            _timer = lv.attackInterval;
+        }
+
+        private IEnumerator FireAfterDelay(List<Unit> shots, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            TowerLevel lv = Current;
+            for (int i = 0; i < shots.Count; i++)
+            {
+                Unit t = shots[i];
+                // เป้าตายระหว่างตั้งท่า -> หาตัวใหม่ในระยะ
+                if (t == null || !t.IsAlive)
+                {
+                    FindTargets(lv.range, 1);
+                    t = _targets.Count > 0 ? _targets[0] : null;
+                }
+                if (t != null) FireShot(i, t, lv);
+            }
+        }
+
+        private void FireShot(int index, Unit target, TowerLevel lv)
+        {
+            Vector2 from = visual != null && visual.GetFirePosition(index).HasValue ? visual.GetFirePosition(index).Value : FirePosition;
+            if (attackType == TowerAttackType.Beam) FireBeam(target, lv, from);
+            else
+            {
+                Projectile p = FireProjectile(target, lv, from);
+                if (p != null && visual != null) visual.OnProjectileSpawned(index, p);
+            }
+            if (visual != null) visual.OnShotFired(index, target);
         }
 
         private void FindTargets(float range, int count)
@@ -193,10 +274,10 @@ namespace NecroDefense
 
         private Vector2 FirePosition => firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
 
-        private void FireProjectile(Unit target, TowerLevel lv)
+        private Projectile FireProjectile(Unit target, TowerLevel lv, Vector2 from)
         {
-            if (projectilePrefab == null) { target.TakeDamage(lv.damage, this); return; }
-            Projectile p = Instantiate(projectilePrefab, FirePosition, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
+            if (projectilePrefab == null) { target.TakeDamage(lv.damage, this); return null; }
+            Projectile p = Instantiate(projectilePrefab, from, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
             p.Launch(Team.Player, target, lv.damage, canHitFlying, this);
             p.SetAreaRadius(lv.areaRadius);
             if (lv.slowPercent > 0f) p.SetSlow(lv.slowPercent, lv.slowDuration);
@@ -210,14 +291,14 @@ namespace NecroDefense
                         Instantiate(pool, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Effects));
                 };
             }
+            return p;
         }
 
         private readonly List<Unit> _chainHit = new List<Unit>();
 
-        private void FireBeam(Unit first, TowerLevel lv)
+        private void FireBeam(Unit first, TowerLevel lv, Vector2 from)
         {
             _chainHit.Clear();
-            Vector2 from = FirePosition;
             Unit current = first;
             int hops = 1 + Mathf.Max(0, lv.chainTargets);
 
@@ -255,6 +336,19 @@ namespace NecroDefense
             if (levels.Count == 0) return;
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(transform.position, Current.range);
+            if (blockPlayer)
+            {
+                Gizmos.color = Color.green;
+                Vector3 c = FootprintCenter;
+                Vector3 prev = c + new Vector3(footprintSize.x * 0.5f, 0f, 0f);
+                for (int i = 1; i <= 32; i++)
+                {
+                    float a = i / 32f * Mathf.PI * 2f;
+                    Vector3 p = c + new Vector3(Mathf.Cos(a) * footprintSize.x * 0.5f, Mathf.Sin(a) * footprintSize.y * 0.5f, 0f);
+                    Gizmos.DrawLine(prev, p);
+                    prev = p;
+                }
+            }
         }
     }
 }

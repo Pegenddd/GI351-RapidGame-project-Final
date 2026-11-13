@@ -13,6 +13,10 @@ namespace NecroDefense
         [Header("Movement")]
         [Tooltip("ความเร็วเดินพื้นฐาน (GDD = 4.5)")]
         [SerializeField] private float moveSpeed = 4.5f;
+        [Tooltip("ตำแหน่งเท้าเทียบกับกลางตัว (ใช้ชนฐานป้อม)")]
+        [SerializeField] private float footOffset = -0.55f;
+        [Tooltip("ขนาดเท้า (ยิ่งมากยิ่งชนฐานป้อมเร็ว)")]
+        [SerializeField] private float footRadius = 0.18f;
 
         private Rigidbody2D _rb;
         private float _moveSpeedBonusPercent;
@@ -62,6 +66,33 @@ namespace NecroDefense
         {
             MapBounds bounds = GameManager.Instance != null ? GameManager.Instance.Bounds : null;
             if (bounds != null) transform.position = bounds.Clamp(transform.position);
+            PushOutOfTowers();
+        }
+
+        /// <summary>เดินทะลุฐานป้อมไม่ได้: ถ้าเท้าเข้าไปในวงรีฐาน ดันออกไปที่ขอบ (เดินอ้อมได้ลื่นๆ)</summary>
+        private void PushOutOfTowers()
+        {
+            Vector2 feet = (Vector2)transform.position + new Vector2(0f, footOffset);
+            for (int i = 0; i < Registry.TowerSlots.Count; i++)
+            {
+                TowerSlot slot = Registry.TowerSlots[i];
+                Tower t = slot != null ? slot.CurrentTower : null;
+                if (t == null || !t.BlocksPlayer) continue;
+
+                Vector2 c = t.FootprintCenter;
+                float rx = t.FootprintSize.x * 0.5f + footRadius;
+                float ry = t.FootprintSize.y * 0.5f + footRadius * 0.5f;
+                if (rx <= 0f || ry <= 0f) continue;
+                Vector2 d = new Vector2((feet.x - c.x) / rx, (feet.y - c.y) / ry);
+                float len = d.magnitude;
+                if (len >= 1f) continue;
+                if (len < 0.0001f) d = Vector2.down; else d /= len;
+                Vector2 edge = c + new Vector2(d.x * rx, d.y * ry);
+                Vector2 delta = edge - feet;
+                feet += delta;
+                transform.position += (Vector3)delta;
+                _rb.position = transform.position;
+            }
         }
 
         private static Vector2 ReadMoveInput()

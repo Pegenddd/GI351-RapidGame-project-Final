@@ -109,6 +109,12 @@ MonoBehaviour:
   homing: 1
   hitRadius: 0.2
   lifetime: 3
-  rotateToDirection: 1
+  rotateToDirection: 0
+  arcHeight: 0.9
+  arcHeightPerDistance: 0.15
+  arcMinFlightTime: 0.35
+  arcStretch: 0.25
+  spinSpeed: 0
   areaRadius: 1.2
   impactEffect: {fileID: 499684343535217920, guid: 36a688a42e94bce44a9387637c955d5a, type: 3}
+  impactSpawn: {fileID: 2344052290516107368, guid: cf7843cb2d5ea2c4eaed1e64709fd303, type: 3}
