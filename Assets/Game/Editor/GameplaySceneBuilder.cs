@@ -48,6 +48,15 @@ namespace NecroDefense.EditorTools
                 EditorUtility.DisplayProgressBar("NecroDefense", "Building scene...", 0.7f);
                 BuildScene(p);
 
+                // ธีม UI ขาว-ดำ + ระบบเสียง (เหมือนกดเมนู Update - UI Theme + Audio)
+                try
+                {
+                    List<string> themeLog = new List<string>();
+                    NecroUpdate_UIAudio.ImportAssets(themeLog);
+                    NecroUpdate_UIAudio.ApplyToScene(themeLog);
+                }
+                catch (Exception e) { Debug.LogWarning("[NecroDefense] UI theme/audio skipped: " + e.Message); }
+
                 BU.EnsureFolder("Assets/Scenes");
                 EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), ScenePath);
                 AddToBuildSettings();

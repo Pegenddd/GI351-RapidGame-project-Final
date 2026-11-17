@@ -14,6 +14,7 @@ namespace NecroDefense
         public void Show(int newLevel, List<UpgradeCard> choices, Action<UpgradeCard> onPick)
         {
             gameObject.SetActive(true);
+            Sfx.UI("SFX_UI_CardFlip");
             if (titleText != null) titleText.text = "LEVEL UP!  Lv " + newLevel + "  -  Choose 1 card";
             LevelUpManager lv = GameManager.Instance.LevelUp;
             for (int i = 0; i < cards.Count; i++)

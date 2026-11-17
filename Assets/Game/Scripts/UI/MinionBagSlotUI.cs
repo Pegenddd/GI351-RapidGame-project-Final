@@ -23,8 +23,8 @@ namespace NecroDefense
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private TooltipTrigger tooltip;
         [SerializeField] private Image background;
-        [SerializeField] private Color normalColor = new Color(0.16f, 0.16f, 0.21f, 0.98f);
-        [SerializeField] private Color placingColor = new Color(0.55f, 0.35f, 0.85f, 1f);
+        [SerializeField] private Color normalColor = new Color(0.62f, 0.62f, 0.63f, 1f);
+        [SerializeField] private Color placingColor = new Color(0.86f, 0.1f, 0.12f, 1f);
 
         private MinionBagUI _owner;
 
@@ -60,7 +60,7 @@ namespace NecroDefense
             {
                 countText.text = "x" + e.count;
                 // กองทัพชนิดนี้เต็มแล้ว -> ตัวเลขสีทอง
-                countText.color = gm.Minions.HasRoom(e.minionPrefab) ? Color.white : new Color(1f, 0.85f, 0.3f);
+                countText.color = gm.Minions.HasRoom(e.minionPrefab) ? Color.white : UITheme.RedBright;
             }
             if (costText != null) costText.text = e.minionPrefab.ManaCost.ToString();
             if (keyText != null) keyText.text = UIUtil.KeyLabel(e.summonKey);

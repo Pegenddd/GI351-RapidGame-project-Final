@@ -73,6 +73,7 @@ namespace NecroDefense
             if (choices.Count == 0) { _pendingLevelUps = 0; return; }
 
             _choosing = true;
+            Sfx.UI("SFX_UI_LevelUp");
             GameManager.Instance.EnterLevelUp();
             GameManager.Instance.UI.LevelUpPanel.Show(Level, choices, OnCardPicked);
         }
@@ -103,6 +104,7 @@ namespace NecroDefense
 
         private void OnCardPicked(UpgradeCard card)
         {
+            Sfx.UI("SFX_UI_CardPick");
             _stacks[card] = GetStacks(card) + 1;
             ApplyCard(card);
             _pendingLevelUps--;

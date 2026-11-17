@@ -58,6 +58,7 @@ namespace NecroDefense
         public void Show(TowerSlot slot)
         {
             Wire();
+            if (slot != null && (_slot != slot || !gameObject.activeSelf)) Sfx.UI("SFX_UI_RingOpen");
             _slot = slot;
             _pending = -1;
             gameObject.SetActive(slot != null);
@@ -81,14 +82,17 @@ namespace NecroDefense
             if (_pending != id)   // กดครั้งแรก = ดูข้อมูล
             {
                 _pending = id;
+                Sfx.UI("SFX_UI_RingSelect");
                 Refresh();
                 return;
             }
 
             // กดซ้ำ = ยืนยัน
-            if (id == UpgradeId) tm.TryUpgrade();
-            else if (id == SellId) tm.Sell();
-            else tm.TryBuild(id);
+            bool ok;
+            if (id == UpgradeId) ok = tm.TryUpgrade();
+            else if (id == SellId) ok = tm.Sell();
+            else ok = tm.TryBuild(id);
+            if (ok) Sfx.UI("SFX_UI_Confirm");
             _pending = -1;
             if (IsOpen) Refresh();
         }

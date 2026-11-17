@@ -17,8 +17,8 @@ namespace NecroDefense
         [SerializeField] private TooltipTrigger tooltip;
         [Tooltip("ภาพแม่กุญแจทับตอนสกิลยังล็อก")]
         [SerializeField] private GameObject lockedOverlay;
-        [SerializeField] private Color readyColor = new Color(0.15f, 0.15f, 0.2f, 0.95f);
-        [SerializeField] private Color unavailableColor = new Color(0.35f, 0.08f, 0.08f, 0.95f);
+        [SerializeField] private Color readyColor = new Color(0.62f, 0.62f, 0.63f, 1f);
+        [SerializeField] private Color unavailableColor = new Color(0.5f, 0.06f, 0.08f, 1f);
 
         public Image Icon => icon;
 

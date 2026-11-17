@@ -70,7 +70,7 @@ namespace NecroDefense
         {
             Tower t = SelectedSlot != null ? SelectedSlot.CurrentTower : null;
             if (t == null) return false;
-            if (!t.CanUpgrade) { GameManager.Instance.UI.ShowMessage("Max level"); return false; }
+            if (!t.CanUpgrade) { GameManager.Instance.UI.ShowError("Max level"); return false; }
             int cost = GetUpgradeCost(t);
             if (!GameManager.Instance.Economy.TrySpendSouls(cost)) return false;
             t.Upgrade(cost);
@@ -84,6 +84,7 @@ namespace NecroDefense
             Tower t = slot != null ? slot.CurrentTower : null;
             if (t == null) return false;
             int refund = GetSellValue(t);
+            Sfx.At("SFX_Tower_Sell", t.transform.position);
             GameManager.Instance.Economy.AddSouls(refund);
             slot.ClearTower();
             Destroy(t.gameObject);

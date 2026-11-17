@@ -15,7 +15,11 @@ namespace NecroDefense
             if (restartButton != null) restartButton.onClick.AddListener(() => GameManager.Instance.RestartGame());
         }
 
-        public void Show() => gameObject.SetActive(true);
+        public void Show()
+        {
+            if (!gameObject.activeSelf) Sfx.UI("SFX_UI_Pause");
+            gameObject.SetActive(true);
+        }
         public void Hide() => gameObject.SetActive(false);
     }
 }

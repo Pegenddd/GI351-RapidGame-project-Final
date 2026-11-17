@@ -77,6 +77,7 @@ namespace NecroDefense
         private void FireBolt(Unit target)
         {
             if (boltPrefab == null) { target.TakeDamage(boltDamage); return; }
+            Sfx.At("SFX_Player_Bolt_Cast", _player.Position, 0.7f);
             Projectile p = Instantiate(boltPrefab, _player.Position, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
             p.Launch(Team.Player, target, boltDamage, true);
         }
@@ -102,6 +103,7 @@ namespace NecroDefense
                     if (Vector2.Distance(pos, enemy.Position) > orbHitRadius + enemy.BodyRadius) continue;
                     if (_orbHitTimes.TryGetValue(enemy, out float last) && now - last < orbHitCooldown) continue;
                     _orbHitTimes[enemy] = now;
+                    Sfx.At("SFX_Player_Orb_Hit", pos, 0.7f);
                     enemy.TakeDamage(orbDamage * _orbDamageMultiplier);
                 }
             }

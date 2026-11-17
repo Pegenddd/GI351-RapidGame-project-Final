@@ -73,5 +73,12 @@ namespace NecroDefense
         {
             if (message != null) message.Show(text);
         }
+
+        /// <summary>ข้อความแจ้งเตือนแบบ "ทำไม่ได้" (เงินไม่พอ / คูลดาวน์ / เต็ม) + เสียง Error + ข้อความสั่น</summary>
+        public void ShowError(string text)
+        {
+            Sfx.UI("SFX_UI_Error");
+            if (message != null) message.ShowError(text);
+        }
     }
 }

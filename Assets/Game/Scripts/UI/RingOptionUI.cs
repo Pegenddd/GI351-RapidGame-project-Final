@@ -19,9 +19,9 @@ namespace NecroDefense
         [SerializeField] private TMP_Text costText;
         [Tooltip("เครื่องหมายถูก โผล่ตอนกดครั้งแรก (กดอีกครั้ง = ยืนยัน)")]
         [SerializeField] private GameObject confirmMark;
-        [SerializeField] private Color normalColor = new Color(0.15f, 0.15f, 0.18f, 1f);
-        [SerializeField] private Color highlightColor = new Color(0.55f, 0.35f, 0.85f, 1f);
-        [SerializeField] private Color disabledColor = new Color(0.3f, 0.1f, 0.1f, 1f);
+        [SerializeField] private Color normalColor = new Color(0.62f, 0.62f, 0.63f, 1f);
+        [SerializeField] private Color highlightColor = new Color(0.86f, 0.1f, 0.12f, 1f);
+        [SerializeField] private Color disabledColor = new Color(0.26f, 0.26f, 0.26f, 1f);
 
         private Action _onClick;
         private bool _available = true;
@@ -67,6 +67,12 @@ namespace NecroDefense
         {
             if (background == null) return;
             background.color = !_available ? disabledColor : highlighted ? highlightColor : normalColor;
+            if (icon != null)
+            {
+                Color c = icon.color;
+                c.a = _available ? 1f : 0.4f;   // เงินไม่พอ = ไอคอนจางลง (แทนสีแดง)
+                icon.color = c;
+            }
         }
     }
 }

@@ -201,9 +201,20 @@ namespace NecroDefense
             }
         }
 
+        protected override string AttackSoundId
+        {
+            get
+            {
+                string k = SoundKey;
+                if (k == "MiniSlime") k = "Slime";
+                return string.IsNullOrEmpty(k) ? null : "SFX_Minion_Attack_" + k;
+            }
+        }
+
         protected override void OnDeath()
         {
             StopMoving();
+            Sfx.At("SFX_Minion_Death", Position, 0.8f);
             // วิญญาณกลับเข้ากระเป๋า (นับตอนบินถึง)
             if (GameManager.Instance != null) GameManager.Instance.Minions.OnMinionDied(this);
             Destroy(gameObject);

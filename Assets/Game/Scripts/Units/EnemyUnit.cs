@@ -300,9 +300,37 @@ namespace NecroDefense
             return best;
         }
 
+        protected override string AttackSoundId
+        {
+            get
+            {
+                switch (SoundKey)
+                {
+                    case "Slime":
+                    case "MiniSlime": return "SFX_Enemy_Slime_Attack";
+                    case "Goblin": return "SFX_Enemy_Goblin_Attack";
+                    case "Archer": return "SFX_Enemy_Archer_Shoot";
+                    case "Vulture": return "SFX_Enemy_Vulture_Screech";
+                    case "Giant": return "SFX_Enemy_Giant_Slam";
+                    default: return "SFX_Enemy_Hit_Generic";
+                }
+            }
+        }
+
+        private void Start()
+        {
+            if (SoundKey == "Giant") { Sfx.At("SFX_Enemy_Giant_Spawn", Position, 1f); CameraShake.Shake(0.1f, 0.6f); }
+        }
+
+        protected override void OnDamaged(float amount) => Sfx.At("SFX_Enemy_Hit_Generic", Position, 0.7f);
+
         protected override void OnDeath()
         {
             StopMoving();
+            string key = SoundKey;
+            if (!string.IsNullOrEmpty(key)) Sfx.At("SFX_Enemy_" + key + "_Death", Position);
+            if (key == "Giant") CameraShake.Shake(0.25f, 0.5f);
+            if (splitPrefab != null) Sfx.At("SFX_Enemy_Slime_Split", Position, 0.8f);
 
             if (GameManager.Instance != null)
             {
@@ -322,6 +350,7 @@ namespace NecroDefense
                     && Random.value < killer.SoulCaptureChance)
                 {
                     GameManager.Instance.Minions.RaiseIntoBag(minionPrefab, Position);
+                    Sfx.At("SFX_Tower_SoulCapture", Position);
                     captured = true;
                 }
 

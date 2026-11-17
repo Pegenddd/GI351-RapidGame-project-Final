@@ -49,6 +49,8 @@ namespace NecroDefense
             t.localRotation = Quaternion.Euler(0f, 0f, facingLeft ? -fallenAngle : fallenAngle);
         }
 
+        private void Start() => Sfx.At("SFX_Corpse_Drop", transform.position, 0.6f);
+
         private void OnEnable() => Registry.Corpses.Add(this);
         private void OnDisable() => Registry.Corpses.Remove(this);
 
@@ -58,7 +60,11 @@ namespace NecroDefense
             float remaining = lifetime - _timer;
             if (spriteRenderer != null && remaining < blinkTime)
                 spriteRenderer.enabled = Mathf.Repeat(_timer * 8f, 1f) > 0.3f;
-            if (remaining <= 0f) Destroy(gameObject);
+            if (remaining <= 0f)
+            {
+                Sfx.At("SFX_Corpse_Fade", transform.position, 0.6f);
+                Destroy(gameObject);
+            }
         }
 
         /// <summary>ใช้ซากนี้แล้ว (ลองชุบไปแล้ว ไม่ว่าจะสำเร็จหรือไม่)</summary>

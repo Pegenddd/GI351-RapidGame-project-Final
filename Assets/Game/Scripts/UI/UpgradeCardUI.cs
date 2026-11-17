@@ -30,7 +30,11 @@ namespace NecroDefense
             gameObject.SetActive(card != null);
             if (card == null) return;
             if (categoryText != null) categoryText.text = card.category.ToString().ToUpper();
-            if (categoryStrip != null) categoryStrip.color = card.cardColor;
+            if (categoryStrip != null)
+            {
+                // ธีมแดง-ขาว: แถบหมวดเป็นแดงเสมอ (ชื่อหมวดเป็นตัวหนังสือบอกอยู่แล้ว)
+                categoryStrip.color = UITheme.Red;
+            }
             if (titleText != null) titleText.text = card.title;
             if (descriptionText != null) descriptionText.text = card.description;
             if (stacksText != null)

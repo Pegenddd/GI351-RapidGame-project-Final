@@ -42,6 +42,8 @@ namespace NecroDefense
             if (target != null) transform.position = Desired();
         }
 
+        private Vector2 _shakeOffset;
+
         private void LateUpdate()
         {
             if (_cam != null && enableScrollZoom && _cam.orthographic)
@@ -56,8 +58,12 @@ namespace NecroDefense
                 _cam.orthographicSize = Mathf.Lerp(_cam.orthographicSize, _targetSize, 1f - Mathf.Exp(-zoomSmooth * Time.unscaledDeltaTime));
             }
 
-            if (target == null) return;
-            transform.position = Vector3.SmoothDamp(transform.position, Desired(), ref _velocity, smoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            // เอาแรงสั่นของเฟรมก่อนออกก่อน แล้วค่อยตามเป้า (กันกล้องลอยออกจากตำแหน่ง)
+            transform.position -= (Vector3)_shakeOffset;
+            if (target != null)
+                transform.position = Vector3.SmoothDamp(transform.position, Desired(), ref _velocity, smoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            _shakeOffset = CameraShake.Sample(Time.deltaTime);
+            transform.position += (Vector3)_shakeOffset;
         }
 
         private Vector3 Desired()
