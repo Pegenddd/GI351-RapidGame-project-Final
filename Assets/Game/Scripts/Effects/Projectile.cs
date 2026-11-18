@@ -39,6 +39,8 @@ namespace NecroDefense
         [SerializeField] private RingEffect impactEffect;
         [Tooltip("ของที่เกิดตอนชนเพิ่ม เช่น สไลม์แตกกระจาย (FX_SlimeSplat) - ไม่ใส่ก็ได้")]
         [SerializeField] private GameObject impactSpawn;
+        [Tooltip("เสียงตอนกระทบ (ว่าง = เดาจากชื่อ Prefab: PlayerBolt / MagicOrb / Explosive / Arrow)")]
+        [SerializeField] private string impactSound = "";
 
         private Team _team;
         private Unit _target;
@@ -173,8 +175,25 @@ namespace NecroDefense
                     splat.Play(_sr != null ? _sr.sprite : null, _baseScale, areaRadius);
                 }
             }
+            PlayImpactSound(pos);
             OnImpact?.Invoke(pos);
             Destroy(gameObject);
+        }
+
+        private void PlayImpactSound(Vector2 pos)
+        {
+            string id = impactSound;
+            if (string.IsNullOrEmpty(id))
+            {
+                string n = gameObject.name;
+                if (n.Contains("PlayerBolt")) id = "SFX_Player_Bolt_Hit";
+                else if (n.Contains("MagicOrb")) id = "SFX_Tower_Orb_Hit";
+                else if (n.Contains("Explosive")) id = "SFX_Tower_Bomb_Explode";
+                else if (n.Contains("Arrow")) id = "SFX_Enemy_Arrow_Hit";
+            }
+            if (string.IsNullOrEmpty(id)) return;
+            Sfx.At(id, pos, 0.75f);
+            if (id == "SFX_Tower_Bomb_Explode") CameraShake.Shake(0.06f, 0.15f);
         }
 
         private void HitUnit(Unit u)

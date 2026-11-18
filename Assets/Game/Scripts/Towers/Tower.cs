@@ -94,8 +94,26 @@ namespace NecroDefense
         [Tooltip("ดาวบอกเลเวล (เปิดทีละอันตาม Tier)")]
         [SerializeField] private GameObject[] levelPips = new GameObject[0];
 
+        [Header("Sound")]
+        [Tooltip("ชนิดเสียง: Orb / Bomb / Beam (ว่าง = เดาจากชื่อป้อม)")]
+        [SerializeField] private string soundKey = "";
+
         private int _levelIndex;
         private float _timer;
+        private int _beamLoop;
+        private float _beamIdle;
+        private string _sk;
+
+        private string SoundKey
+        {
+            get
+            {
+                if (_sk != null) return _sk;
+                string n = !string.IsNullOrEmpty(soundKey) ? soundKey : towerName + gameObject.name;
+                _sk = n.Contains("Beam") ? "Beam" : (n.Contains("Explosive") || n.Contains("Bomb")) ? "Bomb" : "Orb";
+                return _sk;
+            }
+        }
         private Vector3 _baseScale;
         private float _buildTimer;
         private static readonly List<Unit> _targets = new List<Unit>();
@@ -151,6 +169,7 @@ namespace NecroDefense
             TotalSpent = paid;
             RefreshVisual(false);
             StartConstruction();
+            Sfx.At("SFX_Tower_Build_Start", transform.position);
         }
 
         public void Upgrade(int paid)
@@ -160,6 +179,7 @@ namespace NecroDefense
             TotalSpent += paid;
             RefreshVisual(true);
             StartConstruction();
+            Sfx.At("SFX_Tower_Upgrade_T" + Mathf.Clamp(_levelIndex, 1, 3), transform.position);
         }
 
         private void RefreshVisual(bool isUpgrade)
@@ -199,8 +219,15 @@ namespace NecroDefense
                 float t = ConstructionTime > 0f ? 1f - Mathf.Clamp01(_buildTimer / ConstructionTime) : 1f;
                 if (constructionBar != null) constructionBar.SetValue(t);
                 if (visual != null) visual.OnConstruction(_buildTimer <= 0f ? 1f : t);
-                if (_buildTimer <= 0f) SetBodyAlpha(1f);
+                if (_buildTimer <= 0f) { SetBodyAlpha(1f); Sfx.At("SFX_Tower_Build_Done", transform.position); }
                 return;
+            }
+
+            // ลำแสงหยุดยิงนานพอ -> หยุดเสียงฮัม
+            if (_beamLoop != 0)
+            {
+                _beamIdle += Time.deltaTime;
+                if (_beamIdle > Current.attackInterval + 0.35f) Sfx.StopLoop(ref _beamLoop);
             }
 
             _timer -= Time.deltaTime;
@@ -226,6 +253,7 @@ namespace NecroDefense
                 return;
             }
 
+            PlayShotSound();
             for (int i = 0; i < _targets.Count; i++)
             {
                 if (attackType == TowerAttackType.Beam) FireBeam(_targets[i], lv, FirePosition);
@@ -250,8 +278,22 @@ namespace NecroDefense
             }
         }
 
+        private void PlayShotSound()
+        {
+            if (SoundKey == "Beam")
+            {
+                _beamIdle = 0f;
+                if (_beamLoop == 0 || AudioManager.Instance == null || !AudioManager.Instance.IsLoopPlaying(_beamLoop))
+                    _beamLoop = Sfx.Loop("SFX_Tower_Beam_Loop", 0.55f, transform);
+            }
+            else Sfx.At(SoundKey == "Bomb" ? "SFX_Tower_Bomb_Shoot" : "SFX_Tower_Orb_Shoot", transform.position, 0.7f);
+        }
+
+        private void OnDestroy() => Sfx.StopLoop(ref _beamLoop);
+
         private void FireShot(int index, Unit target, TowerLevel lv)
         {
+            PlayShotSound();
             Vector2 from = visual != null && visual.GetFirePosition(index).HasValue ? visual.GetFirePosition(index).Value : FirePosition;
             if (attackType == TowerAttackType.Beam) FireBeam(target, lv, from);
             else
@@ -298,7 +340,10 @@ namespace NecroDefense
                 p.OnImpact = pos =>
                 {
                     if (UnityEngine.Random.value < chance)
+                    {
                         Instantiate(pool, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Effects));
+                        Sfx.At("SFX_Tower_Poison_Pool", pos, 0.6f);
+                    }
                 };
             }
             return p;
@@ -319,6 +364,7 @@ namespace NecroDefense
                     BeamEffect b = Instantiate(beamPrefab, GameManager.GetFolder(SpawnFolder.Effects));
                     b.Play(from, current.Position);
                 }
+                if (h > 0) Sfx.At("SFX_Tower_Beam_Chain", current.Position, 0.6f);
                 current.TakeDamage(lv.damage, this);
                 if (lv.slowPercent > 0f) current.ApplySlow(lv.slowPercent, lv.slowDuration);
                 _chainHit.Add(current);

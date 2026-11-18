@@ -15,6 +15,8 @@ namespace NecroDefense
         [SerializeField] private float lifetime = 40f;
 
         private bool _magnetized;
+        private static float _lastPickup = -10f;
+        private static int _chain;
         private float _age;
 
         public void SetValue(int xp) => value = xp;
@@ -37,6 +39,10 @@ namespace NecroDefense
 
             if (dist <= pickupRadius)
             {
+                // เก็บติดกันเร็วๆ เสียงไล่โน้ตสูงขึ้น
+                _chain = Time.time - _lastPickup < 0.6f ? Mathf.Min(_chain + 1, 8) : 0;
+                _lastPickup = Time.time;
+                Sfx.Play("SFX_XP_Pickup", 0.7f, Mathf.Pow(1.059463f, _chain * 2));
                 if (GameManager.Instance != null) GameManager.Instance.LevelUp.AddXp(value);
                 Destroy(gameObject);
             }

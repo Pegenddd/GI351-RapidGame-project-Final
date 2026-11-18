@@ -25,6 +25,8 @@ namespace NecroDefense
         private Rigidbody2D _rb;
         private float _moveSpeedBonusPercent;
         private Vector2 _moveInput;
+        private float _stepTimer;
+        private float _hurtSoundTimer;
 
         public override Team Team => Team.Player;
         public PlayerStats Stats => stats;
@@ -95,6 +97,13 @@ namespace NecroDefense
 
             _moveInput = MovementLocked ? Vector2.zero : ReadMoveInput();
             _rb.linearVelocity = _moveInput * MoveSpeed;
+            if (_hurtSoundTimer > 0f) _hurtSoundTimer -= Time.deltaTime;
+            if (_moveInput.sqrMagnitude > 0.01f)
+            {
+                _stepTimer -= Time.deltaTime;
+                if (_stepTimer <= 0f) { _stepTimer = 0.35f; Sfx.At("SFX_Player_Step", Position, 0.5f); }
+            }
+            else _stepTimer = 0.1f;
             if (bodyRenderer != null && Mathf.Abs(_moveInput.x) > 0.01f) bodyRenderer.flipX = _moveInput.x < 0f;
         }
 
@@ -155,8 +164,17 @@ namespace NecroDefense
         /// <summary>การ์ด Swift Boots: +% ความเร็ว (0.1 = +10%)</summary>
         public void AddMoveSpeedPercent(float percent) => _moveSpeedBonusPercent += percent;
 
+        protected override void OnDamaged(float amount)
+        {
+            LowHealthVignette.FlashHit();
+            if (_hurtSoundTimer > 0f) return;
+            _hurtSoundTimer = 0.3f;
+            Sfx.Play("SFX_Player_Hurt");
+        }
+
         protected override void OnDeath()
         {
+            Sfx.Play("SFX_Player_Death");
             _rb.linearVelocity = Vector2.zero;
             if (bodyRenderer != null) bodyRenderer.color = Color.gray;
             if (GameManager.Instance != null) GameManager.Instance.Defeat("The Necromancer has fallen");

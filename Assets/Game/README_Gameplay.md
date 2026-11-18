@@ -137,3 +137,29 @@ UI เน้นไอคอน ข้อความรายละเอีย�
 - `Data/` UpgradeCard (ScriptableObject)
 - `UI/` สคริปต์ของแต่ละแผง UI (TowerPanelUI / CommandPanelUI = เมนูวงกลม, RingOptionUI = ปุ่มกลม, TooltipUI)
 - `Assets/Game/Editor/` ตัวสร้างซีน (ใช้ครั้งเดียว จะลบทิ้งหลังสร้างเสร็จก็ได้)
+
+---
+
+## ธีม UI ขาว-ดำ-แดง (แบบ Othercide) + ระบบเสียง
+**ติดตั้ง (ครั้งเดียว):** เปิด Unity รอคอมไพล์เสร็จ → เมนู **Tools > NecroDefense > Update - UI Theme (Red-White) + Audio** → Apply
+(แก้เฉพาะซีน `Gameplay` กดซ้ำได้ ไม่เพิ่มของซ้ำ / Build Gameplay Scene ใหม่ก็ใส่ธีมให้อัตโนมัติ)
+
+| อยากปรับ | ที่ |
+|---|---|
+| รูปกรอบแผง / ช่อง / ปุ่ม / หลอด | `Assets/Game/Art/UI/UI_*.png` (ทับไฟล์ชื่อเดิมได้เลย) |
+| สีธีม (เทาแต่ละระดับ) | `Scripts/UI/UITheme.cs` |
+| เสียงปุ่ม (ชี้/กด), ขยายตอนชี้ | ปุ่มนั้น > **UIButtonFX** |
+| แผงเด้งเข้า | แผงนั้น > **UIPopIn** |
+| หลอดวิ่ง / แถบจางตอนเลือดลด / กระพริบตอนต่ำ | หลอดนั้น > **BarUI** > Animation |
+| เอฟเฟกต์ Slow / พิษ บนตัวศัตรู (สีเส้นขอบ, ไอคอน, อนุภาค) | ใส่อัตโนมัติ: `Scripts/Effects/StatusEffectVisual.cs` (หรือเพิ่ม component นี้ใน Prefab เพื่อปรับค่า) |
+| ขอบจอมืดตอน HP ต่ำ | `Canvas_Gameplay/LowHealthVignette` |
+| ระดับเสียงเริ่มต้น, ระยะได้ยิน, เพลงอัตโนมัติ | `GameManager/AudioManager` |
+| ปรับเสียงในเกม | กด Esc → แถบ Master / Music / SFX / UI (จำค่าไว้ให้) |
+
+### ไฟล์เสียง
+- เสียงประกอบ: `Assets/Game/Resources/Audio/SFX/` / เพลง: `Assets/Game/Resources/Audio/Music/` ตั้งชื่อตาม GDD หัวข้อ 12
+- เสียงที่มีหลายเวอร์ชันใช้ชื่อ `_01`, `_02`, `_03` ระบบสุ่มเล่นเอง (+สุ่ม Pitch ±8%)
+- **เปลี่ยนเสียง = เอาไฟล์ใหม่ชื่อเดิมไปทับ** ไม่ต้องแก้โค้ด (ไฟล์ตอนนี้เป็นเสียงสังเคราะห์ชั่วคราว)
+- เรียกเสียงจากโค้ด: `Sfx.At("SFX_xxx", ตำแหน่ง)` (เสียงในโลก เบาลงตามระยะ) / `Sfx.UI("SFX_UI_xxx")` / `Sfx.Play("SFX_xxx")`
+- เพลงเปลี่ยนเอง: พักเวฟ = MUS_Build, เวฟ 1-4 / 5-8 / 9-12 = Battle Early / Mid / Final, ชนะ/แพ้ = MUS_Victory / MUS_Defeat
+- ป้อมอัปเกรด: `SFX_Tower_Upgrade_T1..T3` ตาม Tier

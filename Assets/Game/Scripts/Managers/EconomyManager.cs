@@ -39,7 +39,17 @@ namespace NecroDefense
         }
 
         // ---- Souls ----
-        public void AddSouls(int amount) => Souls += Mathf.Max(0, amount);
+        public void AddSouls(int amount)
+        {
+            Souls += Mathf.Max(0, amount);
+            if (amount > 0 && Time.unscaledTime - _lastSoulSound > 0.155f)
+            {
+                _lastSoulSound = Time.unscaledTime;
+                Sfx.UI("SFX_Souls_Gain", 0.5f);
+            }
+        }
+
+        private float _lastSoulSound = -1f;
 
         // ---- ใช้ในซีนเทส ----
         public void SetSouls(int value) => Souls = Mathf.Max(0, value);
@@ -53,7 +63,7 @@ namespace NecroDefense
         {
             if (Souls < amount)
             {
-                if (showMessage && GameManager.Instance != null) GameManager.Instance.UI.ShowMessage("Not enough Souls");
+                if (showMessage && GameManager.Instance != null) GameManager.Instance.UI.ShowError("Not enough Souls");
                 return false;
             }
             Souls -= amount;
@@ -65,7 +75,7 @@ namespace NecroDefense
         {
             if (Mana < amount)
             {
-                if (showMessage && GameManager.Instance != null) GameManager.Instance.UI.ShowMessage("Not enough Mana");
+                if (showMessage && GameManager.Instance != null) GameManager.Instance.UI.ShowError("Not enough Mana");
                 return false;
             }
             Mana -= amount;

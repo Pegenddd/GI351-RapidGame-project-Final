@@ -14,7 +14,12 @@ namespace NecroDefense
         private void Awake()
         {
             if (startWaveButton != null)
-                startWaveButton.onClick.AddListener(() => { if (GameManager.Instance != null) GameManager.Instance.Waves.StartNextWave(); });
+                startWaveButton.onClick.AddListener(() =>
+                {
+                    if (GameManager.Instance == null) return;
+                    Sfx.UI("SFX_Wave_CallEarly");
+                    GameManager.Instance.Waves.StartNextWave();
+                });
         }
 
         private void Update()

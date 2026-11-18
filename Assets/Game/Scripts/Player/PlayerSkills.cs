@@ -77,6 +77,8 @@ namespace NecroDefense
         private float _castTimer, _castDuration;
         private float _novaRadiusMult = 1f, _novaDamageMult = 1f;
         private float _teleportCooldownMult = 1f;
+        private int _castLoop;
+        private bool _wasTeleportReady = true, _wasNovaReady = true, _wasRaiseReady = true;
         private static readonly List<Unit> _buffer = new List<Unit>();
 
         // ---- ข้อมูลให้ UI อ่าน ----
@@ -122,7 +124,13 @@ namespace NecroDefense
             _novaTimer -= dt;
             _massRaiseTimer -= dt;
 
-            if (_player == null || !_player.IsAlive || !GameManager.IsGameplayRunning) return;
+            if (_player == null || !_player.IsAlive || !GameManager.IsGameplayRunning)
+            {
+                bool over = GameManager.Instance == null || GameManager.Instance.State == GameState.Victory || GameManager.Instance.State == GameState.Defeat;
+                if (_castLoop != 0 && (_player == null || !_player.IsAlive || over)) Sfx.StopLoop(ref _castLoop);
+                return;
+            }
+            CheckCooldownReady();
 
             // ----- กำลังร่ายเวท: ยืนนิ่ง ทำอย่างอื่นไม่ได้ -----
             if (IsCasting)
@@ -239,9 +247,14 @@ namespace NecroDefense
             if (ok)
             {
                 GameManager.Instance.Minions.RaiseIntoBag(c.MinionPrefab, c.Position);
+                Sfx.At("SFX_Player_Raise_Success", c.Position);
                 if (raiseEffect != null) SpawnRing(raiseEffect, c.Position, 0.8f);
             }
-            else if (raiseFailEffect != null) SpawnRing(raiseFailEffect, c.Position, 0.5f);
+            else
+            {
+                Sfx.At("SFX_Player_Raise_Fail", c.Position);
+                if (raiseFailEffect != null) SpawnRing(raiseFailEffect, c.Position, 0.5f);
+            }
             c.Consume();
             return ok ? RaiseOk : RaiseFailed;
         }
@@ -264,7 +277,7 @@ namespace NecroDefense
         {
             if (_teleportTimer > 0f)
             {
-                GameManager.Instance.UI.ShowMessage("Teleport on cooldown");
+                GameManager.Instance.UI.ShowError("Teleport on cooldown");
                 return;
             }
             Vector2 from = _player.Position;
@@ -272,8 +285,10 @@ namespace NecroDefense
             if (teleportMaxDistance > 0f && Vector2.Distance(from, to) > teleportMaxDistance)
                 to = from + (to - from).normalized * teleportMaxDistance;
 
+            Sfx.At("SFX_Player_Teleport_Out", from);
             if (teleportEffect != null) SpawnRing(teleportEffect, from, 0.8f);
             _player.TeleportTo(to);
+            Sfx.Play("SFX_Player_Teleport_In");
             if (teleportEffect != null) SpawnRing(teleportEffect, _player.Position, 0.8f);
             _teleportTimer = TeleportCooldown;
         }
@@ -290,12 +305,15 @@ namespace NecroDefense
             _player.SetMovementLocked(true);
             if (castBar != null) castBar.SetValue(0f);
             if (castStartEffect != null) SpawnRing(castStartEffect, _player.Position, 1f);
+            Sfx.StopLoop(ref _castLoop);
+            _castLoop = Sfx.Loop("SFX_Player_Cast_Loop", 0.6f);
         }
 
         private void FinishCast()
         {
             Action a = _castAction;
             _castAction = null;
+            Sfx.StopLoop(ref _castLoop);
             _player.SetMovementLocked(false);
             if (castBar != null) castBar.SetValue(1f);
             a?.Invoke();
@@ -305,7 +323,7 @@ namespace NecroDefense
 
         private void TryMassRaise()
         {
-            if (_massRaiseTimer > 0f) { GameManager.Instance.UI.ShowMessage("Mass Raise on cooldown"); return; }
+            if (_massRaiseTimer > 0f) { GameManager.Instance.UI.ShowError("Mass Raise on cooldown"); return; }
             _massRaiseTimer = MassRaiseCooldown;
             BeginCast(massRaiseCastTime, DoMassRaise);
         }
@@ -316,12 +334,13 @@ namespace NecroDefense
         {
             float radius = MassRaiseRadius;
             if (massRaiseEffect != null) SpawnRing(massRaiseEffect, _player.Position, radius);
+            Sfx.Play("SFX_Player_MassRaise");
 
             _corpseBuffer.Clear();
             for (int i = 0; i < Registry.Corpses.Count; i++)
                 if (Vector2.Distance(_player.Position, Registry.Corpses[i].Position) <= radius) _corpseBuffer.Add(Registry.Corpses[i]);
 
-            if (_corpseBuffer.Count == 0) { GameManager.Instance.UI.ShowMessage("No corpses nearby"); return; }
+            if (_corpseBuffer.Count == 0) { GameManager.Instance.UI.ShowError("No corpses nearby"); return; }
 
             int ok = 0, harvested = 0, souls = 0;
             foreach (Corpse c in _corpseBuffer)
@@ -341,7 +360,7 @@ namespace NecroDefense
 
         private void TryNova()
         {
-            if (_novaTimer > 0f) { GameManager.Instance.UI.ShowMessage("Arcane Nova on cooldown"); return; }
+            if (_novaTimer > 0f) { GameManager.Instance.UI.ShowError("Arcane Nova on cooldown"); return; }
             _novaTimer = novaCooldown;
             BeginCast(novaCastTime, DoNova);
         }
@@ -352,6 +371,16 @@ namespace NecroDefense
             Registry.GetHostilesInRadius(_player.Position, radius, Team.Player, novaHitsFlying, _buffer);
             for (int i = 0; i < _buffer.Count; i++) _buffer[i].TakeDamage(NovaDamage);
             if (novaEffect != null) SpawnRing(novaEffect, _player.Position, radius);
+            Sfx.Play("SFX_Player_Nova");
+            CameraShake.Shake(0.18f, 0.25f);
+        }
+
+        /// <summary>เสียง "ติ๊ง" เบาๆ ตอนสกิลคูลดาวน์เสร็จ</summary>
+        private void CheckCooldownReady()
+        {
+            bool t = _teleportTimer <= 0f, n = _novaTimer <= 0f, r = _massRaiseTimer <= 0f;
+            if ((t && !_wasTeleportReady) || (n && !_wasNovaReady) || (r && !_wasRaiseReady)) Sfx.UI("SFX_Player_CooldownReady", 0.6f);
+            _wasTeleportReady = t; _wasNovaReady = n; _wasRaiseReady = r;
         }
 
         private static void SpawnRing(RingEffect prefab, Vector2 pos, float radius)

@@ -143,6 +143,7 @@ namespace NecroDefense
             }
             _plannedFor = -1;
             _preview.Clear();
+            Sfx.Play("SFX_Wave_Start");
             if (GameManager.Instance != null)
                 GameManager.Instance.UI.ShowMessage("Wave " + CurrentWaveNumber + " - " + wave.waveName);
         }
@@ -192,6 +193,8 @@ namespace NecroDefense
         private IEnumerator SpawnGroupRoutine(SpawnGroup g, List<EnemyPath> paths)
         {
             if (g.startDelay > 0f) yield return new WaitForSeconds(g.startDelay);
+            EnemyPath first = paths != null && paths.Count > 0 ? paths[0] : GetPath(g.side);
+            if (first != null) Sfx.At("SFX_Enemy_Spawn", first.SpawnPosition, 0.8f);
             for (int i = 0; i < g.count; i++)
             {
                 EnemyPath path = paths != null && paths.Count > 0 ? paths[i % paths.Count] : GetPath(g.side);
@@ -243,6 +246,7 @@ namespace NecroDefense
                 return;
             }
             _countdown = timeBetweenWaves;
+            Sfx.Play("SFX_Wave_Clear");
             if (GameManager.Instance != null) GameManager.Instance.UI.ShowMessage("Wave " + CurrentWaveNumber + " cleared!");
         }
 

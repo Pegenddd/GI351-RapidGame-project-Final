@@ -56,14 +56,19 @@ namespace NecroDefense
             foreach (MinionBagSlotUI s in slots) if (s != null) s.Bind(this);
             if (dragGhost != null) dragGhost.gameObject.SetActive(false);
             SetOpen(startOpen);
+            _started = true;
         }
 
         public void Toggle() => SetOpen(!IsOpen);
 
         public void SetOpen(bool open)
         {
-            if (panel != null) panel.SetActive(open);
+            if (panel == null) return;
+            if (panel.activeSelf != open && _started) Sfx.UI(open ? "SFX_UI_BagOpen" : "SFX_UI_BagClose");
+            panel.SetActive(open);
         }
+
+        private bool _started;
 
         private void Update()
         {

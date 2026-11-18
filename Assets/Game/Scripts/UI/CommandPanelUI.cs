@@ -35,6 +35,7 @@ namespace NecroDefense
         public void Show(MinionUnit minion)
         {
             Wire();
+            if (minion != null && (_target != minion || !gameObject.activeSelf)) Sfx.UI("SFX_UI_RingOpen");
             _target = minion;
             gameObject.SetActive(minion != null);
             Refresh();
@@ -52,6 +53,7 @@ namespace NecroDefense
             if (GameManager.Instance == null) return;
             if (c == MinionCommand.MoveTo)
             {
+                Sfx.UI("SFX_UI_RingSelect");
                 GameManager.Instance.Minions.BeginMoveOrder(GameManager.Instance.Minions.SelectedMinion);
                 return;
             }

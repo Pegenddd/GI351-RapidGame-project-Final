@@ -219,8 +219,10 @@ namespace NecroDefense
 
             _incoming.TryGetValue(prefab, out int inc);
             _incoming[prefab] = inc + 1;
+            Sfx.UI("SFX_Soul_Fly", 0.6f);
             fly.Fly(prefab.Icon, fromWorld, index, () =>
             {
+                Sfx.UI("SFX_Soul_Arrive", 0.8f);
                 _incoming[prefab] = Mathf.Max(0, _incoming[prefab] - 1);
                 AddToBag(prefab, 1, null, false);
             });
@@ -302,8 +304,8 @@ namespace NecroDefense
             UIManager ui = GameManager.Instance.UI;
 
             if (entry.minionPrefab == null) return false;
-            if (entry.count <= 0) { if (showMessages) ui.ShowMessage(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return false; }
-            if (ActiveCount >= maxActiveMinions) { if (showMessages) ui.ShowMessage("Too many minions (" + maxActiveMinions + ")"); return false; }
+            if (entry.count <= 0) { if (showMessages) ui.ShowError(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return false; }
+            if (ActiveCount >= maxActiveMinions) { if (showMessages) ui.ShowError("Too many minions (" + maxActiveMinions + ")"); return false; }
             if (!GameManager.Instance.Economy.TrySpendMana(entry.minionPrefab.ManaCost, showMessages)) return false;
 
             Vector2 pos;
@@ -331,6 +333,7 @@ namespace NecroDefense
             m.ApplyMultipliers(healthMultiplier, damageMultiplier, speedMultiplier);
             m.SetCommand(defaultCommand);
 
+            if (playEffect) Sfx.At(m.SoundKey == "Giant" ? "SFX_Minion_Summon_Giant" : "SFX_Minion_Summon", pos);
             if (playEffect && summonEffect != null)
             {
                 RingEffect fx = Instantiate(summonEffect, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Effects));
@@ -349,9 +352,9 @@ namespace NecroDefense
 
             MinionBagEntry entry = bag[index];
             UIManager ui = GameManager.Instance.UI;
-            if (entry.count <= 0) { ui.ShowMessage(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return; }
-            if (ActiveCount >= maxActiveMinions) { ui.ShowMessage("Too many minions (" + maxActiveMinions + ")"); return; }
-            if (GameManager.Instance.Economy.Mana < entry.minionPrefab.ManaCost) { ui.ShowMessage("Not enough Mana"); return; }
+            if (entry.count <= 0) { ui.ShowError(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return; }
+            if (ActiveCount >= maxActiveMinions) { ui.ShowError("Too many minions (" + maxActiveMinions + ")"); return; }
+            if (GameManager.Instance.Economy.Mana < entry.minionPrefab.ManaCost) { ui.ShowError("Not enough Mana"); return; }
 
             Deselect();
             GameManager.Instance.Towers.CloseSlotPanel();
@@ -398,6 +401,7 @@ namespace NecroDefense
                 MinionUnit m = _moveOrder;
                 CancelPlacement();
                 m.MoveTo(world);
+                Sfx.UI("SFX_Minion_Command_Move");
             }
         }
 
@@ -460,6 +464,7 @@ namespace NecroDefense
         {
             if (SelectedMinion == null) return;
             SelectedMinion.SetCommand(command);
+            Sfx.UI(command == MinionCommand.FollowPlayer ? "SFX_Minion_Command_Follow" : "SFX_Minion_Command_Hold");
         }
 
         // ---------------- Upgrades ----------------

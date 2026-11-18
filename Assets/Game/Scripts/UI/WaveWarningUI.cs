@@ -18,13 +18,19 @@ namespace NecroDefense
         [Tooltip("ยกไอคอนขึ้นจากป้ายในฉาก (หน่วย UI) ตอนอยู่ในจอ")]
         [SerializeField] private float onScreenLift = 70f;
 
+        private bool _wasShowing = true; // ไม่เป่าแตรตอนเพิ่งเข้าเกม
         private readonly HashSet<EnemyPath> _warned = new HashSet<EnemyPath>();
         private readonly HashSet<EnemyPath> _now = new HashSet<EnemyPath>();
 
         private void Awake()
         {
             foreach (WaveWarningIndicator ind in indicators)
-                if (ind != null) ind.Bind(() => { if (GameManager.Instance != null) GameManager.Instance.Waves.StartNextWave(); });
+                if (ind != null) ind.Bind(() =>
+                {
+                    if (GameManager.Instance == null) return;
+                    Sfx.UI("SFX_Wave_CallEarly");
+                    GameManager.Instance.Waves.StartNextWave();
+                });
         }
 
         private void LateUpdate()
@@ -50,6 +56,10 @@ namespace NecroDefense
                 }
             }
             for (int i = used; i < indicators.Count; i++) if (indicators[i] != null) indicators[i].Hide();
+
+            // ป้ายเตือนเพิ่งโผล่ = แตรสงคราม
+            if (used > 0 && !_wasShowing) Sfx.UI("SFX_Wave_Warning", 0.8f);
+            _wasShowing = used > 0;
 
             foreach (EnemyPath p in _warned) if (p != null && !_now.Contains(p)) p.SetWarning(false);
             _warned.Clear();

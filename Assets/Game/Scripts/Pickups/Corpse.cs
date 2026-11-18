@@ -76,6 +76,8 @@ namespace NecroDefense
             t.localRotation = Quaternion.Euler(0f, 0f, facingLeft ? -fallenAngle : fallenAngle);
         }
 
+        private void Start() => Sfx.At("SFX_Corpse_Drop", transform.position, 0.6f);
+
         private void OnEnable() => Registry.Corpses.Add(this);
         private void OnDisable() => Registry.Corpses.Remove(this);
 
@@ -101,6 +103,7 @@ namespace NecroDefense
 
             if (remaining <= 0f)
             {
+                Sfx.At("SFX_Corpse_Fade", transform.position, 0.6f);
                 if (expireSouls > 0) Harvest(expireSouls);
                 else Destroy(gameObject);
             }

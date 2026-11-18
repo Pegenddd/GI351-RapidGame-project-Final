@@ -22,8 +22,8 @@ namespace NecroDefense
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private TooltipTrigger tooltip;
         [SerializeField] private Image background;
-        [SerializeField] private Color normalColor = new Color(0.16f, 0.16f, 0.21f, 0.98f);
-        [SerializeField] private Color placingColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+        [SerializeField] private Color normalColor = new Color(0.62f, 0.62f, 0.63f, 1f);
+        [SerializeField] private Color placingColor = new Color(0.86f, 0.1f, 0.12f, 1f);
 
         [Header("Locked (ยังไม่เคยได้มินเนียนชนิดนี้)")]
         [Tooltip("ซ่อนรูป / ชื่อ / ราคา จนกว่าจะได้มินเนียนชนิดนี้ครั้งแรก (ไม่สปอยผู้เล่น)")]
@@ -85,7 +85,7 @@ namespace NecroDefense
             {
                 countText.text = "x" + e.count;
                 // กองทัพชนิดนี้เต็มแล้ว -> ตัวเลขสีทอง
-                countText.color = gm.Minions.HasRoom(e.minionPrefab) ? Color.white : new Color(0.9f, 0.15f, 0.12f); // เต็มเพดาน = แดง
+                countText.color = gm.Minions.HasRoom(e.minionPrefab) ? Color.white : UITheme.RedBright;
             }
             if (costText != null) costText.text = e.minionPrefab.ManaCost.ToString();
             if (keyText != null) keyText.text = UIUtil.KeyLabel(e.summonKey);

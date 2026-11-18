@@ -52,6 +52,9 @@ namespace NecroDefense
         public float BodyRadius => bodyRadius;
         public Vector2 Position => transform.position;
         public bool IsSlowed => _slowTimer > 0f;
+        public bool IsPoisoned => _poisonTimer > 0f;
+        public SpriteRenderer BodyRenderer => bodyRenderer;
+        public Transform HealthBarTransform => healthBar != null ? healthBar.transform : null;
         /// <summary>ตัวคูณความเร็วจากการโดน Slow (1 = ปกติ)</summary>
         public float SlowMultiplier => _slowTimer > 0f ? 1f - _slowPercent : 1f;
 
@@ -66,6 +69,8 @@ namespace NecroDefense
             currentHealth = maxHealth;
             if (bodyRenderer != null) _baseColor = bodyRenderer.color;
             RefreshHealthBar();
+            // เอฟเฟกต์สถานะ Slow / พิษ (ใส่ให้ศัตรู/มินเนียนอัตโนมัติ)
+            if (this is CombatUnit && GetComponent<StatusEffectVisual>() == null) gameObject.AddComponent<StatusEffectVisual>();
         }
 
         /// <summary>คลาสลูกคัดลอกค่าจากไฟล์ Data (Stats) มาใส่ตัวแปร - เรียกก่อนทุกอย่างใน Awake</summary>
@@ -115,7 +120,7 @@ namespace NecroDefense
         {
             if (!IsAlive || Invincible) return;
             currentHealth -= amount;
-            if (flash) Flash();
+            if (flash) { Flash(); OnDamaged(amount); }
             RefreshHealthBar();
             if (currentHealth <= 0f)
             {
@@ -123,6 +128,9 @@ namespace NecroDefense
                 Die();
             }
         }
+
+        /// <summary>โดนตีจริง (ไม่นับพิษ) - คลาสลูกใช้เล่นเสียง/เอฟเฟกต์</summary>
+        protected virtual void OnDamaged(float amount) { }
 
         public void Heal(float amount)
         {

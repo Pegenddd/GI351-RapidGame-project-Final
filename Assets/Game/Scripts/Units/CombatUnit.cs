@@ -31,7 +31,34 @@ namespace NecroDefense
         [Tooltip("เอฟเฟกต์ตอนทุบพื้น (ไม่ใส่ก็ได้)")]
         [SerializeField] protected RingEffect areaAttackEffect;
 
+        [Header("Sound")]
+        [Tooltip("ชนิดเสียง: Slime / MiniSlime / Goblin / Archer / Vulture / Giant (ว่าง = เดาจากชื่อ Prefab)")]
+        [SerializeField] protected string soundKey = "";
+
         protected Rigidbody2D rb;
+        private string _resolvedSoundKey;
+        private float _stepTimer;
+
+        /// <summary>ชนิดเสียงของยูนิตนี้ (ใช้ประกอบชื่อไฟล์เสียง)</summary>
+        public string SoundKey
+        {
+            get
+            {
+                if (_resolvedSoundKey != null) return _resolvedSoundKey;
+                string n = !string.IsNullOrEmpty(soundKey) ? soundKey : gameObject.name;
+                if (n.Contains("SlimeSmall") || n.Contains("MiniSlime") || n.Contains("Mini Slime")) _resolvedSoundKey = "MiniSlime";
+                else if (n.Contains("Slime")) _resolvedSoundKey = "Slime";
+                else if (n.Contains("Goblin")) _resolvedSoundKey = "Goblin";
+                else if (n.Contains("Skeleton") || n.Contains("Archer")) _resolvedSoundKey = "Archer";
+                else if (n.Contains("Vulture")) _resolvedSoundKey = "Vulture";
+                else if (n.Contains("Giant")) _resolvedSoundKey = "Giant";
+                else _resolvedSoundKey = string.IsNullOrEmpty(soundKey) ? "" : soundKey;
+                return _resolvedSoundKey;
+            }
+        }
+
+        /// <summary>ไฟล์เสียงตอนโจมตี (คลาสลูกกำหนด)</summary>
+        protected virtual string AttackSoundId => null;
         protected Unit currentTarget;
         protected float attackTimer;
 
@@ -162,6 +189,18 @@ namespace NecroDefense
             if (rb != null) rb.linearVelocity = velocity;
             else transform.position += (Vector3)(velocity * Time.deltaTime);
             FaceTowards(destination);
+
+            // เสียงก้าวหนักของ Giant
+            if (SoundKey == "Giant")
+            {
+                _stepTimer -= Time.deltaTime;
+                if (_stepTimer <= 0f)
+                {
+                    _stepTimer = 0.95f;
+                    Sfx.At("SFX_Enemy_Giant_Step", Position, Team == Team.Enemy ? 0.8f : 0.5f);
+                    if (Team == Team.Enemy) CameraShake.Shake(0.05f, 0.15f);
+                }
+            }
         }
 
         /// <summary>แรงเบี่ยงทิศตอนเดิน (เช่น หลบเพื่อนที่ขวางอยู่) - คลาสลูก override, ค่าเริ่มต้น = ไม่เบี่ยง</summary>
@@ -190,6 +229,9 @@ namespace NecroDefense
         {
             Attacked?.Invoke();
             float dmg = AttackDamage;
+            string snd = AttackSoundId;
+            if (!string.IsNullOrEmpty(snd)) Sfx.At(snd, Position, Team == Team.Enemy ? 1f : 0.6f);
+            if (attackStyle == AttackStyle.MeleeArea && Team == Team.Enemy) CameraShake.Shake(0.15f, 0.25f);
             switch (attackStyle)
             {
                 case AttackStyle.Melee:
