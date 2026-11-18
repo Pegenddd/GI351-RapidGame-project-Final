@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85ecbae96d4ef9944a3b568cd7eecfef, type: 3}
+  m_Name: Tower_MagicOrb
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.TowerStats
+  towerName: Magic Orb
+  description: Single target. Can hit flying.
+  canHitFlying: 1
+  chainRange: 3
+  constructionTime: 1
+  levels:
+  - label: Base
+    cost: 30
+    description: Single target magic orb.
+    damage: 10
+    attackInterval: 1.5
+    range: 5
+    targetsPerShot: 1
+    areaRadius: 0
+    slowPercent: 0
+    slowDuration: 0
+    chainTargets: 0
+    soulCaptureChance: 0
+    poisonPoolChance: 0
+  - label: Tier 1
+    cost: 25
+    description: +Damage
+    damage: 15
+    attackInterval: 1.5
+    range: 5.2
+    targetsPerShot: 1
+    areaRadius: 0
+    slowPercent: 0
+    slowDuration: 0
+    chainTargets: 0
+    soulCaptureChance: 0
+    poisonPoolChance: 0
+  - label: Tier 2
+    cost: 40
+    description: Fires 2 orbs at once
+    damage: 17
+    attackInterval: 1.5
+    range: 5.4
+    targetsPerShot: 2
+    areaRadius: 0
+    slowPercent: 0
+    slowDuration: 0
+    chainTargets: 0
+    soulCaptureChance: 0
+    poisonPoolChance: 0
+  - label: Tier 3
+    cost: 60
+    description: 'Soul Capture: 30% of kills go straight into the Minion Bag'
+    damage: 22
+    attackInterval: 1
+    range: 5.6
+    targetsPerShot: 2
+    areaRadius: 0
+    slowPercent: 0
+    slowDuration: 0
+    chainTargets: 0
+    soulCaptureChance: 0.3
+    poisonPoolChance: 0

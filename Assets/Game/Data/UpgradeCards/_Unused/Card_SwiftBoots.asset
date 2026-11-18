@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eff652f2c24e3c242a70ca8351eeb0bd, type: 3}
-  m_Name: Card_MinionVitality
+  m_Name: Card_SwiftBoots
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
-  title: Minion Vitality
-  category: 1
-  description: All minions +25% Max HP.
-  effect: 7
-  value1: 0.25
+  title: Swift Boots
+  category: 2
+  description: +10% Necromancer move speed.
+  effect: 10
+  value1: 0.1
   value2: 0
   maxStacks: 5
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 0.4, g: 1, b: 0.5, a: 1}
+  cardColor: {r: 0.8028, g: 0.8028, b: 0.8028, a: 1}

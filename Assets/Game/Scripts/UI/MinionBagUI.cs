@@ -19,6 +19,8 @@ namespace NecroDefense
         [SerializeField] private bool startOpen = false;
         [Tooltip("ตัวเลขจำนวนมินเนียนทั้งหมดในกระเป๋า (บนปุ่ม)")]
         [SerializeField] private TMP_Text totalCountText;
+        [Tooltip("ป้ายจำนวนที่เสกต่อครั้ง เช่น R x2 (บนปุ่ม)")]
+        [SerializeField] private TMP_Text summonBatchText;
 
         [Header("Slots")]
         [SerializeField] private List<MinionBagSlotUI> slots = new List<MinionBagSlotUI>();
@@ -80,6 +82,8 @@ namespace NecroDefense
             int total = 0;
             foreach (MinionBagEntry e in gm.Minions.Bag) total += e.count;
             if (totalCountText != null) totalCountText.text = total.ToString();
+            if (summonBatchText != null)
+                summonBatchText.text = UIUtil.KeyLabel(gm.Minions.BatchKey) + " x" + gm.Minions.SummonBatch;
 
             if (!IsOpen) return;
             foreach (MinionBagSlotUI s in slots) if (s != null) s.Refresh();

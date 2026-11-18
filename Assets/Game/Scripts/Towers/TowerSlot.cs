@@ -9,7 +9,7 @@ namespace NecroDefense
         [SerializeField] private int slotNumber = 1;
         [SerializeField] private SpriteRenderer slotRenderer;
         [SerializeField] private Color normalColor = new Color(0.35f, 0.35f, 0.35f);
-        [SerializeField] private Color selectedColor = new Color(1f, 0.85f, 0.2f);
+        [SerializeField] private Color selectedColor = new Color(0.85f, 0.85f, 0.85f);
         [Tooltip("ป้อมที่สร้างแล้วจะไปอยู่เป็นลูกของ Transform นี้ (ว่าง = ตัวเอง)")]
         [SerializeField] private Transform towerAnchor;
         [Tooltip("สร้างป้อมแล้วซ่อนรูปจุดสร้างป้อม (วงรี) / ขายป้อมแล้วโชว์กลับมา")]

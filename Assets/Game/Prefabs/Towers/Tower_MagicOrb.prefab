@@ -81,6 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c20f48902a519b448fb937ce1752f09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.Tower
+  stats: {fileID: 11400000, guid: 2ae22212d8db01a4f8ed7607c9f9475d, type: 2}
   towerName: Magic Orb
   description: Single target. Can hit flying.
   attackType: 0
@@ -144,6 +145,11 @@ MonoBehaviour:
     chainTargets: 0
     soulCaptureChance: 0.3
     poisonPoolChance: 0
+  sortAsOneObject: 1
+  sortingOrder: 5
+  blockPlayer: 1
+  footprintSize: {x: 1.25, y: 0.5}
+  footprintOffset: {x: 0, y: -0.4}
   constructionTime: 1
   constructionBar: {fileID: 461545764657041551}
   visual: {fileID: 7652375456465798949}
@@ -371,7 +377,7 @@ SpriteRenderer:
   m_SortingOrder: 25
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 00a095c67f1f32144a492b87a66f1766, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.3, a: 1}
+  m_Color: {r: 0.83215004, g: 0.83215004, b: 0.83215004, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1530,7 +1536,7 @@ SpriteRenderer:
   m_SortingOrder: 25
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 00a095c67f1f32144a492b87a66f1766, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.3, a: 1}
+  m_Color: {r: 0.83215004, g: 0.83215004, b: 0.83215004, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1987,7 +1993,7 @@ SpriteRenderer:
   m_SortingOrder: 25
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 00a095c67f1f32144a492b87a66f1766, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.3, a: 1}
+  m_Color: {r: 0.83215004, g: 0.83215004, b: 0.83215004, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -2782,7 +2788,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.3, a: 1}
+  m_Color: {r: 0.83215004, g: 0.83215004, b: 0.83215004, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

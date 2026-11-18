@@ -270,7 +270,7 @@ namespace NecroDefense.EditorTools
                 SpriteRenderer sight = BU.Sprite("DetectionRing", go.transform, BU.Ring, new Color(0.35f, 0.9f, 1f, 0.55f), Vector2.one, -3);
                 sight.gameObject.SetActive(false);
                 new SO(m).Set("detectionRing", sight.transform).Set("aggroRange", s.sight).Set("displayName", display).Set("icon", s.art).Set("manaCost", mana)
-                    .Set("sacrificeHealPercent", sacrificePct).Set("selectionRing", ring.gameObject).Apply();
+                    .Set("selectionRing", ring.gameObject).Apply();
                 return go;
             });
         }

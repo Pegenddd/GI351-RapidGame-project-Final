@@ -21,4 +21,4 @@ MonoBehaviour:
   maxStacks: 5
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 0.4, g: 1, b: 0.5, a: 1}
+  cardColor: {r: 0.7636, g: 0.7636, b: 0.7636, a: 1}

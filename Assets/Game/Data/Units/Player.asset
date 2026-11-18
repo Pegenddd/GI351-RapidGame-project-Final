@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb09e698a89c3984a8da028901e49f0e, type: 3}
+  m_Name: Player
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.PlayerStats
+  maxHealth: 100
+  armor: 0
+  moveSpeed: 2
+  boltDamage: 12
+  attackInterval: 2
+  attackRange: 5
+  orbCount: 2
+  orbRadius: 1.4
+  orbRotateSpeed: 220
+  orbDamage: 6
+  orbHitRadius: 0.35
+  orbHitCooldown: 0.5
+  orbsFireAsBolts: 1
+  orbRechargeTime: 1.2
+  orbFireGap: 0.15
+  teleportCooldown: 10
+  teleportMaxDistance: 0
+  raiseChanceBonus: 0
+  massRaiseCooldown: 10
+  massRaiseRadius: 5
+  massRaiseCastTime: 0.6
+  novaCooldown: 8
+  novaCastTime: 0.8
+  novaRadius: 3.5
+  novaDamage: 45
+  novaHitsFlying: 1

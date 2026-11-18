@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
   title: Soul Harvester
   category: 2
-  description: All tower build & upgrade costs -15%.
+  description: Tower build & upgrade cost -10%.
   effect: 11
-  value1: 0.15
+  value1: 0.1
   value2: 0
   maxStacks: 3
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 1, g: 0.8, b: 0.3, a: 1}
+  cardColor: {r: 0.8028, g: 0.8028, b: 0.8028, a: 1}

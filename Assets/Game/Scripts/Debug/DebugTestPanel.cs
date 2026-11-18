@@ -82,7 +82,7 @@ namespace NecroDefense
         [SerializeField] private TMP_Text statusText;
 
         [Header("Colors")]
-        [SerializeField] private Color onColor = new Color(0.2f, 0.55f, 0.25f, 1f);
+        [SerializeField] private Color onColor = new Color(0.55f, 0.55f, 0.55f, 1f);
         [SerializeField] private Color offColor = new Color(0.22f, 0.22f, 0.28f, 1f);
 
         private bool _infiniteMana, _playerGod, _baseGod;

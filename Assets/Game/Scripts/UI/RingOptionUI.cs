@@ -20,7 +20,7 @@ namespace NecroDefense
         [Tooltip("เครื่องหมายถูก โผล่ตอนกดครั้งแรก (กดอีกครั้ง = ยืนยัน)")]
         [SerializeField] private GameObject confirmMark;
         [SerializeField] private Color normalColor = new Color(0.15f, 0.15f, 0.18f, 1f);
-        [SerializeField] private Color highlightColor = new Color(0.55f, 0.35f, 0.85f, 1f);
+        [SerializeField] private Color highlightColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         [SerializeField] private Color disabledColor = new Color(0.3f, 0.1f, 0.1f, 1f);
 
         private Action _onClick;

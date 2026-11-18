@@ -706,7 +706,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.2, a: 0.95}
+  m_Color: {r: 0.82075, g: 0.82075, b: 0.82075, a: 0.95}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1166,7 +1166,7 @@ SpriteRenderer:
   m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 0.35, g: 0.9, b: 1, a: 0.55}
+  m_Color: {r: 0.74695, g: 0.74695, b: 0.74695, a: 0.55}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1297,7 +1297,7 @@ MonoBehaviour:
   bodyRenderer: {fileID: 1743594467340722573}
   visualRoot: {fileID: 2072471125639638384}
   healthBar: {fileID: 4031413920982961693}
-  hitFlashColor: {r: 1, g: 0.45, b: 0.45, a: 0.45}
+  hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
   hitFlashTime: 0.08
   moveSpeed: 2.2
   attackStyle: 2
@@ -1308,6 +1308,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 1778974467967613043, guid: 1034c7387780f694a8e9117b7a23a155, type: 3}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  stats: {fileID: 11400000, guid: 6c5f188181b67254c9b1f41b32f93b56, type: 2}
   displayName: Skeleton
   icon: {fileID: 21300000, guid: fab6f6b3841510a439232137220b0ddd, type: 3}
   manaCost: 25
@@ -1402,7 +1403,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 0.3, g: 1, b: 0.35, a: 1}
+  m_Color: {r: 0.7166, g: 0.7166, b: 0.7166, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

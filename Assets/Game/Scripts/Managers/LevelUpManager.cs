@@ -136,6 +136,15 @@ namespace NecroDefense
                 case CardEffect.RaiseRadius: gm.PlayerSkills.AddMassRaiseRadius(card.value1); break;
                 case CardEffect.RaiseCooldown: gm.PlayerSkills.ReduceMassRaiseCooldown(card.value1); break;
                 case CardEffect.ArmySize: gm.Minions.AddArmyCapacity(Mathf.RoundToInt(card.value1)); break;
+                case CardEffect.MinionUpgrade:
+                    gm.Minions.AddDamagePercent(card.value1);
+                    gm.Minions.AddHealthPercent(card.value2);
+                    break;
+                case CardEffect.ManaFontRegenPercent:
+                    gm.Economy.UpgradeMana(card.value1, 0f);
+                    gm.Economy.AddManaRegenPercent(card.value2);
+                    break;
+                case CardEffect.BaseHealFaster: gm.Crystal.ReduceHealInterval(card.value1); break;
             }
             gm.UI.ShowMessage("Picked: " + card.title);
         }

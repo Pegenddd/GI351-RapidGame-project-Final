@@ -20,7 +20,7 @@ namespace NecroDefense
         [SerializeField] private float arcHeight = 160f;
         [Tooltip("สุ่มดีเลย์เล็กน้อย ให้ชุบหลายตัวพร้อมกันแล้วดูไหลเป็นสาย")]
         [SerializeField] private float maxStartDelay = 0.25f;
-        [SerializeField] private Color soulColor = new Color(0.75f, 1f, 0.85f, 0.9f);
+        [SerializeField] private Color soulColor = new Color(0.92f, 0.92f, 0.92f, 0.9f);
 
         private void Awake()
         {

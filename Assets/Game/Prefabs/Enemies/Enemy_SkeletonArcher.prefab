@@ -376,7 +376,7 @@ MonoBehaviour:
   bodyRenderer: {fileID: 2774945024520729098}
   visualRoot: {fileID: 1380678144182469692}
   healthBar: {fileID: 837354512664261448}
-  hitFlashColor: {r: 1, g: 0.45, b: 0.45, a: 0.45}
+  hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
   hitFlashTime: 0.08
   moveSpeed: 1.6
   attackStyle: 2
@@ -387,8 +387,9 @@ MonoBehaviour:
   projectilePrefab: {fileID: 1517003644495182365, guid: d5673e5cc95a6884eac8b0429dc7919e, type: 3}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  stats: {fileID: 11400000, guid: 219b2771e881ade4b833c243645e7f53, type: 2}
   displayName: Skeleton Archer
-  attackPlayer: 1
+  attackPlayer: 0
   attackMinions: 1
   attackMainBase: 1
   priority: 0
@@ -398,6 +399,9 @@ MonoBehaviour:
   shootWhileWalking: 1
   followPath: 1
   waypointReachDistance: 0.5
+  passThroughOtherEnemies: 1
+  separationStrength: 1.2
+  stuckSkipTime: 1.5
   soulReward: 3
   xpReward: 2
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}
@@ -581,7 +585,7 @@ SpriteRenderer:
   m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 1, g: 0.2, b: 0.2, a: 0.75}
+  m_Color: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.75}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1041,7 +1045,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 0.3, g: 1, b: 0.35, a: 1}
+  m_Color: {r: 0.7166, g: 0.7166, b: 0.7166, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

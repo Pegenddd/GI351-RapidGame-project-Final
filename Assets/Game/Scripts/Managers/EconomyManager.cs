@@ -20,7 +20,11 @@ namespace NecroDefense
         public int Souls { get; private set; }
         public float Mana { get; private set; }
         public float MaxMana => maxMana;
-        public float ManaRegen => manaRegenPerSecond;
+        public float ManaRegen => manaRegenPerSecond * _regenMultiplier;
+        private float _regenMultiplier = 1f;
+
+        /// <summary>การ์ด Mana Font: ฟื้น Mana เร็วขึ้น % (0.2 = +20% ของค่าพื้นฐาน)</summary>
+        public void AddManaRegenPercent(float percent) => _regenMultiplier += percent;
 
         private void Awake()
         {
@@ -31,7 +35,7 @@ namespace NecroDefense
         private void Update()
         {
             if (!GameManager.IsGameplayRunning) return;
-            Mana = Mathf.Min(maxMana, Mana + manaRegenPerSecond * Time.deltaTime);
+            Mana = Mathf.Min(maxMana, Mana + ManaRegen * Time.deltaTime);
         }
 
         // ---- Souls ----

@@ -23,7 +23,10 @@ namespace NecroDefense
         Removed_13,        // (เลิกใช้ - เดิม Unlock Shockwave)
         RaiseRadius,       // value1 = +รัศมีสกิล Q (Mass Raise) %
         RaiseCooldown,     // value1 = ลดคูลดาวน์สกิล Q %
-        ArmySize           // value1 = +จำนวนกองทัพสูงสุด ทุกชนิดมินเนียน (+1)
+        ArmySize,          // value1 = +จำนวนกองทัพสูงสุด ทุกชนิดมินเนียน (+1)
+        MinionUpgrade,     // value1 = +ATK มินเนียน % (0.1), value2 = +Max HP มินเนียน % (0.1)
+        ManaFontRegenPercent, // value1 = +Max Mana, value2 = +Mana Regen % (0.2 = +20%)
+        BaseHealFaster     // value1 = ป้อมหลักฮีลเร็วขึ้นกี่วินาที (5 = ทุก 45 -> 40 วิ)
     }
 
     /// <summary>

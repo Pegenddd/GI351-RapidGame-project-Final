@@ -124,7 +124,7 @@ namespace NecroDefense.EditorTools
             new SO(crystal).Set("maxHealth", 500f).Set("bodyRadius", 1.4f).Set("bodyRenderer", baseBody).Set("healthBar", baseHb)
                 .Set("hitFlashColor", new Color(1f, 0.45f, 0.45f))
                 .Set("healInterval", 30f).Set("healPercent", 0.1f).Set("healEffect", p.FxHeal).Set("healEffectRadius", 6f)
-                .Set("sacrificeDropRadius", 2.2f).Set("sacrificeEffect", p.FxSacrifice).Apply();
+                .Apply();
             return crystal;
         }
 

@@ -21,9 +21,9 @@ namespace NecroDefense
     /// <summary>
     /// ระบบกองทัพมินเนียน
     /// - Minion Bag: เก็บมินเนียนที่ชุบได้ (ลำดับในลิสต์ = ลำดับช่องใน UI)
-    /// - Summon: คลิกช่อง / กดปุ่มลัด -> เลือกจุดวางในสนามด้วยคลิกซ้าย (คลิกขวา/Esc = ยกเลิก)
-    ///           หรือลากช่องไปปล่อยในสนามได้เลย (ใช้ Mana ตอนวางจริง)
-    /// - Sacrifice: ลากช่องไปปล่อยที่คริสตัล
+    /// - Raise: ชุบสำเร็จ -> ลุกขึ้นสู้ตรงศพทันที (ไม่ต้องเข้ากระเป๋า)
+    /// - Summon: กด 1-5 / คลิกช่อง -> เกิดรอบตัวผู้เล่นทันที ครั้งละ 1-3 ตัว (กด R เปลี่ยนจำนวน 1 -> 2 -> 3 -> 1)
+    ///           หรือลากช่องไปปล่อยในสนามได้ (ใช้ Mana ตัวละครั้ง)
     /// - Army Cap: แต่ละชนิดมีได้จำกัด (Max Owned) ชุบเกินไม่ได้ / การ์ด Legion +1 ทุกชนิด
     /// - มินเนียนตาย -> วิญญาณกลับเข้ากระเป๋า (เรียกใหม่ได้ เสีย Mana)
     /// - Command: คลิกที่มินเนียนทีละตัว -> Hold Area / Move / Follow Player
@@ -33,8 +33,18 @@ namespace NecroDefense
         [Header("Minion Bag")]
         [SerializeField] private List<MinionBagEntry> bag = new List<MinionBagEntry>();
 
+        [Header("Raise (ชุบ)")]
+        [Tooltip("ชุบสำเร็จ -> ลุกขึ้นสู้ตรงศพทันที (ปิด = วิญญาณบินเข้ากระเป๋าแบบเดิม)")]
+        [SerializeField] private bool raisedFightImmediately = true;
+
         [Header("Summon")]
-        [Tooltip("อัญเชิญรอบตัวผู้เล่นในรัศมีนี้ (ใช้เมื่อไม่ได้ระบุจุดวาง)")]
+        [Tooltip("กดเลข / คลิกช่อง -> เกิดรอบตัวผู้เล่นทันที (ปิด = เลือกจุดวางด้วยเมาส์แบบเดิม)")]
+        [SerializeField] private bool summonAroundPlayer = true;
+        [Tooltip("ปุ่มเปลี่ยนจำนวนที่เสกต่อครั้ง (1 -> 2 -> 3 -> 1)")]
+        [SerializeField] private Key batchKey = Key.R;
+        [Tooltip("เสกพร้อมกันได้สูงสุดกี่ตัวต่อครั้ง")]
+        [SerializeField] private int maxSummonBatch = 3;
+        [Tooltip("อัญเชิญรอบตัวผู้เล่นในรัศมีนี้")]
         [SerializeField] private float summonRadius = 1.2f;
         [Tooltip("ภาพเงาที่ตามเมาส์ตอนเลือกจุดวาง (Map/SummonPlacementGhost)")]
         [SerializeField] private SpriteRenderer placementGhost;
@@ -72,6 +82,18 @@ namespace NecroDefense
             return (e != null ? e.maxOwned : 5) + armyCapacityBonus;
         }
 
+        private readonly HashSet<MinionUnit> _unlocked = new HashSet<MinionUnit>();
+
+        /// <summary>เคยมีมินเนียนชนิดนี้แล้วหรือยัง (ยังไม่เคย = ช่องในกระเป๋าซ่อนรูป ไม่สปอยผู้เล่น) - ปลดแล้วปลดถาวร</summary>
+        public bool IsUnlocked(MinionUnit prefab)
+        {
+            if (prefab == null) return false;
+            if (_unlocked.Contains(prefab)) return true;
+            if (GetOwned(prefab) <= 0) return false;
+            _unlocked.Add(prefab);
+            return true;
+        }
+
         /// <summary>มีอยู่ทั้งหมดกี่ตัว (กระเป๋า + สนาม + วิญญาณที่กำลังบินเข้ากระเป๋า)</summary>
         public int GetOwned(MinionUnit prefab)
         {
@@ -79,6 +101,7 @@ namespace NecroDefense
             int n = e != null ? e.count : 0;
             for (int i = 0; i < Registry.Minions.Count; i++) if (Registry.Minions[i].SourcePrefab == prefab) n++;
             if (_incoming.TryGetValue(prefab, out int inc)) n += inc;
+            if (_splitPending.TryGetValue(prefab, out int sp)) n += sp;
             return n;
         }
 
@@ -106,6 +129,12 @@ namespace NecroDefense
 
         public event Action BagChanged;
 
+        private int _batch = 1;
+        /// <summary>จำนวนที่เสกต่อครั้งตอนนี้ (1..Max)</summary>
+        public int SummonBatch => _batch;
+        public int MaxSummonBatch => Mathf.Max(1, maxSummonBatch);
+        public Key BatchKey => batchKey;
+
         private int _placingIndex = -1;
         private MinionUnit _moveOrder;
 
@@ -121,8 +150,10 @@ namespace NecroDefense
             Keyboard kb = Keyboard.current;
             if (kb == null) return;
 
+            if (batchKey != Key.None && kb[batchKey].wasPressedThisFrame) CycleBatch();
+
             for (int i = 0; i < bag.Count; i++)
-                if (bag[i].summonKey != Key.None && kb[bag[i].summonKey].wasPressedThisFrame) BeginPlacement(i);
+                if (bag[i].summonKey != Key.None && kb[bag[i].summonKey].wasPressedThisFrame) SummonFromSlot(i);
 
             if (_moveOrder != null) UpdateMoveOrder();
             else if (_placingIndex >= 0) UpdatePlacement();
@@ -134,11 +165,49 @@ namespace NecroDefense
 
         // ---------------- Bag ----------------
 
-        /// <summary>ชุบสำเร็จ: วิญญาณ (รูปมินเนียน) บินจากศพเข้ากระเป๋า แล้วค่อยนับเข้า Bag</summary>
+        /// <summary>
+        /// ชุบสำเร็จ: ลุกขึ้นสู้ตรงศพทันที (ฟรี ไม่ใช้ Mana)
+        /// ถ้าปิด Raised Fight Immediately หรือมินเนียนในสนามเต็ม -> วิญญาณบินเข้ากระเป๋าแทน
+        /// </summary>
         public void RaiseIntoBag(MinionUnit prefab, Vector2 fromWorld)
         {
             if (prefab == null) return;
+            if (raisedFightImmediately && ActiveCount < maxActiveMinions)
+            {
+                MapBounds bounds = GameManager.Instance != null ? GameManager.Instance.Bounds : null;
+                SpawnMinion(prefab, bounds != null ? bounds.Clamp(fromWorld) : fromWorld);
+                BagChanged?.Invoke();
+                return;
+            }
             SendSoulToBag(prefab, fromWorld);
+        }
+
+        /// <summary>ปุ่ม R: จำนวนที่เสกต่อครั้ง 1 -> 2 -> 3 -> 1</summary>
+        public void CycleBatch()
+        {
+            _batch = _batch % MaxSummonBatch + 1;
+            if (GameManager.Instance != null) GameManager.Instance.UI.ShowMessage("Summon x" + _batch);
+            BagChanged?.Invoke();
+        }
+
+        /// <summary>กดเลข / คลิกช่อง: เสกรอบตัวผู้เล่นตามจำนวนที่เลือก (หรือเข้าโหมดเลือกจุดวาง ถ้าปิด Summon Around Player)</summary>
+        public void SummonFromSlot(int index)
+        {
+            if (!summonAroundPlayer) { BeginPlacement(index); return; }
+            CancelPlacement();
+            PlayerNecromancer p = Registry.Player;
+            Vector2 center = p != null ? p.Position : Vector2.zero;
+            float start = UnityEngine.Random.Range(0f, 360f);
+            int done = 0;
+            for (int k = 0; k < _batch; k++)
+            {
+                float a = (start + k * 360f / _batch) * Mathf.Deg2Rad;
+                Vector2 pos = center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * summonRadius;
+                if (!TrySummon(index, pos, k == 0)) break;
+                done++;
+            }
+            if (done > 0 && done < _batch && GameManager.Instance != null)
+                GameManager.Instance.UI.ShowMessage("Summoned " + done + "/" + _batch);
         }
 
         /// <summary>วิญญาณบินจากจุดนี้เข้ากระเป๋า (ใช้ตอนชุบสำเร็จ และตอนมินเนียนตาย)</summary>
@@ -158,11 +227,54 @@ namespace NecroDefense
         }
 
         /// <summary>มินเนียนตาย -> กลับเข้ากระเป๋า</summary>
+        // มินเนียนที่แตกตัวอยู่ (ยังนับเป็นกองทัพของตัวใหญ่ จนกว่าตัวเล็กจะตายหมด)
+        private readonly Dictionary<MinionUnit, int> _splitPending = new Dictionary<MinionUnit, int>();
+
         public void OnMinionDied(MinionUnit minion)
         {
-            if (minion == null || minion.SourcePrefab == null) return;
+            if (minion == null) return;
             if (SelectedMinion == minion) Deselect();
+
+            // ตัวเล็กที่แตกออกมา: ตายครบทุกตัวแล้ว -> วิญญาณตัวใหญ่กลับเข้ากระเป๋า 1 ตัว (ตัวเล็กไม่เข้า)
+            MinionSplitGroup group = minion.SplitGroup;
+            if (group != null)
+            {
+                group.alive--;
+                if (group.alive <= 0 && !group.done)
+                {
+                    group.done = true;
+                    ChangeSplitPending(group.prefab, -1);
+                    SendSoulToBag(group.prefab, minion.Position);
+                }
+                return;
+            }
+
+            if (minion.SourcePrefab == null) return;
+
+            // ตัวใหญ่ที่แตกตัวได้ (Slime): แตกเป็นตัวเล็กสู้ต่อ ยังไม่เข้ากระเป๋า
+            if (minion.SplitPrefab != null && minion.SplitCount > 0)
+            {
+                MinionSplitGroup g = new MinionSplitGroup { prefab = minion.SourcePrefab };
+                MinionCommand cmd = minion.Command == MinionCommand.FollowPlayer ? MinionCommand.FollowPlayer : MinionCommand.SelfDefense;
+                for (int i = 0; i < minion.SplitCount; i++)
+                {
+                    Vector2 pos = minion.Position + UnityEngine.Random.insideUnitCircle * minion.SplitSpread;
+                    MinionUnit child = SpawnMinion(minion.SplitPrefab, pos, false);
+                    child.SplitGroup = g;
+                    child.SetCommand(cmd);
+                    g.alive++;
+                }
+                if (g.alive > 0) { ChangeSplitPending(g.prefab, +1); BagChanged?.Invoke(); return; }
+            }
+
             SendSoulToBag(minion.SourcePrefab, minion.Position);
+        }
+
+        private void ChangeSplitPending(MinionUnit prefab, int delta)
+        {
+            if (prefab == null) return;
+            _splitPending.TryGetValue(prefab, out int n);
+            _splitPending[prefab] = Mathf.Max(0, n + delta);
         }
 
         public void AddToBag(MinionUnit prefab, int amount = 1, string reason = null, bool showMessage = true)
@@ -182,17 +294,17 @@ namespace NecroDefense
 
         // ---------------- Summon ----------------
 
-        /// <summary>อัญเชิญมินเนียนช่องที่ index (position = null -> รอบตัวผู้เล่น)</summary>
-        public bool TrySummon(int index, Vector2? position = null)
+        /// <summary>อัญเชิญมินเนียนช่องที่ index 1 ตัว (position = null -> รอบตัวผู้เล่น)</summary>
+        public bool TrySummon(int index, Vector2? position = null, bool showMessages = true)
         {
             if (index < 0 || index >= bag.Count) return false;
             MinionBagEntry entry = bag[index];
             UIManager ui = GameManager.Instance.UI;
 
             if (entry.minionPrefab == null) return false;
-            if (entry.count <= 0) { ui.ShowMessage("No " + entry.minionPrefab.DisplayName + " in bag"); return false; }
-            if (ActiveCount >= maxActiveMinions) { ui.ShowMessage("Too many minions (" + maxActiveMinions + ")"); return false; }
-            if (!GameManager.Instance.Economy.TrySpendMana(entry.minionPrefab.ManaCost)) return false;
+            if (entry.count <= 0) { if (showMessages) ui.ShowMessage(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return false; }
+            if (ActiveCount >= maxActiveMinions) { if (showMessages) ui.ShowMessage("Too many minions (" + maxActiveMinions + ")"); return false; }
+            if (!GameManager.Instance.Economy.TrySpendMana(entry.minionPrefab.ManaCost, showMessages)) return false;
 
             Vector2 pos;
             if (position.HasValue) pos = position.Value;
@@ -204,21 +316,27 @@ namespace NecroDefense
             MapBounds bounds = GameManager.Instance.Bounds;
             if (bounds != null) pos = bounds.Clamp(pos);
 
-            MinionUnit m = Instantiate(entry.minionPrefab, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Minions));
-            m.name = entry.minionPrefab.name;
-            m.SourcePrefab = entry.minionPrefab;
+            SpawnMinion(entry.minionPrefab, pos);
+            entry.count--;
+            BagChanged?.Invoke();
+            return true;
+        }
+
+        /// <summary>สร้างมินเนียน 1 ตัวในสนาม (ใช้ทั้งตอนเสกจากกระเป๋า และตอนชุบแล้วลุกสู้ทันที)</summary>
+        private MinionUnit SpawnMinion(MinionUnit prefab, Vector2 pos, bool playEffect = true)
+        {
+            MinionUnit m = Instantiate(prefab, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Minions));
+            m.name = prefab.name;
+            m.SourcePrefab = prefab;
             m.ApplyMultipliers(healthMultiplier, damageMultiplier, speedMultiplier);
             m.SetCommand(defaultCommand);
 
-            if (summonEffect != null)
+            if (playEffect && summonEffect != null)
             {
                 RingEffect fx = Instantiate(summonEffect, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Effects));
                 fx.Play(0.8f);
             }
-
-            entry.count--;
-            BagChanged?.Invoke();
-            return true;
+            return m;
         }
 
         // ---------------- Placement (เลือกจุดวาง) ----------------
@@ -231,7 +349,7 @@ namespace NecroDefense
 
             MinionBagEntry entry = bag[index];
             UIManager ui = GameManager.Instance.UI;
-            if (entry.count <= 0) { ui.ShowMessage("No " + entry.minionPrefab.DisplayName + " in bag"); return; }
+            if (entry.count <= 0) { ui.ShowMessage(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return; }
             if (ActiveCount >= maxActiveMinions) { ui.ShowMessage("Too many minions (" + maxActiveMinions + ")"); return; }
             if (GameManager.Instance.Economy.Mana < entry.minionPrefab.ManaCost) { ui.ShowMessage("Not enough Mana"); return; }
 
@@ -315,22 +433,6 @@ namespace NecroDefense
                 CancelPlacement();
                 TrySummon(index, world);
             }
-        }
-
-        // ---------------- Sacrifice ----------------
-
-        public bool TrySacrifice(int index)
-        {
-            if (index < 0 || index >= bag.Count) return false;
-            MinionBagEntry entry = bag[index];
-            Crystal crystal = Registry.Crystal;
-            if (entry.minionPrefab == null || entry.count <= 0 || crystal == null || !crystal.IsAlive) return false;
-
-            entry.count--;
-            crystal.Sacrifice(entry.minionPrefab);
-            BagChanged?.Invoke();
-            GameManager.Instance.UI.ShowMessage("Sacrificed " + entry.minionPrefab.DisplayName + ": Crystal +" + entry.minionPrefab.SacrificeHealPercent + "% HP");
-            return true;
         }
 
         // ---------------- Command ----------------

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
   title: Mana Font
   category: 2
-  description: +20 Max Mana, +1 Mana/sec.
-  effect: 8
+  description: +20 Max Mana, +20% Mana regen.
+  effect: 18
   value1: 20
-  value2: 1
+  value2: 0.2
   maxStacks: 5
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 1, g: 0.8, b: 0.3, a: 1}
+  cardColor: {r: 0.8028, g: 0.8028, b: 0.8028, a: 1}

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eff652f2c24e3c242a70ca8351eeb0bd, type: 3}
-  m_Name: Card_MinionHaste
+  m_Name: Card_MinionUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
-  title: Minion Haste
+  title: Minion Upgrade
   category: 1
-  description: All minions +20% move & attack speed.
-  effect: 6
-  value1: 0.2
-  value2: 0
-  maxStacks: 5
+  description: All minions +10% ATK, +10% Max HP. (No limit)
+  effect: 17
+  value1: 0.1
+  value2: 0.1
+  maxStacks: 0
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 0.4, g: 1, b: 0.5, a: 1}
+  cardColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}

@@ -10,6 +10,10 @@ namespace NecroDefense
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerNecromancer : Unit
     {
+        [Header("Data (ค่าบาลานซ์)")]
+        [Tooltip("ไฟล์ค่าผู้เล่น (Data/Units/Player) - เลือด / เดิน / ยิงอัตโนมัติ / สกิล ใช้ค่าจากไฟล์นี้แทนค่าใน Inspector (ว่าง = ใช้ค่าใน Inspector)")]
+        [SerializeField] private PlayerStats stats;
+
         [Header("Movement")]
         [Tooltip("ความเร็วเดินพื้นฐาน (GDD = 4.5)")]
         [SerializeField] private float moveSpeed = 4.5f;
@@ -23,6 +27,38 @@ namespace NecroDefense
         private Vector2 _moveInput;
 
         public override Team Team => Team.Player;
+        public PlayerStats Stats => stats;
+
+#if UNITY_EDITOR
+        private const string DefaultStatsPath = "Assets/Game/Data/Units/Player.asset";
+
+        /// <summary>ใน Editor: ช่อง Stats ว่าง -> ผูก Player.asset ให้อัตโนมัติ (กด Ctrl+S เซฟซีนเพื่อให้ติดไปตอน Build)</summary>
+        private void OnValidate() => AutoLinkStats();
+        private void Reset() => AutoLinkStats();
+
+        private void AutoLinkStats()
+        {
+            if (stats != null) return;
+            stats = UnityEditor.AssetDatabase.LoadAssetAtPath<PlayerStats>(DefaultStatsPath);
+            if (stats != null && !Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+
+        protected override void ApplyStats()
+        {
+#if UNITY_EDITOR
+            AutoLinkStats();
+#endif
+            if (stats == null)
+            {
+                Debug.LogWarning("[NecroDefense] ผู้เล่นในซีนนี้ยังไม่ได้ผูกไฟล์ Data (ช่อง Stats ว่าง) -> ใช้ค่าในสคริปต์แทน\n" +
+                                 "แก้: Tools > NecroDefense > Data > Link Player Stats In All Scenes", this);
+                return;
+            }
+            maxHealth = stats.maxHealth;
+            armor = stats.armor;
+            moveSpeed = stats.moveSpeed;
+        }
         public float MoveSpeed => moveSpeed * (1f + _moveSpeedBonusPercent);
         public Vector2 MoveInput => _moveInput;
         /// <summary>true = ยืนนิ่ง (กำลังร่ายเวท)</summary>

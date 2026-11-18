@@ -266,7 +266,7 @@ SpriteRenderer:
   m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 1, g: 0.2, b: 0.2, a: 0.75}
+  m_Color: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.75}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1122,7 +1122,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 0.3, g: 1, b: 0.35, a: 1}
+  m_Color: {r: 0.7166, g: 0.7166, b: 0.7166, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1344,7 +1344,7 @@ MonoBehaviour:
   bodyRenderer: {fileID: 8414976003592179620}
   visualRoot: {fileID: 4526297022071239314}
   healthBar: {fileID: 6880819022261764530}
-  hitFlashColor: {r: 1, g: 0.45, b: 0.45, a: 0.45}
+  hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
   hitFlashTime: 0.08
   moveSpeed: 1.6
   attackStyle: 0
@@ -1355,8 +1355,9 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  stats: {fileID: 11400000, guid: 8f99597f16a3adf4f97e7fdcd949f221, type: 2}
   displayName: Mini Slime
-  attackPlayer: 1
+  attackPlayer: 0
   attackMinions: 1
   attackMainBase: 1
   priority: 0
@@ -1366,6 +1367,9 @@ MonoBehaviour:
   shootWhileWalking: 0
   followPath: 1
   waypointReachDistance: 0.5
+  passThroughOtherEnemies: 1
+  separationStrength: 1.2
+  stuckSkipTime: 1.5
   soulReward: 1
   xpReward: 1
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}

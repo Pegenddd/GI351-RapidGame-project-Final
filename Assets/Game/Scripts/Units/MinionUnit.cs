@@ -10,14 +10,16 @@ namespace NecroDefense
     /// </summary>
     public class MinionUnit : CombatUnit
     {
+        [Header("Data (ค่าบาลานซ์)")]
+        [Tooltip("ไฟล์ค่าของมินเนียนชนิดนี้ (Data/Units/Minions) - ใส่แล้วเกมจะใช้ค่าในไฟล์แทนค่าใน Prefab ด้านล่าง (ว่าง = ใช้ค่าใน Prefab)")]
+        [SerializeField] private MinionStats stats;
+
         [Header("Minion Info")]
         [SerializeField] private string displayName = "Minion";
         [Tooltip("รูปที่ใช้ใน UI (ว่าง = ใช้รูปของ Body)")]
         [SerializeField] private Sprite icon;
         [Tooltip("Mana ที่ใช้อัญเชิญ")]
         [SerializeField] private int manaCost = 10;
-        [Tooltip("สังเวยให้คริสตัลแล้วฟื้น HP ฐานกี่ % (5 = 5%)")]
-        [SerializeField] private float sacrificeHealPercent = 5f;
 
         [Header("Selection")]
         [Tooltip("วงที่โชว์ใต้ตัวตอนถูกเลือก")]
@@ -39,21 +41,56 @@ namespace NecroDefense
         [Tooltip("Follow Player: ระยะเดินตามผู้เล่น")]
         [SerializeField] private float followDistance = 1.8f;
 
+        [Header("Split On Death (Slime)")]
+        [Tooltip("ตายแล้วแตกเป็นตัวอะไร (ว่าง = ไม่แตก) - ตัวที่แตกออกมาตายหมดแล้ว วิญญาณตัวใหญ่ถึงจะกลับเข้ากระเป๋า 1 ตัว")]
+        [SerializeField] private MinionUnit splitPrefab;
+        [SerializeField] private int splitCount = 2;
+        [SerializeField] private float splitSpread = 0.5f;
+
+        [Header("Crowd (รุมตี / ไม่ดันกัน)")]
+        [Tooltip("เดินทะลุศัตรูและมินเนียนด้วยกันได้ (ไม่ดันกันทางฟิสิกส์) - ตอนรุมจะยืนเป็นวงรอบเป้าแทน")]
+        [SerializeField] private bool passThroughUnits = true;
+        [Tooltip("รุมตีได้ แต่ถ้ามีศัตรูตัวอื่นที่ยังไม่มีใครขวาง เข้ามาในวงมองเห็น จะแบ่งตัวไปขวางมัน")]
+        [SerializeField] private bool splitToBlockFreeEnemies = true;
+        [Tooltip("ระยะห่างของช่องยืนรอบเป้า (องศา) ตอนรุม - ยิ่งมากยิ่งยืนห่างกัน")]
+        [Range(20f, 120f)]
+        [SerializeField] private float surroundSpacing = 55f;
+        [Tooltip("แรงแยกตัวจากมินเนียนข้างๆ ตอนเดิน (ไม่ให้ซ้อนกันเป็นก้อน) 0 = ปิด")]
+        [SerializeField] private float separationStrength = 1f;
+
         private float _baseMaxHealth;
         private Vector2 _holdPosition;
         private float _formationAngle;
         private MinionCommand _command = MinionCommand.SelfDefense;
         private Vector2 _moveTarget;
-        public float DetectionRange => aggroRange;
+        public float DetectionRange => stats != null ? stats.aggroRange : aggroRange;
+        public MinionStats Stats => stats;
+        public MinionUnit SplitPrefab => splitPrefab;
+        public int SplitCount => splitCount;
+        public float SplitSpread => splitSpread;
+        /// <summary>เป็นตัวที่แตกออกมาจากกลุ่มไหน (null = ตัวปกติ)</summary>
+        public MinionSplitGroup SplitGroup { get; set; }
+
         /// <summary>Prefab ต้นแบบ (ใช้นับจำนวนกองทัพ และส่งกลับเข้ากระเป๋าตอนตาย)</summary>
         public MinionUnit SourcePrefab { get; set; }
 
         public override Team Team => Team.Player;
-        public string DisplayName => displayName;
-        public int ManaCost => manaCost;
+        public string DisplayName => stats != null ? stats.displayName : displayName;
+        public int ManaCost => stats != null ? stats.manaCost : manaCost;
         public Sprite Icon => icon != null ? icon : (bodyRenderer != null ? bodyRenderer.sprite : null);
         public MinionCommand Command => _command;
-        public float SacrificeHealPercent => sacrificeHealPercent;
+
+        protected override void ApplyStats()
+        {
+            if (stats == null) return;
+            ApplyUnitStats(stats);
+            displayName = stats.displayName;
+            manaCost = stats.manaCost;
+            aggroRange = stats.aggroRange;
+            chaseLeash = stats.chaseLeash;
+            guardRadius = stats.guardRadius;
+            followDistance = stats.followDistance;
+        }
 
         protected override void Awake()
         {
@@ -69,6 +106,101 @@ namespace NecroDefense
         {
             base.OnEnable();
             Registry.Minions.Add(this);
+            if (passThroughUnits)
+            {
+                for (int i = 0; i < Registry.Enemies.Count; i++) IgnoreCollisions(this, Registry.Enemies[i]);
+                for (int i = 0; i < Registry.Minions.Count; i++) IgnoreCollisions(this, Registry.Minions[i]);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // รุมตี / แบ่งตัวไปขวาง
+        // ------------------------------------------------------------------
+
+        protected override void OnTargetChanged(Unit oldTarget, Unit newTarget)
+        {
+            if (oldTarget is EnemyUnit o) o.Attackers.Remove(this);
+            // ตัวยิงไกลไม่นับเป็นตัวขวาง (ศัตรูที่โดนยิงอย่างเดียว ยังถือว่าไม่มีใครขวาง)
+            if (attackStyle != AttackStyle.Ranged && newTarget is EnemyUnit n && !n.Attackers.Contains(this)) n.Attackers.Add(this);
+        }
+
+        /// <summary>
+        /// เลือกศัตรูในวง: ตัวที่ยังไม่มีใครขวางก่อน (แบ่งกันไปขวาง) / ถ้าทุกตัวมีคนขวางแล้ว -> ไปรุมตัวที่ใกล้สุด
+        /// กำลังตีตัวไหนอยู่ก็ตีต่อ ยกเว้นตัวนั้นมีเพื่อนรุมอยู่แล้ว และมีศัตรูที่ยังไม่มีใครขวางโผล่มา -> แยกไปขวางตัวนั้น
+        /// </summary>
+        private Unit PickEnemy(Vector2 center, float range, float leashFromHold)
+        {
+            EnemyUnit current = currentTarget as EnemyUnit;
+            bool currentOk = current != null && Registry.IsValidHostile(current, Team, canAttackFlying)
+                             && Vector2.Distance(center, current.Position) - current.BodyRadius <= range + 0.5f
+                             && (leashFromHold <= 0f || Vector2.Distance(_holdPosition, current.Position) <= aggroRange + leashFromHold);
+
+            EnemyUnit nearest = null, nearestFree = null;
+            float dN = float.MaxValue, dF = float.MaxValue;
+            for (int i = 0; i < Registry.Enemies.Count; i++)
+            {
+                EnemyUnit e = Registry.Enemies[i];
+                if (!Registry.IsValidHostile(e, Team, canAttackFlying)) continue;
+                float dc = Vector2.Distance(center, e.Position) - e.BodyRadius;
+                if (dc > range) continue;
+                if (leashFromHold > 0f && Vector2.Distance(_holdPosition, e.Position) > aggroRange + leashFromHold) continue;
+                float d = Vector2.Distance(Position, e.Position);
+                if (d < dN) { dN = d; nearest = e; }
+                bool free = e.Attackers.Count == 0 || (e.Attackers.Count == 1 && e.Attackers[0] == this);
+                if (free && d < dF) { dF = d; nearestFree = e; }
+            }
+
+            if (currentOk)
+            {
+                // มีเพื่อนรุมตัวนี้อยู่แล้ว + มีศัตรูที่ยังไม่มีใครขวาง -> แบ่งตัวไปขวาง (ทีละตัว เพราะพอไปแล้วตัวนั้นก็ "มีคนขวาง")
+                if (splitToBlockFreeEnemies && nearestFree != null && nearestFree != current && current.Attackers.Count > 1)
+                    return nearestFree;
+                return current;
+            }
+            if (splitToBlockFreeEnemies && nearestFree != null) return nearestFree;
+            return nearest;
+        }
+
+        /// <summary>ช่องยืนรอบเป้าตอนรุม: ตัวแรกยืนหน้า ตัวต่อไปสลับซ้าย-ขวา เป็นวงรอบเป้า</summary>
+        protected override Vector2? GetAttackSlot(Unit target)
+        {
+            if (attackStyle == AttackStyle.Ranged) return null;
+            if (!(target is EnemyUnit e)) return null;
+            int idx = e.Attackers.IndexOf(this);
+            if (idx <= 0) return null; // ตัวแรก = ขวางหน้าตรงๆ
+            MinionUnit first = e.Attackers[0];
+            Vector2 baseDir = first != null ? first.Position - e.Position : Position - e.Position;
+            if (baseDir.sqrMagnitude < 0.0001f) baseDir = Vector2.right;
+            baseDir.Normalize();
+
+            int step = (idx + 1) / 2;
+            float ang = (idx % 2 == 1 ? 1f : -1f) * step * surroundSpacing;
+            float ring = 0f;
+            while (Mathf.Abs(ang) > 180f) { ang -= Mathf.Sign(ang) * 360f; ring += 0.35f; } // วงเต็ม -> วงนอก
+            float rad = ang * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(baseDir.x * Mathf.Cos(rad) - baseDir.y * Mathf.Sin(rad), baseDir.x * Mathf.Sin(rad) + baseDir.y * Mathf.Cos(rad));
+            float r = e.BodyRadius + bodyRadius + Mathf.Max(0.05f, attackRange * 0.5f) + ring;
+            return e.Position + dir * r;
+        }
+
+        /// <summary>แยกตัวจากมินเนียนข้างๆ ตอนเดิน (เดินทะลุกันได้แล้ว เลยใช้แรงนี้กันซ้อนเป็นก้อน)</summary>
+        protected override Vector2 GetSteeringOffset(Vector2 moveDir)
+        {
+            if (separationStrength <= 0f) return Vector2.zero;
+            Vector2 push = Vector2.zero;
+            for (int i = 0; i < Registry.Minions.Count; i++)
+            {
+                MinionUnit other = Registry.Minions[i];
+                if (other == null || other == this || other.isFlying != isFlying) continue;
+                Vector2 away = Position - other.Position;
+                float minDist = (bodyRadius + other.BodyRadius) * 1.05f;
+                float d = away.magnitude;
+                if (d >= minDist) continue;
+                away = d < 0.001f ? new Vector2(-moveDir.y, moveDir.x) * (i % 2 == 0 ? 1f : -1f) : away / d;
+                push += away * (1f - d / minDist);
+            }
+            if (push == Vector2.zero) return Vector2.zero;
+            return Vector2.ClampMagnitude(push * separationStrength * CurrentMoveSpeed, CurrentMoveSpeed * 0.6f);
         }
 
         protected override void OnDisable()
@@ -115,15 +247,8 @@ namespace NecroDefense
             }
         }
 
-        /// <summary>ศัตรูใกล้สุดในวงมองเห็น (และไม่เกินระยะ leash จากจุดยืน)</summary>
-        private Unit FindInSight(Vector2 center)
-        {
-            Unit u = Registry.FindNearestHostile(center, Team, aggroRange, canAttackFlying);
-            if (u == null) return null;
-            // กำลังไล่อยู่แล้วแต่ศัตรูหนีไกลเกินจุดยืน -> ปล่อย
-            if (chaseLeash > 0f && Vector2.Distance(_holdPosition, u.Position) > aggroRange + chaseLeash) return null;
-            return u;
-        }
+        /// <summary>ศัตรูในวงมองเห็น (และไม่เกินระยะ leash จากจุดยืน) - แบ่งกันขวาง / รุมตามกติกาใน PickEnemy</summary>
+        private Unit FindInSight(Vector2 center) => PickEnemy(center, aggroRange, chaseLeash);
 
         protected override Unit ChooseTarget()
         {
@@ -151,8 +276,7 @@ namespace NecroDefense
                 {
                     PlayerNecromancer p = Registry.Player;
                     Vector2 center = p != null ? p.Position : Position;
-                    Unit u = Registry.FindNearestHostile(center, Team, aggroRange, canAttackFlying);
-                    return u;
+                    return PickEnemy(center, aggroRange, 0f);
                 }
 
                 case MinionCommand.AttackNearest:

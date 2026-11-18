@@ -8,6 +8,10 @@ namespace NecroDefense
     /// </summary>
     public class EnemyUnit : CombatUnit
     {
+        [Header("Data (ค่าบาลานซ์)")]
+        [Tooltip("ไฟล์ค่าของศัตรูชนิดนี้ (Data/Units/Enemies) - ใส่แล้วเกมจะใช้ค่าในไฟล์แทนค่าใน Prefab ด้านล่าง (ว่าง = ใช้ค่าใน Prefab)")]
+        [SerializeField] private EnemyStats stats;
+
         [Header("Enemy Info")]
         [SerializeField] private string displayName = "Enemy";
 
@@ -42,6 +46,10 @@ namespace NecroDefense
         [SerializeField] private bool passThroughOtherEnemies = true;
         [Tooltip("แรงแยกตัวจากศัตรูข้างๆ ไม่ให้ซ้อนทับกันเป็นก้อนเดียว (0 = ปิด)")]
         [SerializeField] private float separationStrength = 1.2f;
+        [Tooltip("เดินทะลุมินเนียนได้ (ไม่ดันกันทางฟิสิกส์) - หยุดสู้เฉพาะตัวที่มาขวาง")]
+        [SerializeField] private bool passThroughMinions = true;
+        [Tooltip("ไม่รุมมินเนียนที่กำลังสู้กับศัตรูตัวอื่นอยู่: เดินผ่านไปเลย / สู้แค่มินเนียนที่มาขวางตัวเอง (หรือตัวที่ว่างอยู่)")]
+        [SerializeField] private bool ignoreBusyMinions = true;
         [Tooltip("ถ้าเดินไม่เข้าใกล้ Waypoint เลยนานเท่านี้ (วินาที) ให้ข้ามไปจุดถัดไป")]
         [SerializeField] private float stuckSkipTime = 1.5f;
 
@@ -60,18 +68,51 @@ namespace NecroDefense
         [Tooltip("โอกาสชุบชีวิตสำเร็จ (0.3 = 30%)")]
         [Range(0f, 1f)]
         [SerializeField] private float raiseChance = 0.3f;
+        [Tooltip("Souls ที่ได้เมื่อคลิก / กด Q ที่ศพนี้ ตอนกองทัพชนิดนั้นเต็ม (ชุบไม่ได้)")]
+        [SerializeField] private int corpseHarvestSouls = 3;
+        [Tooltip("Souls ที่ได้เมื่อศพนี้หมดเวลาหายไปเอง (0 = ไม่ได้)")]
+        [SerializeField] private int corpseExpireSouls = 1;
 
         [Header("Split On Death (Slime)")]
         [Tooltip("ตายแล้วแตกเป็นตัวอะไร (ว่าง = ไม่แตก)")]
         [SerializeField] private EnemyUnit splitPrefab;
         [SerializeField] private int splitCount = 2;
         [SerializeField] private float splitSpread = 0.5f;
+        [Tooltip("ตัวที่แตกตัวได้ ทิ้งศพ (และจับวิญญาณด้วยป้อม) ไหม - ปิด = มีแค่ศพตัวเล็กที่แตกออกมา (ชุบตัวเล็กก็ได้มินเนียนตามที่ตั้งในตัวเล็ก)")]
+        [SerializeField] private bool dropCorpseWhenSplitting = false;
 
         private EnemyPath _path;
         private int _waypointIndex;
 
+        /// <summary>มินเนียนที่กำลังสู้กับศัตรูตัวนี้อยู่ (เรียงตามลำดับที่เข้ามา - ใช้แบ่งช่องยืนรอบตัว)</summary>
+        public readonly System.Collections.Generic.List<MinionUnit> Attackers = new System.Collections.Generic.List<MinionUnit>();
+        /// <summary>มีมินเนียนสู้ด้วยอยู่ไหม</summary>
+        public bool IsEngaged => Attackers.Count > 0;
+
         public override Team Team => Team.Enemy;
-        public string DisplayName => displayName;
+        public string DisplayName => stats != null ? stats.displayName : displayName;
+        public EnemyStats Stats => stats;
+
+        protected override void ApplyStats()
+        {
+            if (stats == null) return;
+            ApplyUnitStats(stats);
+            displayName = stats.displayName;
+            attackPlayer = stats.attackPlayer;
+            attackMinions = stats.attackMinions;
+            attackMainBase = stats.attackMainBase;
+            priority = stats.priority;
+            aggroRange = stats.aggroRange;
+            priorityChaseRange = stats.priorityChaseRange;
+            onlyMinionsOnLane = stats.onlyMinionsOnLane;
+            shootWhileWalking = stats.shootWhileWalking;
+            soulReward = stats.soulReward;
+            xpReward = stats.xpReward;
+            raiseChance = stats.raiseChance;
+            corpseHarvestSouls = stats.corpseHarvestSouls;
+            corpseExpireSouls = stats.corpseExpireSouls;
+            splitCount = stats.splitCount;
+        }
         public MinionUnit MinionPrefab => minionPrefab;
         public Sprite Icon => bodyRenderer != null ? bodyRenderer.sprite : null;
 
@@ -80,6 +121,8 @@ namespace NecroDefense
             base.OnEnable();
             Registry.Enemies.Add(this);
             if (passThroughOtherEnemies) IgnoreOtherEnemies();
+            if (passThroughMinions)
+                for (int i = 0; i < Registry.Minions.Count; i++) IgnoreCollisions(this, Registry.Minions[i]);
         }
 
         /// <summary>ปิดการชนทางฟิสิกส์ระหว่างศัตรูตัวนี้กับศัตรูตัวอื่นทั้งหมด (ต้นเหตุที่ดันกันจนติด)</summary>
@@ -293,6 +336,8 @@ namespace NecroDefense
                 {
                     MinionUnit m = Registry.Minions[i];
                     if (!Registry.IsValidHostile(m, Team, canAttackFlying)) continue;
+                    // มินเนียนกำลังสู้กับศัตรูตัวอื่น -> ไม่ไปรุม เดินผ่านไป
+                    if (ignoreBusyMinions && m.CurrentTarget is EnemyUnit busyWith && busyWith != this) continue;
                     float d = Vector2.Distance(Position, m.Position) - m.BodyRadius;
                     if (d <= bestDist) { bestDist = d; best = m; }
                 }
@@ -315,8 +360,12 @@ namespace NecroDefense
                     orb.SetValue(xpReward);
                 }
 
+                // ตัวที่แตกตัว (Slime ใหญ่): ไม่ทิ้งศพ ให้ตัวเล็กทิ้งแทน
+                bool splitting = splitPrefab != null && splitCount > 0;
+                bool leaveRemains = !splitting || dropCorpseWhenSplitting;
+
                 // Soul Capture (Magic Orb Tower Tier 3): โดนป้อมฆ่า -> มีโอกาสเข้ากระเป๋าทันที
-                bool captured = false;
+                bool captured = !leaveRemains;
                 Tower killer = LastTowerAttacker;
                 if (killer != null && minionPrefab != null && GameManager.Instance.Minions.HasRoom(minionPrefab)
                     && Random.value < killer.SoulCaptureChance)
@@ -330,6 +379,7 @@ namespace NecroDefense
                 {
                     Corpse c = Instantiate(corpsePrefab, Position, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Pickups));
                     c.Setup(displayName, minionPrefab, raiseChance);
+                    c.SetSouls(corpseHarvestSouls, corpseExpireSouls);
                     // ศพหน้าตาเหมือนศัตรูตัวนั้น (ล้มนอน + สีเทา)
                     if (bodyRenderer != null)
                         c.SetLook(bodyRenderer.sprite, bodyRenderer.transform.lossyScale, visualRoot != null && visualRoot.localScale.x < 0f);

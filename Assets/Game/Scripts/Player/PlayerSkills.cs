@@ -98,6 +98,21 @@ namespace NecroDefense
         {
             _player = GetComponent<PlayerNecromancer>();
             if (castBar != null) castBar.SetValue(1f);
+            PlayerStats s = _player != null ? _player.Stats : null;
+            if (s != null)
+            {
+                teleportCooldown = s.teleportCooldown;
+                teleportMaxDistance = s.teleportMaxDistance;
+                raiseChanceBonus = s.raiseChanceBonus;
+                massRaiseCooldown = s.massRaiseCooldown;
+                massRaiseRadius = s.massRaiseRadius;
+                massRaiseCastTime = s.massRaiseCastTime;
+                novaCooldown = s.novaCooldown;
+                novaCastTime = s.novaCastTime;
+                novaRadius = s.novaRadius;
+                novaDamage = s.novaDamage;
+                novaHitsFlying = s.novaHitsFlying;
+            }
         }
 
         private void Update()
@@ -201,20 +216,24 @@ namespace NecroDefense
             int r = RollRaise(best);
             if (r == RaiseFailed)
                 GameManager.Instance.UI.ShowMessage("Raise Dead failed (" + Mathf.RoundToInt(Mathf.Clamp01(best.RaiseChance + raiseChanceBonus) * 100f) + "%)");
-            else if (r == RaiseArmyFull)
-                GameManager.Instance.UI.ShowMessage(best.MinionPrefab.DisplayName + " army is full (" + GameManager.Instance.Minions.GetCap(best.MinionPrefab) + ")");
             return true;
         }
 
-        private const int RaiseOk = 0, RaiseFailed = 1, RaiseArmyFull = 2;
+        private const int RaiseOk = 0, RaiseFailed = 1, RaiseHarvested = 2;
+        private int _lastHarvestSouls;
 
         /// <summary>
-        /// ลองชุบ 1 ศพ (สุ่มโอกาสของศพนั้น) สำเร็จ = วิญญาณบินเข้ากระเป๋า / ไม่สำเร็จ = ซากสลาย
-        /// กองทัพชนิดนั้นเต็ม = ไม่ชุบ ศพยังอยู่
+        /// ลองชุบ 1 ศพ (สุ่มโอกาสของศพนั้น) สำเร็จ = ลุกขึ้นสู้ / ไม่สำเร็จ = ซากสลาย
+        /// กองทัพชนิดนั้นเต็ม (ชุบไม่ได้) = เก็บพลังวิญญาณ (Souls) จากศพแทน
         /// </summary>
         private int RollRaise(Corpse c)
         {
-            if (!GameManager.Instance.Minions.HasRoom(c.MinionPrefab)) return RaiseArmyFull;
+            if (!GameManager.Instance.Minions.HasRoom(c.MinionPrefab))
+            {
+                _lastHarvestSouls = c.HarvestNow();
+                if (raiseEffect != null) SpawnRing(raiseEffect, c.Position, 0.5f);
+                return RaiseHarvested;
+            }
             float chance = Mathf.Clamp01(c.RaiseChance + raiseChanceBonus);
             bool ok = UnityEngine.Random.value < chance;
             if (ok)
@@ -304,15 +323,18 @@ namespace NecroDefense
 
             if (_corpseBuffer.Count == 0) { GameManager.Instance.UI.ShowMessage("No corpses nearby"); return; }
 
-            int ok = 0, full = 0;
+            int ok = 0, harvested = 0, souls = 0;
             foreach (Corpse c in _corpseBuffer)
             {
                 if (c == null) continue;
                 int r = RollRaise(c);
                 if (r == RaiseOk) ok++;
-                else if (r == RaiseArmyFull) full++;
+                else if (r == RaiseHarvested) { harvested++; souls += _lastHarvestSouls; }
             }
-            GameManager.Instance.UI.ShowMessage("Arise! " + ok + " / " + (_corpseBuffer.Count - full) + " raised" + (full > 0 ? "   (" + full + " skipped: army full)" : ""));
+            int tried = _corpseBuffer.Count - harvested;
+            string msg = tried > 0 ? "Arise! " + ok + " / " + tried + " raised" : "Arise!";
+            if (harvested > 0) msg += "   +" + souls + " Souls";
+            GameManager.Instance.UI.ShowMessage(msg);
         }
 
         // ---------------- E: Arcane Nova ----------------

@@ -42,6 +42,9 @@ namespace NecroDefense
 
         private static readonly List<Unit> _hitBuffer = new List<Unit>();
 
+        /// <summary>เรียกทุกครั้งที่โจมตี (ใช้เล่นท่าตี)</summary>
+        public event System.Action Attacked;
+
         public Unit CurrentTarget => currentTarget;
         public float CurrentMoveSpeed => moveSpeed * moveSpeedMultiplier * SlowMultiplier;
         public float AttackDamage => attackDamage * damageMultiplier;
@@ -50,6 +53,22 @@ namespace NecroDefense
         {
             base.Awake();
             rb = GetComponent<Rigidbody2D>();
+        }
+
+        /// <summary>คัดลอกค่าพื้นฐาน (เลือด / เดิน / โจมตี) จากไฟล์ Data</summary>
+        protected void ApplyUnitStats(UnitStats s)
+        {
+            if (s == null) return;
+            maxHealth = s.maxHealth;
+            armor = s.armor;
+            isFlying = s.isFlying;
+            moveSpeed = s.moveSpeed;
+            attackStyle = s.attackStyle;
+            attackDamage = s.attackDamage;
+            attackRange = s.attackRange;
+            attackInterval = s.attackInterval;
+            areaRadius = s.areaRadius;
+            canAttackFlying = s.canAttackFlying;
         }
 
         protected override void Update()
@@ -64,14 +83,17 @@ namespace NecroDefense
             }
 
             attackTimer -= Time.deltaTime;
-            currentTarget = ChooseTarget();
+            SetTarget(ChooseTarget());
 
             if (currentTarget != null)
             {
                 float edgeDistance = Vector2.Distance(Position, currentTarget.Position) - currentTarget.BodyRadius - bodyRadius;
+                Vector2? slot = GetAttackSlot(currentTarget);
                 if (edgeDistance <= attackRange)
                 {
-                    StopMoving();
+                    // รุมตี: ขยับเข้าช่องของตัวเองรอบเป้า (ไม่ยืนซ้อน/ไม่ดันกัน) ระหว่างนั้นตีไปด้วยได้
+                    if (slot.HasValue && Vector2.Distance(Position, slot.Value) > SlotTolerance) MoveTowards(slot.Value);
+                    else StopMoving();
                     FaceTowards(currentTarget.Position);
                     if (attackTimer <= 0f)
                     {
@@ -81,7 +103,7 @@ namespace NecroDefense
                 }
                 else
                 {
-                    MoveTowards(currentTarget.Position);
+                    MoveTowards(slot ?? currentTarget.Position);
                 }
             }
             else
@@ -92,6 +114,24 @@ namespace NecroDefense
                 else StopMoving();
             }
         }
+
+        /// <summary>เปลี่ยนเป้า (แจ้งคลาสลูกเมื่อเป้าเปลี่ยน)</summary>
+        protected void SetTarget(Unit target)
+        {
+            if (target == currentTarget) return;
+            Unit old = currentTarget;
+            currentTarget = target;
+            OnTargetChanged(old, target);
+        }
+
+        /// <summary>เป้าเปลี่ยน (มินเนียนใช้ลงชื่อ/ถอนชื่อว่ากำลังสู้กับศัตรูตัวไหน)</summary>
+        protected virtual void OnTargetChanged(Unit oldTarget, Unit newTarget) { }
+
+        /// <summary>จุดยืนตอนรุมตีรอบเป้า (null = เดินเข้าหาเป้าตรงๆ)</summary>
+        protected virtual Vector2? GetAttackSlot(Unit target) => null;
+
+        /// <summary>ห่างจากช่องยืนไม่เกินเท่านี้ถือว่าถึงแล้ว</summary>
+        protected virtual float SlotTolerance => 0.2f;
 
         /// <summary>คลาสลูกบอกว่าจะตีใคร (null = ไม่มีเป้า)</summary>
         protected abstract Unit ChooseTarget();
@@ -148,6 +188,7 @@ namespace NecroDefense
 
         protected virtual void PerformAttack(Unit target)
         {
+            Attacked?.Invoke();
             float dmg = AttackDamage;
             switch (attackStyle)
             {
@@ -180,7 +221,25 @@ namespace NecroDefense
         protected override void OnDeath()
         {
             StopMoving();
+            SetTarget(null);
             base.OnDeath();
+        }
+
+        protected override void OnDisable()
+        {
+            SetTarget(null);
+            base.OnDisable();
+        }
+
+        /// <summary>ปิดการชนทางฟิสิกส์ระหว่าง 2 ยูนิต (เดินทะลุกันได้ ไม่ดันกัน)</summary>
+        protected static void IgnoreCollisions(Component a, Component b)
+        {
+            if (a == null || b == null || a == b) return;
+            Collider2D[] ca = a.GetComponentsInChildren<Collider2D>();
+            Collider2D[] cb = b.GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < ca.Length; i++)
+                for (int k = 0; k < cb.Length; k++)
+                    if (!ca[i].isTrigger && !cb[k].isTrigger) Physics2D.IgnoreCollision(ca[i], cb[k], true);
         }
 
         protected override void OnDrawGizmosSelected()

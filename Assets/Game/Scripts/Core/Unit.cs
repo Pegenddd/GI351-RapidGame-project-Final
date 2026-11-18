@@ -62,10 +62,14 @@ namespace NecroDefense
 
         protected virtual void Awake()
         {
+            ApplyStats();
             currentHealth = maxHealth;
             if (bodyRenderer != null) _baseColor = bodyRenderer.color;
             RefreshHealthBar();
         }
+
+        /// <summary>คลาสลูกคัดลอกค่าจากไฟล์ Data (Stats) มาใส่ตัวแปร - เรียกก่อนทุกอย่างใน Awake</summary>
+        protected virtual void ApplyStats() { }
 
         protected virtual void OnEnable() { }
         protected virtual void OnDisable() { }

@@ -40,6 +40,10 @@ namespace NecroDefense
     /// </summary>
     public class Tower : MonoBehaviour
     {
+        [Header("Data (ค่าบาลานซ์)")]
+        [Tooltip("ไฟล์ค่าของป้อมนี้ (Data/Towers) - ราคา / ดาเมจ / ระยะ แต่ละ Tier ใช้ค่าจากไฟล์นี้แทนค่าใน Prefab ด้านล่าง (ว่าง = ใช้ค่าใน Prefab)")]
+        [SerializeField] private TowerStats stats;
+
         [Header("Info")]
         [SerializeField] private string towerName = "Tower";
         [TextArea(2, 4)]
@@ -96,14 +100,20 @@ namespace NecroDefense
         private float _buildTimer;
         private static readonly List<Unit> _targets = new List<Unit>();
 
-        public string TowerName => towerName;
-        public string Description => description;
+        public string TowerName => stats != null ? stats.towerName : towerName;
+        public string Description => stats != null ? stats.description : description;
+        public TowerStats Stats => stats;
+        /// <summary>ค่าแต่ละเลเวล (จากไฟล์ Data ถ้ามี)</summary>
+        public List<TowerLevel> Levels => stats != null && stats.levels != null && stats.levels.Count > 0 ? stats.levels : levels;
+        private float ConstructionTime => stats != null ? stats.constructionTime : constructionTime;
+        private bool CanHitFlying => stats != null ? stats.canHitFlying : canHitFlying;
+        private float ChainRange => stats != null ? stats.chainRange : chainRange;
         public int LevelIndex => _levelIndex;
-        public int MaxLevelIndex => levels.Count - 1;
-        public TowerLevel Current => levels.Count > 0 ? levels[Mathf.Clamp(_levelIndex, 0, levels.Count - 1)] : new TowerLevel();
-        public TowerLevel Next => _levelIndex + 1 < levels.Count ? levels[_levelIndex + 1] : null;
+        public int MaxLevelIndex => Levels.Count - 1;
+        public TowerLevel Current => Levels.Count > 0 ? Levels[Mathf.Clamp(_levelIndex, 0, Levels.Count - 1)] : new TowerLevel();
+        public TowerLevel Next => _levelIndex + 1 < Levels.Count ? Levels[_levelIndex + 1] : null;
         public bool CanUpgrade => Next != null;
-        public int BaseCost => levels.Count > 0 ? levels[0].cost : 0;
+        public int BaseCost => Levels.Count > 0 ? Levels[0].cost : 0;
         public float SoulCaptureChance => Current.soulCaptureChance;
         /// <summary>Souls ที่จ่ายไปทั้งหมด (สร้าง + อัปเกรด) ใช้คิดเงินคืน</summary>
         public int TotalSpent { get; private set; }
@@ -162,7 +172,7 @@ namespace NecroDefense
 
         private void StartConstruction()
         {
-            _buildTimer = constructionTime;
+            _buildTimer = ConstructionTime;
             if (_buildTimer > 0f)
             {
                 SetBodyAlpha(0.35f);
@@ -181,12 +191,12 @@ namespace NecroDefense
 
         private void Update()
         {
-            if (!GameManager.IsGameplayRunning || levels.Count == 0) return;
+            if (!GameManager.IsGameplayRunning || Levels.Count == 0) return;
 
             if (_buildTimer > 0f)
             {
                 _buildTimer -= Time.deltaTime;
-                float t = constructionTime > 0f ? 1f - Mathf.Clamp01(_buildTimer / constructionTime) : 1f;
+                float t = ConstructionTime > 0f ? 1f - Mathf.Clamp01(_buildTimer / ConstructionTime) : 1f;
                 if (constructionBar != null) constructionBar.SetValue(t);
                 if (visual != null) visual.OnConstruction(_buildTimer <= 0f ? 1f : t);
                 if (_buildTimer <= 0f) SetBodyAlpha(1f);
@@ -263,7 +273,7 @@ namespace NecroDefense
                 for (int i = 0; i < Registry.Enemies.Count; i++)
                 {
                     EnemyUnit e = Registry.Enemies[i];
-                    if (!Registry.IsValidHostile(e, Team.Player, canHitFlying) || _targets.Contains(e)) continue;
+                    if (!Registry.IsValidHostile(e, Team.Player, CanHitFlying) || _targets.Contains(e)) continue;
                     float d = Vector2.Distance(pos, e.Position) - e.BodyRadius;
                     if (d <= bestDist) { bestDist = d; best = e; }
                 }
@@ -278,7 +288,7 @@ namespace NecroDefense
         {
             if (projectilePrefab == null) { target.TakeDamage(lv.damage, this); return null; }
             Projectile p = Instantiate(projectilePrefab, from, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
-            p.Launch(Team.Player, target, lv.damage, canHitFlying, this);
+            p.Launch(Team.Player, target, lv.damage, CanHitFlying, this);
             p.SetAreaRadius(lv.areaRadius);
             if (lv.slowPercent > 0f) p.SetSlow(lv.slowPercent, lv.slowDuration);
             if (lv.poisonPoolChance > 0f && poisonPoolPrefab != null)
@@ -320,11 +330,11 @@ namespace NecroDefense
         private Unit FindChainTarget(Vector2 from)
         {
             Unit best = null;
-            float bestDist = chainRange;
+            float bestDist = ChainRange;
             for (int i = 0; i < Registry.Enemies.Count; i++)
             {
                 EnemyUnit e = Registry.Enemies[i];
-                if (!Registry.IsValidHostile(e, Team.Player, canHitFlying) || _chainHit.Contains(e)) continue;
+                if (!Registry.IsValidHostile(e, Team.Player, CanHitFlying) || _chainHit.Contains(e)) continue;
                 float d = Vector2.Distance(from, e.Position);
                 if (d <= bestDist) { bestDist = d; best = e; }
             }
@@ -333,7 +343,7 @@ namespace NecroDefense
 
         private void OnDrawGizmosSelected()
         {
-            if (levels.Count == 0) return;
+            if (Levels.Count == 0) return;
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(transform.position, Current.range);
             if (blockPlayer)

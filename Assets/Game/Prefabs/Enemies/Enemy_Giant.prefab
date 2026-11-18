@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5163496649407047723}
@@ -120,7 +120,7 @@ MonoBehaviour:
   bodyRenderer: {fileID: 420506008400234680}
   visualRoot: {fileID: 699769291083680465}
   healthBar: {fileID: 5304230746607743774}
-  hitFlashColor: {r: 1, g: 0.45, b: 0.45, a: 0.45}
+  hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
   hitFlashTime: 0.08
   moveSpeed: 0.8
   attackStyle: 1
@@ -131,8 +131,9 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 5171944064729236294, guid: ee67e3080ffc7e04db46762fefb655ea, type: 3}
+  stats: {fileID: 11400000, guid: 2d09fd0b1503cdd45a5220d7143314dd, type: 2}
   displayName: Giant
-  attackPlayer: 1
+  attackPlayer: 0
   attackMinions: 1
   attackMainBase: 1
   priority: 0
@@ -142,15 +143,23 @@ MonoBehaviour:
   shootWhileWalking: 0
   followPath: 1
   waypointReachDistance: 0.5
+  passThroughOtherEnemies: 1
+  separationStrength: 1.2
+  passThroughMinions: 1
+  ignoreBusyMinions: 1
+  stuckSkipTime: 1.5
   soulReward: 12
   xpReward: 8
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}
   corpsePrefab: {fileID: 3678099141589912850, guid: b90db5d4a6c0a4d4d8bb3f4caf9bcb7b, type: 3}
   minionPrefab: {fileID: 8538096052331886428, guid: 95b4e8583fdc8bc4f808343b8719f497, type: 3}
   raiseChance: 0.2
+  corpseHarvestSouls: 3
+  corpseExpireSouls: 1
   splitPrefab: {fileID: 0}
   splitCount: 0
   splitSpread: 0.5
+  dropCorpseWhenSplitting: 0
 --- !u!1 &633607144408052861
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,7 +242,7 @@ SpriteRenderer:
   m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 1, g: 0.2, b: 0.2, a: 0.75}
+  m_Color: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.75}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1234,7 +1243,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 0.3, g: 1, b: 0.35, a: 1}
+  m_Color: {r: 0.7166, g: 0.7166, b: 0.7166, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
   title: Orbital Magic
   category: 0
-  description: +1 orbiting orb, +20% orb damage. (No level cap)
+  description: +1 orbiting orb, +20% orb damage.
   effect: 4
   value1: 1
   value2: 0.2
-  maxStacks: 0
+  maxStacks: 3
   minLevel: 1
   requires: {fileID: 0}
-  cardColor: {r: 0.65, g: 0.45, b: 1, a: 1}
+  cardColor: {r: 0.5725, g: 0.5725, b: 0.5725, a: 1}

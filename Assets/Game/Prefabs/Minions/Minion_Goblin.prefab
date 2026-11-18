@@ -305,7 +305,7 @@ SpriteRenderer:
   m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 9a1708d5f63de104c8b1b773664549bd, type: 3}
-  m_Color: {r: 0.3, g: 1, b: 0.35, a: 1}
+  m_Color: {r: 0.7166, g: 0.7166, b: 0.7166, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -581,7 +581,7 @@ SpriteRenderer:
   m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 0.35, g: 0.9, b: 1, a: 0.55}
+  m_Color: {r: 0.74695, g: 0.74695, b: 0.74695, a: 0.55}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1161,7 +1161,7 @@ MonoBehaviour:
   bodyRenderer: {fileID: 559608292348209475}
   visualRoot: {fileID: 4888658156981692772}
   healthBar: {fileID: 2067004691023118122}
-  hitFlashColor: {r: 1, g: 0.45, b: 0.45, a: 0.45}
+  hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
   hitFlashTime: 0.08
   moveSpeed: 3.2
   attackStyle: 0
@@ -1172,6 +1172,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  stats: {fileID: 11400000, guid: fc6a03aa17f9ea242bd6d07d30ba95cc, type: 2}
   displayName: Goblin
   icon: {fileID: 21300000, guid: 7fe0c0215f218834094dc65d86572cfc, type: 3}
   manaCost: 20
@@ -1450,7 +1451,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7c24e4103adca9942b1729ec87a9a5f2, type: 3}
-  m_Color: {r: 1, g: 0.85, b: 0.2, a: 0.95}
+  m_Color: {r: 0.82075, g: 0.82075, b: 0.82075, a: 0.95}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
