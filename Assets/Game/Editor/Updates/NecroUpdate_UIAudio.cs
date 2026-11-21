@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace NecroDefense.EditorTools
 {
     /// <summary>
-    /// อัปเดต "ธีม UI ขาว-ดำ + ระบบเสียง" ให้ซีน Gameplay (กดซ้ำได้ ไม่เพิ่มของซ้ำ)
+    /// อัปเดต "ธีม UI ขาว-ดำ + ระบบเสียง" ให้ซีน Map2 หรือซีนที่เปิดอยู่ (กดซ้ำได้ ไม่เพิ่มของซ้ำ)
     /// - ตั้งค่า Import ของรูปธีม (Assets/Game/Art/UI) และไฟล์เสียง (Assets/Game/Resources/Audio)
     /// - แปลงสี UI ทั้งหมดเป็นขาว-ดำ-เทา, ใส่กรอบแผง/ช่อง/ปุ่ม/หลอดแบบใหม่, ตัวหนังสือมีเงา
     /// - ใส่เอฟเฟกต์ปุ่ม (ชี้/กด + เสียง), แผงเด้งเข้า, ขอบจอมืดตอน HP ต่ำ
@@ -19,7 +19,8 @@ namespace NecroDefense.EditorTools
     /// </summary>
     public static class NecroUpdate_UIAudio
     {
-        private const string ScenePath = "Assets/Scenes/Gameplay.unity";
+        // ซีนหลักของเกม (ถ้าซีนที่เปิดอยู่มี Canvas_Gameplay จะแต่งซีนนั้นแทน)
+        private const string ScenePath = "Assets/Scenes/Map2.unity";
         private const string UiArtDir = "Assets/Game/Art/UI";
         private const string SfxDir = "Assets/Game/Resources/Audio/SFX";
         private const string MusicDir = "Assets/Game/Resources/Audio/Music";
@@ -32,7 +33,7 @@ namespace NecroDefense.EditorTools
         public static void Run()
         {
             if (!EditorUtility.DisplayDialog("NecroDefense - UI Theme + Audio",
-                    "จะแก้ซีน Gameplay ดังนี้:\n\n" +
+                    "จะแก้ซีน " + TargetSceneName() + " ดังนี้:\n\n" +
                     "• UI ธีมขาว-ดำ-เทา + แดงเลือดเป็นสีเน้น (แบบ Othercide) + กรอบแผง/ปุ่ม/หลอดแบบใหม่\n" +
                     "• เอฟเฟกต์ปุ่ม (ชี้/กด + เสียง), แผงเด้งเข้า, ขอบจอมืดตอน HP ต่ำ\n" +
                     "• แถบปรับเสียง 4 ช่องในหน้า Pause\n" +
@@ -49,7 +50,7 @@ namespace NecroDefense.EditorTools
 
                 EditorUtility.DisplayProgressBar("NecroDefense", "Updating Gameplay scene...", 0.6f);
                 Scene scene = SceneManager.GetActiveScene();
-                if (scene.path != ScenePath)
+                if (!HasGameplayCanvas(scene))
                 {
                     if (!System.IO.File.Exists(ScenePath)) { EditorUtility.DisplayDialog("Not found", ScenePath + " not found", "OK"); return; }
                     scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -67,6 +68,22 @@ namespace NecroDefense.EditorTools
             string summary = string.Join("\n", log);
             Debug.Log("<b>[NecroDefense] UI Theme + Audio</b>\n" + summary);
             EditorUtility.DisplayDialog("UI Theme + Audio done", summary.Length > 1500 ? summary.Substring(0, 1500) + "\n..." : summary, "OK");
+        }
+
+        /// <summary>ชื่อซีนที่จะถูกแต่ง: ซีนที่เปิดอยู่ถ้ามี Canvas_Gameplay ไม่งั้น Map2</summary>
+        private static string TargetSceneName()
+        {
+            Scene a = SceneManager.GetActiveScene();
+            return HasGameplayCanvas(a) ? a.name : System.IO.Path.GetFileNameWithoutExtension(ScenePath);
+        }
+
+        private static bool HasGameplayCanvas(Scene scene)
+        {
+            if (!scene.IsValid() || !scene.isLoaded) return false;
+            foreach (GameObject r in scene.GetRootGameObjects())
+                foreach (Canvas c in r.GetComponentsInChildren<Canvas>(true))
+                    if (c.name.StartsWith("Canvas_Gameplay")) return true;
+            return false;
         }
 
         // ================================================================== assets
