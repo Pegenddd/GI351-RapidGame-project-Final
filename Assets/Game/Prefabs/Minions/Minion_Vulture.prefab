@@ -759,7 +759,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: e6011075f331c6747af4d8f5d3e4d56c, type: 2}
   displayName: Vulture
   icon: {fileID: 21300000, guid: 34d8c767c51061649a5e54c857aca772, type: 3}
-  manaCost: 35
+  soulCost: 35
   sacrificeHealPercent: 10
   selectionRing: {fileID: 552799185494567993}
   detectionRing: {fileID: 6800329694221147345}

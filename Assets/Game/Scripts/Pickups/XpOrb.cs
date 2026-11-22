@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace NecroDefense
 {
-    /// <summary>ลูกแก้ว XP ที่ศัตรูดรอป เดินเข้าใกล้แล้วจะถูกดูดเข้าหาผู้เล่น</summary>
+    /// <summary>
+    /// ลูกแก้ว XP ที่ศัตรูดรอป เดินเข้าใกล้แล้วจะถูกดูดเข้าหาผู้เล่น
+    /// เพิ่ม XP (เลเวลอัป)
+    /// </summary>
     public class XpOrb : MonoBehaviour
     {
         [SerializeField] private int value = 1;
@@ -19,7 +22,7 @@ namespace NecroDefense
         private static int _chain;
         private float _age;
 
-        public void SetValue(int xp) => value = xp;
+        public void SetValue(int xp) { value = xp; }
 
         private void Update()
         {
@@ -42,6 +45,7 @@ namespace NecroDefense
                 // เก็บติดกันเร็วๆ เสียงไล่โน้ตสูงขึ้น
                 _chain = Time.time - _lastPickup < 0.6f ? Mathf.Min(_chain + 1, 8) : 0;
                 _lastPickup = Time.time;
+
                 Sfx.Play("SFX_XP_Pickup", 0.7f, Mathf.Pow(1.059463f, _chain * 2));
                 if (GameManager.Instance != null) GameManager.Instance.LevelUp.AddXp(value);
                 Destroy(gameObject);

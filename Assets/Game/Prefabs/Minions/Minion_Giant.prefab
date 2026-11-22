@@ -779,7 +779,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 2d8f77a7d638b5949bec90bc44f91093, type: 2}
   displayName: Giant
   icon: {fileID: 21300000, guid: 7d0b3d946f9c29143b63a861a5ec5d94, type: 3}
-  manaCost: 60
+  soulCost: 60
   sacrificeHealPercent: 20
   selectionRing: {fileID: 295862504021360816}
   detectionRing: {fileID: 1650584069198313898}

@@ -465,7 +465,7 @@ namespace NecroDefense.EditorTools
         private static readonly Vector2 MC = new Vector2(0.5f, 0.5f), ML = new Vector2(0f, 0.5f);
 
         private static readonly Color Gold = new Color(1f, 0.85f, 0.35f);
-        private static readonly Color ManaBlue = new Color(0.35f, 0.6f, 1f);
+        private static readonly Color SoulBarPurple = new Color(0.72f, 0.45f, 1f);
         private static readonly Color SoulPurple = new Color(0.8f, 0.6f, 1f);
 
         private static UIRefs BuildCanvas(MinionUnit[] bagOrder, Sprite necroArt)
@@ -494,14 +494,14 @@ namespace NecroDefense.EditorTools
             RectTransform ps = BU.Panel("TopLeft_PlayerStatus", hud, TL, TL, new Vector2(20f, -20f), new Vector2(400f, 132f));
             BU.Icon("HP_Icon", ps, BU.Heart, new Color(0.95f, 0.3f, 0.35f), TL, TL, new Vector2(12f, -12f), new Vector2(32f, 32f));
             BarUI hp = BU.Bar("HP_Bar", ps, "HP", new Color(0.85f, 0.2f, 0.25f), TL, TL, new Vector2(52f, -12f), new Vector2(334f, 32f));
-            BU.Icon("Mana_Icon", ps, BU.Diamond, ManaBlue, TL, TL, new Vector2(12f, -50f), new Vector2(32f, 32f));
-            BarUI mana = BU.Bar("Mana_Bar", ps, "Mana", new Color(0.25f, 0.45f, 1f), TL, TL, new Vector2(52f, -50f), new Vector2(334f, 32f));
+            BU.Icon("Soul_Icon", ps, BU.Diamond, SoulBarPurple, TL, TL, new Vector2(12f, -50f), new Vector2(32f, 32f));
+            BarUI soul = BU.Bar("Soul_Bar", ps, "Soul", SoulBarPurple, TL, TL, new Vector2(52f, -50f), new Vector2(334f, 32f));
             BU.Icon("XP_Icon", ps, BU.Star, Gold, TL, TL, new Vector2(12f, -90f), new Vector2(32f, 32f));
             BarUI xp = BU.Bar("XP_Bar", ps, "XP", new Color(0.95f, 0.8f, 0.25f), TL, TL, new Vector2(52f, -90f), new Vector2(250f, 30f));
             TextMeshProUGUI lvText = BU.Text("Level_Text", ps, "Lv 1", 24f, TL, TL, new Vector2(306f, -88f), new Vector2(84f, 34f));
             lvText.fontStyle = FontStyles.Bold;
             r.playerStatus = ps.gameObject.AddComponent<PlayerStatusUI>();
-            new SO(r.playerStatus).Set("healthBar", hp).Set("manaBar", mana).Set("xpBar", xp).Set("levelText", lvText).Apply();
+            new SO(r.playerStatus).Set("healthBar", hp).Set("soulBar", soul).Set("xpBar", xp).Set("levelText", lvText).Apply();
 
             // Help (?) - ชี้เพื่อดูปุ่มควบคุม
             RectTransform help = BU.Panel("Help_Button", hud, TL, TL, new Vector2(20f, -160f), new Vector2(44f, 44f), new Color(0.1f, 0.1f, 0.14f, 0.9f));
@@ -617,7 +617,7 @@ namespace NecroDefense.EditorTools
             TextMeshProUGUI cdText = BU.StretchText("Cooldown_Text", rt, "", 34f);
             cdText.fontStyle = FontStyles.Bold;
             TextMeshProUGUI key = BU.Badge("Key_Badge", rt, "?", TL, TL, new Vector2(3f, -3f), new Vector2(42f, 22f), null, Gold, 14f);
-            TextMeshProUGUI cost = BU.Badge("Mana_Badge", rt, "", BR, BR, new Vector2(-3f, 3f), new Vector2(54f, 24f), new Color(0.05f, 0.1f, 0.3f, 0.95f), Color.white, 15f, BU.Diamond, ManaBlue);
+            TextMeshProUGUI cost = BU.Badge("Soul_Badge", rt, "", BR, BR, new Vector2(-3f, 3f), new Vector2(54f, 24f), new Color(0.05f, 0.1f, 0.3f, 0.95f), Color.white, 15f, BU.Diamond, SoulBarPurple);
             Image lockImg = BU.Icon("Locked_Overlay", rt, BU.Lock, new Color(1f, 0.85f, 0.4f), MC, MC, Vector2.zero, new Vector2(46f, 46f));
             lockImg.gameObject.SetActive(false);
             TooltipTrigger tip = rt.gameObject.AddComponent<TooltipTrigger>();
@@ -637,7 +637,7 @@ namespace NecroDefense.EditorTools
             Image icon = BU.Icon("Icon", rt, BU.Circle, Color.white, MC, MC, new Vector2(0f, 4f), new Vector2(76f, 76f));
             TextMeshProUGUI key = BU.Badge("Key_Badge", rt, "", TL, TL, new Vector2(3f, -3f), new Vector2(24f, 22f), null, Gold, 15f);
             TextMeshProUGUI count = BU.Badge("Count_Badge", rt, "x0", TR, TR, new Vector2(-3f, -3f), new Vector2(40f, 24f), new Color(0.35f, 0.15f, 0.5f, 0.95f), Color.white, 16f);
-            TextMeshProUGUI cost = BU.Badge("Mana_Badge", rt, "", BC, BC, new Vector2(0f, 3f), new Vector2(56f, 22f), new Color(0.05f, 0.1f, 0.3f, 0.95f), Color.white, 14f, BU.Diamond, ManaBlue);
+            TextMeshProUGUI cost = BU.Badge("Soul_Badge", rt, "", BC, BC, new Vector2(0f, 3f), new Vector2(56f, 22f), new Color(0.05f, 0.1f, 0.3f, 0.95f), Color.white, 14f, BU.Diamond, SoulBarPurple);
             TooltipTrigger tip = rt.gameObject.AddComponent<TooltipTrigger>();
 
             MinionBagSlotUI s = rt.gameObject.AddComponent<MinionBagSlotUI>();

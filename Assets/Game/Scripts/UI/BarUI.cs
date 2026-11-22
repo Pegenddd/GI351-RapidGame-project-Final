@@ -37,7 +37,18 @@ namespace NecroDefense
 
         private float _target = -1f, _shown, _trailValue, _trailWait;
         private Color _fillBase;
-        private bool _init;
+        private bool _init, _hasBaseColor;
+
+        /// <summary>เปลี่ยนชื่อบนหลอด (เช่น Mana -> Soul)</summary>
+        public void SetTitle(string newTitle) => title = newTitle;
+
+        /// <summary>เปลี่ยนสีหลอด (ใช้ก่อน SetValue ครั้งแรกได้)</summary>
+        public void SetBaseColor(Color color)
+        {
+            _hasBaseColor = true;
+            _fillBase = color;
+            if (fill != null) fill.color = color;
+        }
 
         public void SetValue(float current, float max)
         {
@@ -64,7 +75,7 @@ namespace NecroDefense
         {
             if (_init) return;
             _init = true;
-            _fillBase = fill.color;
+            if (!_hasBaseColor) _fillBase = fill.color;
             if (useTrail && trail == null)
             {
                 GameObject go = Instantiate(fill.gameObject, fill.transform.parent);

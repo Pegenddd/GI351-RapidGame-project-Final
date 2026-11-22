@@ -8,15 +8,15 @@ namespace NecroDefense
 {
     /// <summary>
     /// แผงเทสเกม (ใช้ในซีน TestArena เท่านั้น) - กด F1 เพื่อเปิด/ปิด
-    /// ตั้ง Souls / Mana, เสกศัตรู, เพิ่มมินเนียน, เลเวลอัป, ให้การ์ด, God Mode, เร่งเวลา ฯลฯ
+    /// ตั้ง Souls / Soul, เสกศัตรู, เพิ่มมินเนียน, เลเวลอัป, ให้การ์ด, God Mode, เร่งเวลา ฯลฯ
     /// ค่าเริ่มต้นตอนกด Play ตั้งได้ในหัวข้อ "Start Settings"
     /// </summary>
     public class DebugTestPanel : MonoBehaviour
     {
         [Header("Start Settings (ตอนกด Play)")]
         [SerializeField] private int startSouls = 1000;
-        [SerializeField] private float startMaxMana = 100f;
-        [SerializeField] private bool startInfiniteMana = false;
+        [SerializeField] private float startMaxSoul = 100f;
+        [SerializeField] private bool startInfiniteSoul = false;
         [SerializeField] private bool startPlayerGod = true;
         [SerializeField] private bool startBaseGod = true;
         [Tooltip("ความแข็งศัตรูที่เสกออกมา = เหมือนเวฟที่เท่าไร")]
@@ -41,10 +41,10 @@ namespace NecroDefense
         [SerializeField] private Button setSoulsButton;
         [SerializeField] private Button addSouls100Button;
         [SerializeField] private Button addSouls1000Button;
-        [SerializeField] private TMP_InputField manaInput;
-        [SerializeField] private Button setMaxManaButton;
-        [SerializeField] private Button fillManaButton;
-        [SerializeField] private Button infiniteManaButton;
+        [SerializeField] private TMP_InputField soulInput;
+        [SerializeField] private Button setMaxSoulButton;
+        [SerializeField] private Button fillSoulButton;
+        [SerializeField] private Button infiniteSoulButton;
 
         [Header("Cheats")]
         [SerializeField] private Button playerGodButton;
@@ -85,7 +85,7 @@ namespace NecroDefense
         [SerializeField] private Color onColor = new Color(0.55f, 0.55f, 0.55f, 1f);
         [SerializeField] private Color offColor = new Color(0.22f, 0.22f, 0.28f, 1f);
 
-        private bool _infiniteMana, _playerGod, _baseGod;
+        private bool _infiniteSoul, _playerGod, _baseGod;
         private float _timeScale = 1f;
         private int _enemyWave = 1;
         private float _fps;
@@ -94,18 +94,18 @@ namespace NecroDefense
 
         private void Start()
         {
-            _infiniteMana = startInfiniteMana;
+            _infiniteSoul = startInfiniteSoul;
             _playerGod = startPlayerGod;
             _baseGod = startBaseGod;
             _enemyWave = Mathf.Max(1, startEnemyWave);
             if (GM != null)
             {
                 GM.Economy.SetSouls(startSouls);
-                GM.Economy.SetMaxMana(startMaxMana);
-                GM.Economy.FillMana();
+                GM.Economy.SetMaxSoul(startMaxSoul);
+                GM.Economy.FillSoul();
             }
             if (soulsInput != null) soulsInput.text = startSouls.ToString();
-            if (manaInput != null) manaInput.text = startMaxMana.ToString("0");
+            if (soulInput != null) soulInput.text = startMaxSoul.ToString("0");
             if (enemyCountInput != null) enemyCountInput.text = "1";
             if (panelRoot != null) panelRoot.SetActive(startPanelOpen);
 
@@ -148,9 +148,9 @@ namespace NecroDefense
             On(setSoulsButton, () => { if (int.TryParse(soulsInput.text, out int v)) GM.Economy.SetSouls(v); });
             On(addSouls100Button, () => GM.Economy.AddSouls(100));
             On(addSouls1000Button, () => GM.Economy.AddSouls(1000));
-            On(setMaxManaButton, () => { if (float.TryParse(manaInput.text, out float v)) { GM.Economy.SetMaxMana(v); GM.Economy.FillMana(); } });
-            On(fillManaButton, () => GM.Economy.FillMana());
-            On(infiniteManaButton, () => { _infiniteMana = !_infiniteMana; RefreshToggles(); });
+            On(setMaxSoulButton, () => { if (float.TryParse(soulInput.text, out float v)) { GM.Economy.SetMaxSoul(v); GM.Economy.FillSoul(); } });
+            On(fillSoulButton, () => GM.Economy.FillSoul());
+            On(infiniteSoulButton, () => { _infiniteSoul = !_infiniteSoul; RefreshToggles(); });
 
             On(playerGodButton, () => { _playerGod = !_playerGod; RefreshToggles(); });
             On(baseGodButton, () => { _baseGod = !_baseGod; RefreshToggles(); });
@@ -185,7 +185,8 @@ namespace NecroDefense
             if (kb != null && kb[toggleKey].wasPressedThisFrame) TogglePanel();
             if (GM == null) return;
 
-            if (_infiniteMana) GM.Economy.FillMana();
+            GM.Economy.SoulDrainEnabled = !_infiniteSoul;
+            if (_infiniteSoul) GM.Economy.FillSoul();
             if (GM.Player != null) GM.Player.Invincible = _playerGod;
             if (GM.Crystal != null) GM.Crystal.Invincible = _baseGod;
             if (GM.State == GameState.Playing) Time.timeScale = _timeScale;
@@ -205,7 +206,7 @@ namespace NecroDefense
 
         private void RefreshToggles()
         {
-            Paint(infiniteManaButton, _infiniteMana);
+            Paint(infiniteSoulButton, _infiniteSoul);
             Paint(playerGodButton, _playerGod);
             Paint(baseGodButton, _baseGod);
             for (int i = 0; i < timeScaleButtons.Count && i < timeScales.Count; i++)

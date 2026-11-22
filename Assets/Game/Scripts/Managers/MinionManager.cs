@@ -23,9 +23,9 @@ namespace NecroDefense
     /// - Minion Bag: เก็บมินเนียนที่ชุบได้ (ลำดับในลิสต์ = ลำดับช่องใน UI)
     /// - Raise: ชุบสำเร็จ -> ลุกขึ้นสู้ตรงศพทันที (ไม่ต้องเข้ากระเป๋า)
     /// - Summon: กด 1-5 / คลิกช่อง -> เกิดรอบตัวผู้เล่นทันที ครั้งละ 1-3 ตัว (กด R เปลี่ยนจำนวน 1 -> 2 -> 3 -> 1)
-    ///           หรือลากช่องไปปล่อยในสนามได้ (ใช้ Mana ตัวละครั้ง)
+    ///           หรือลากช่องไปปล่อยในสนามได้ (ใช้ Soul ตัวละครั้ง)
     /// - Army Cap: แต่ละชนิดมีได้จำกัด (Max Owned) ชุบเกินไม่ได้ / การ์ด Legion +1 ทุกชนิด
-    /// - มินเนียนตาย -> วิญญาณกลับเข้ากระเป๋า (เรียกใหม่ได้ เสีย Mana)
+    /// - มินเนียนตาย -> วิญญาณกลับเข้ากระเป๋า (เรียกใหม่ได้ เสีย Soul)
     /// - Command: คลิกที่มินเนียนทีละตัว -> Hold Area / Move / Follow Player
     /// </summary>
     public class MinionManager : MonoBehaviour
@@ -166,7 +166,7 @@ namespace NecroDefense
         // ---------------- Bag ----------------
 
         /// <summary>
-        /// ชุบสำเร็จ: ลุกขึ้นสู้ตรงศพทันที (ฟรี ไม่ใช้ Mana)
+        /// ชุบสำเร็จ: ลุกขึ้นสู้ตรงศพทันที (ฟรี ไม่ใช้ Soul)
         /// ถ้าปิด Raised Fight Immediately หรือมินเนียนในสนามเต็ม -> วิญญาณบินเข้ากระเป๋าแทน
         /// </summary>
         public void RaiseIntoBag(MinionUnit prefab, Vector2 fromWorld)
@@ -306,7 +306,7 @@ namespace NecroDefense
             if (entry.minionPrefab == null) return false;
             if (entry.count <= 0) { if (showMessages) ui.ShowError(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return false; }
             if (ActiveCount >= maxActiveMinions) { if (showMessages) ui.ShowError("Too many minions (" + maxActiveMinions + ")"); return false; }
-            if (!GameManager.Instance.Economy.TrySpendMana(entry.minionPrefab.ManaCost, showMessages)) return false;
+            if (!GameManager.Instance.Economy.TrySpendSoul(entry.minionPrefab.SoulCost, showMessages)) return false;
 
             Vector2 pos;
             if (position.HasValue) pos = position.Value;
@@ -354,7 +354,7 @@ namespace NecroDefense
             UIManager ui = GameManager.Instance.UI;
             if (entry.count <= 0) { ui.ShowError(IsUnlocked(entry.minionPrefab) ? "No " + entry.minionPrefab.DisplayName + " in bag" : "Locked - raise this enemy to unlock"); return; }
             if (ActiveCount >= maxActiveMinions) { ui.ShowError("Too many minions (" + maxActiveMinions + ")"); return; }
-            if (GameManager.Instance.Economy.Mana < entry.minionPrefab.ManaCost) { ui.ShowError("Not enough Mana"); return; }
+            if (GameManager.Instance.Economy.Soul < entry.minionPrefab.SoulCost) { ui.ShowError("Not enough Soul"); return; }
 
             Deselect();
             GameManager.Instance.Towers.CloseSlotPanel();

@@ -127,7 +127,7 @@ namespace NecroDefense
                 case CardEffect.MinionPower: gm.Minions.AddDamagePercent(card.value1); break;
                 case CardEffect.MinionHaste: gm.Minions.AddSpeedPercent(card.value1); break;
                 case CardEffect.MinionVitality: gm.Minions.AddHealthPercent(card.value1); break;
-                case CardEffect.ManaFont: gm.Economy.UpgradeMana(card.value1, card.value2); break;
+                case CardEffect.SoulFont: gm.Economy.UpgradeSoul(card.value1, card.value2); break;
                 case CardEffect.BaseArchitect:
                     gm.Crystal.AddMaxHealth(card.value1);
                     gm.Crystal.AddArmor(card.value2);
@@ -142,9 +142,8 @@ namespace NecroDefense
                     gm.Minions.AddDamagePercent(card.value1);
                     gm.Minions.AddHealthPercent(card.value2);
                     break;
-                case CardEffect.ManaFontRegenPercent:
-                    gm.Economy.UpgradeMana(card.value1, 0f);
-                    gm.Economy.AddManaRegenPercent(card.value2);
+                case CardEffect.SoulFontDrainPercent:
+                    gm.Economy.UpgradeSoul(card.value1, card.value2);
                     break;
                 case CardEffect.BaseHealFaster: gm.Crystal.ReduceHealInterval(card.value1); break;
             }

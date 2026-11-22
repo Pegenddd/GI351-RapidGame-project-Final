@@ -186,12 +186,12 @@ namespace NecroDefense.EditorTools
             Button souls1000 = Btn(t, "Souls_+1000", "+1000", r, x0 + lw + 244f, 106f);
             r++;
 
-            // Mana
-            Label(t, "Max MP", r, x0, lw);
-            TMP_InputField mana = Input(t, "Mana_Input", r, x0 + lw, 100f, TMP_InputField.ContentType.DecimalNumber);
-            Button setMana = Btn(t, "Mana_SetMax", "Set", r, x0 + lw + 106f, 56f);
-            Button fillMana = Btn(t, "Mana_Fill", "Fill", r, x0 + lw + 168f, 70f);
-            Button infMana = Btn(t, "Mana_Infinite", "Infinite", r, x0 + lw + 244f, 106f);
+            // Soul
+            Label(t, "Soul", r, x0, lw);
+            TMP_InputField soul = Input(t, "Soul_Input", r, x0 + lw, 100f, TMP_InputField.ContentType.DecimalNumber);
+            Button setSoul = Btn(t, "Soul_SetMax", "Set", r, x0 + lw + 106f, 56f);
+            Button fillSoul = Btn(t, "Soul_Fill", "Fill", r, x0 + lw + 168f, 70f);
+            Button infSoul = Btn(t, "Soul_Infinite", "Infinite", r, x0 + lw + 244f, 106f);
             r++;
 
             // God / heal
@@ -256,7 +256,7 @@ namespace NecroDefense.EditorTools
                 .ObjList("enemyPrefabs", p.EnemySlime, p.EnemySlimeSmall, p.EnemyGoblin, p.EnemyVulture, p.EnemyArcher, p.EnemyGiant)
                 .Set("panelRoot", panel.gameObject).Set("panelToggleButton", toggle)
                 .Set("soulsInput", souls).Set("setSoulsButton", setSouls).Set("addSouls100Button", souls100).Set("addSouls1000Button", souls1000)
-                .Set("manaInput", mana).Set("setMaxManaButton", setMana).Set("fillManaButton", fillMana).Set("infiniteManaButton", infMana)
+                .Set("soulInput", soul).Set("setMaxSoulButton", setSoul).Set("fillSoulButton", fillSoul).Set("infiniteSoulButton", infSoul)
                 .Set("playerGodButton", godPlayer).Set("baseGodButton", godBase).Set("healAllButton", healAll).Set("resetCooldownButton", resetCd)
                 .ObjList("timeScaleButtons", speedBtns.Cast<Object>().ToArray())
                 .Set("enemyDropdown", enemyDrop).Set("enemyCountInput", count)

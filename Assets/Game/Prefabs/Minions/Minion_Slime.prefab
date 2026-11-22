@@ -774,7 +774,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 6492803a695a1c44aaba7ee6198f9f9e, type: 2}
   displayName: Slime
   icon: {fileID: 21300000, guid: 6f1e82bb4b221ef4582761e658d25e3c, type: 3}
-  manaCost: 10
+  soulCost: 10
   selectionRing: {fileID: 4656619202593781152}
   detectionRing: {fileID: 1198531501619482449}
   aggroRange: 5

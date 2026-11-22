@@ -78,7 +78,7 @@ namespace NecroDefense
                 int owned = gm.Minions.GetOwned(e.minionPrefab), cap = gm.Minions.GetCap(e.minionPrefab);
                 tooltip.Set(e.minionPrefab.DisplayName,
                     "Army " + owned + " / " + cap + "   (in bag " + e.count + ")\n" +
-                    e.minionPrefab.ManaCost + " Mana to summon. Dead minions return to the bag.\n" +
+                    e.minionPrefab.SoulCost + " Soul to summon. Dead minions return to the bag.\n" +
                     "Click (or key): summon around you (R = how many)\nDrag onto the field: summon there");
             }
             if (countText != null)
@@ -87,7 +87,7 @@ namespace NecroDefense
                 // กองทัพชนิดนี้เต็มแล้ว -> ตัวเลขสีทอง
                 countText.color = gm.Minions.HasRoom(e.minionPrefab) ? Color.white : UITheme.RedBright;
             }
-            if (costText != null) costText.text = e.minionPrefab.ManaCost.ToString();
+            if (costText != null) costText.text = e.minionPrefab.SoulCost.ToString();
             if (keyText != null) keyText.text = UIUtil.KeyLabel(e.summonKey);
             if (canvasGroup != null) canvasGroup.alpha = e.count > 0 ? 1f : 0.45f;
             if (background != null)

@@ -23,6 +23,7 @@ namespace NecroDefense.EditorTools
         public DamageZone FxPoisonPool;
         public Corpse CorpsePrefab;
         public XpOrb XpOrbPrefab;
+        public SoulOrb SoulOrbPrefab;
         public GameObject OrbitOrb;
         public MinionUnit MinionSlime, MinionGoblin, MinionSkeleton, MinionVulture, MinionGiant;
         public EnemyUnit EnemySlimeSmall, EnemySlime, EnemyGoblin, EnemyVulture, EnemyGiant, EnemyArcher;
@@ -184,6 +185,18 @@ namespace NecroDefense.EditorTools
                 return go;
             });
 
+            SoulOrbPrefab = Prefab<SoulOrb>("Pickups/SoulOrb", () =>
+            {
+                GameObject go = BU.Go("SoulOrb");
+                go.transform.localScale = Vector3.one * 0.28f;
+                SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+                sr.sprite = BU.Diamond;
+                sr.color = new Color(0.72f, 0.45f, 1f);
+                sr.sortingOrder = -2;
+                go.AddComponent<SoulOrb>();
+                return go;
+            });
+
             OrbitOrb = Prefab<Transform>("Player/Player_OrbitOrb", () =>
             {
                 GameObject go = BU.Go("Player_OrbitOrb");
@@ -257,7 +270,7 @@ namespace NecroDefense.EditorTools
             return go;
         }
 
-        private MinionUnit Minion(string file, UnitSpec s, string display, int mana, float sacrificePct)
+        private MinionUnit Minion(string file, UnitSpec s, string display, int soulCost, float sacrificePct)
         {
             s.outline = new Color(0.05f, 0.05f, 0.05f, 0.9f);
             return Prefab<MinionUnit>("Minions/" + file, () =>
@@ -269,7 +282,7 @@ namespace NecroDefense.EditorTools
                 // วงระยะมองหาศัตรู (โชว์ตอนเลือกมินเนียน, ขนาดปรับอัตโนมัติตาม Aggro Range)
                 SpriteRenderer sight = BU.Sprite("DetectionRing", go.transform, BU.Ring, new Color(0.35f, 0.9f, 1f, 0.55f), Vector2.one, -3);
                 sight.gameObject.SetActive(false);
-                new SO(m).Set("detectionRing", sight.transform).Set("aggroRange", s.sight).Set("displayName", display).Set("icon", s.art).Set("manaCost", mana)
+                new SO(m).Set("detectionRing", sight.transform).Set("aggroRange", s.sight).Set("displayName", display).Set("icon", s.art).Set("soulCost", soulCost)
                     .Set("selectionRing", ring.gameObject).Apply();
                 return go;
             });
@@ -277,7 +290,7 @@ namespace NecroDefense.EditorTools
 
         private void BuildMinions()
         {
-            // ค่าตามตาราง GDD (Mana / HP / ATK)
+            // ค่าตามตาราง GDD (Soul / HP / ATK)
             MinionSlime = Minion("Minion_Slime", new UnitSpec
             {
                 name = "Minion_Slime", label = "Slime (ally)", sprite = BU.Circle, color = new Color(0.4f, 1f, 0.5f), art = BU.Art("Minion_slime"),
@@ -331,7 +344,7 @@ namespace NecroDefense.EditorTools
                 new SO(e).Set("displayName", display).Set("aggroRange", aggro)
                     .Set("attackPlayer", aim.player).Set("attackMinions", aim.minions).Set("attackMainBase", aim.mainBase)
                     .Set("priority", aim.priority).Set("onlyMinionsOnLane", aim.laneOnlyMinions).Set("shootWhileWalking", aim.shootWhileWalking)
-                    .Set("soulReward", souls).Set("xpReward", xp).Set("xpOrbPrefab", XpOrbPrefab)
+                    .Set("soulReward", souls).Set("xpReward", xp).Set("xpOrbPrefab", XpOrbPrefab).Set("soulOrbPrefab", SoulOrbPrefab)
                     .Set("corpsePrefab", CorpsePrefab).Set("minionPrefab", raiseInto).Set("raiseChance", raiseChance)
                     .Set("splitPrefab", split).Set("splitCount", splitCount).Apply();
                 return go;
@@ -482,7 +495,7 @@ namespace NecroDefense.EditorTools
                 Card("Card_MinionPower", "Minion Power", CardCategory.Minion, CardEffect.MinionPower, 0.15f, 0f, 5, minion, "All minions +15% ATK."),
                 Card("Card_MinionHaste", "Minion Haste", CardCategory.Minion, CardEffect.MinionHaste, 0.2f, 0f, 5, minion, "All minions +20% move & attack speed."),
                 Card("Card_MinionVitality", "Minion Vitality", CardCategory.Minion, CardEffect.MinionVitality, 0.25f, 0f, 5, minion, "All minions +25% Max HP."),
-                Card("Card_ManaFont", "Mana Font", CardCategory.Support, CardEffect.ManaFont, 20f, 1f, 5, support, "+20 Max Mana, +1 Mana/sec."),
+                Card("Card_ManaFont", "Soul Font", CardCategory.Support, CardEffect.SoulFontDrainPercent, 20f, 0.2f, 5, support, "+20 Max Soul, Soul drains 20% slower."),
                 Card("Card_BaseArchitect", "Base Architect", CardCategory.Support, CardEffect.BaseArchitect, 100f, 1f, 5, support, "Crystal +100 Max HP, +1 armor."),
                 Card("Card_SwiftBoots", "Swift Boots", CardCategory.Support, CardEffect.SwiftBoots, 0.1f, 0f, 5, support, "+10% Necromancer move speed."),
                 Card("Card_SoulHarvester", "Soul Harvester", CardCategory.Support, CardEffect.SoulHarvester, 0.15f, 0f, 3, support, "All tower build & upgrade costs -15%."),

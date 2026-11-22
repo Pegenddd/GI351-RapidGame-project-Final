@@ -7,8 +7,8 @@ namespace NecroDefense
     public class MinionStats : UnitStats
     {
         [Header("Minion")]
-        [Tooltip("Mana ที่ใช้อัญเชิญ")]
-        public int manaCost = 10;
+        [Tooltip("Soul ที่ใช้อัญเชิญ")]
+        public int soulCost = 10;
 
         [Header("AI Ranges")]
         [Tooltip("ระยะมองหาศัตรู")]

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace NecroDefense
 {
-    /// <summary>ช่องสกิล 1 ช่อง (ไอคอน + ปุ่มลัด + ราคา Mana + คูลดาวน์) ชื่อสกิลดูได้จาก Tooltip</summary>
+    /// <summary>ช่องสกิล 1 ช่อง (ไอคอน + ปุ่มลัด + ราคา Soul + คูลดาวน์) ชื่อสกิลดูได้จาก Tooltip</summary>
     public class SkillSlotUI : MonoBehaviour
     {
         [SerializeField] private Image icon;

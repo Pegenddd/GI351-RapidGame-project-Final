@@ -23,7 +23,7 @@
 ## Hierarchy ของซีน Gameplay
 ```
 GameManager                    ← ตัวหลัก (ลาก Reference ทั้งหมดอยู่ที่นี่)
- ├ EconomyManager             ← Souls เริ่มต้น / Mana สูงสุด / Mana Regen
+ ├ EconomyManager             ← Souls เริ่มต้น / Soul สูงสุด / อัตรา Soul ลดลง / HP ลดตอน Soul หมด
  ├ WaveManager                ← 12 เวฟ, เวลาพัก, ทางเกิด (Path West/East/South)
  ├ MinionManager              ← Minion Bag, ปุ่มลัด 1-5, คำสั่งเริ่มต้น, จำนวนสูงสุด
  ├ TowerManager               ← รายการป้อม, % เงินคืน, RangeIndicator
@@ -43,7 +43,7 @@ Canvas_Gameplay
  ├ TowerPanel (Ring Menu)     ← เมนูวงกลมรอบแท่น: BuildGroup (3 ป้อม) / ManageGroup (Upgrade, Sell) / InfoBox
  ├ MinionCommandPanel (Ring Menu) ← เมนูวงกลมรอบมินเนียน: Guard / Self-Defense / Follow
  ├ HUD
- │  ├ TopLeft_PlayerStatus     (HP / Mana / XP / Level)
+ │  ├ TopLeft_PlayerStatus     (HP / Soul / XP / Level)
  │  ├ Help_Button              (ชี้เพื่อดูปุ่มควบคุม)
  │  ├ TopCenter_Wave
  │  ├ TopRight_Resources       (Souls, HP ฐาน, เวลาฮีล)
@@ -67,7 +67,7 @@ UI เน้นไอคอน ข้อความรายละเอีย�
 | วิญญาณบินเข้ากระเป๋า (ความเร็ว/ความโค้ง) | `Canvas_Gameplay/SoulFly` > SoulFlyUI |
 | การ์ดอัปสกิล Q | `Card_RaiseRadius` (+รัศมี), `Card_RaiseCooldown` (-คูลดาวน์), `Card_NecromancyMastery` (+โอกาส) |
 | ซูมกล้อง | `Main Camera` > Camera (Size) และ CameraFollow (Min/Max) |
-| Souls เริ่มต้น, Mana | `GameManager/EconomyManager` |
+| Souls เริ่มต้น, Soul สูงสุด, Soul ลดลงกี่/วิ, HP ลดตอน Soul หมด | `GameManager/EconomyManager` |
 | ศัตรูแต่ละเวฟ / ออกทางไหน | `GameManager/WaveManager` > Waves (Side = West/East/South/Random/AllSides) |
 | ทางเดินศัตรู | ย้าย `Map/EnemyPaths/Path_*/WP_*` |
 | ค่าศัตรู | `Assets/Game/Prefabs/Enemies/Enemy_*.prefab` (Follow Path = เดินตามทางมอน) |
@@ -90,16 +90,24 @@ UI เน้นไอคอน ข้อความรายละเอีย�
 |---|---|
 | จำนวนกองทัพสูงสุดต่อชนิด (Slime 10, Goblin 6, Skeleton 3, Vulture 3, Giant 1) | `GameManager/MinionManager` > Bag > **Max Owned** |
 | การ์ดเพิ่มกองทัพ +1 ทุกชนิด | `Assets/Game/Data/UpgradeCards/Card_Legion` |
-| มินเนียนตาย | วิญญาณบินกลับเข้ากระเป๋าอัตโนมัติ (เรียกใหม่เสีย Mana) |
+| มินเนียนตาย | วิญญาณบินกลับเข้ากระเป๋าอัตโนมัติ (เรียกใหม่เสีย Soul) |
 | ศัตรูแข็งขึ้นทุกเวฟ | `GameManager/WaveManager` > Difficulty Scaling (Health/Damage Growth Per Wave = 0.12 คือ +12%/เวฟ) |
 | ศพหายภายใน / หน้าตาศพ | `Assets/Game/Prefabs/Pickups/Corpse.prefab` > Lifetime (10), Corpse Tint, Fallen Angle |
 | สกิล E Arcane Nova | `Player_Necromancer` > PlayerSkills > Skill E (Cooldown, Cast Time, Radius, Damage) / การ์ด `Card_NovaBoost` |
+
+## ระบบ Soul (หลอดพลังชีวิต)
+- หลอด **Soul** แทนหลอด Mana เดิม (มุมซ้ายบน) — ใช้เป็นทรัพยากรอัญเชิญมินเนียนด้วย
+- Soul ลดลงเองตลอดเวลา: `GameManager/EconomyManager` > **Soul Drain Per Second** (ค่าเริ่มต้น 1.5/วิ)
+- ศัตรูตายจะดรอป **ลูกแก้ว Soul สีม่วง** — เดินเข้าใกล้เพื่อเก็บ (เติม Soul)
+- ถ้าหลอด Soul หมด -> HP ผู้เล่นจะลดลงเรื่อยๆ: **Empty Soul Health Drain Per Second** (ค่าเริ่มต้น 3/วิ)
+- การ์ด **Soul Font** = +Max Soul และทำให้ Soul ลดลงช้าลง
+- เงิน **Souls** (มุมขวาบน) ยังแยกจากหลอด Soul ใช้สร้าง/อัปเกรดป้อมเหมือนเดิม
 
 ## ซีนเทส (Test Arena)
 สร้างด้วย **Tools > NecroDefense > Build Test Arena Scene** -> `Assets/Scenes/TestArena.unity`
 (ไม่แตะซีน Gameplay / Prefab / การ์ด - สร้างใหม่ได้เรื่อยๆ)
 - เลนเดียว: ศัตรูเดินจากซ้าย -> พื้นที่อิสระ -> ป้อมหลัก, แท่นป้อม 4 จุด, ไม่มีเวฟอัตโนมัติ
-- แผงเทส (กด **F1** หรือปุ่ม TEST): ตั้ง Souls / Max Mana / Mana ไม่จำกัด, God Mode (ผู้เล่น / ป้อมหลัก), Heal All,
+- แผงเทส (กด **F1** หรือปุ่ม TEST): ตั้ง Souls / Max Soul / Soul ไม่จำกัด, God Mode (ผู้เล่น / ป้อมหลัก), Heal All,
   ความเร็วเกม 0.5x–4x, เสกศัตรูชนิดใดก็ได้ จำนวนเท่าไหร่ก็ได้ (ที่ต้นเลน / พื้นที่อิสระ / ใกล้ตัว) พร้อมเลือกความแข็งเท่าเวฟที่ N,
   ฆ่าศัตรูทั้งหมด, ล้างศพ, เพิ่มมินเนียนเข้ากระเป๋า (+1 / +5 / เต็มเพดาน), Level Up, +XP, ให้การ์ดใบไหนก็ได้ทันที, รีเซ็ตคูลดาวน์
 - ค่าตอนเริ่มกด Play: เลือก `Canvas_Gameplay/TestPanel (F1)` > DebugTestPanel > Start Settings

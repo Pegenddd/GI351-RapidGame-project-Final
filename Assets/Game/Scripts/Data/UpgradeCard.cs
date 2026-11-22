@@ -15,7 +15,7 @@ namespace NecroDefense
         MinionPower,       // value1 = +ATK มินเนียน % (0.15)
         MinionHaste,       // value1 = +ความเร็วเดิน/ตี มินเนียน % (0.2)
         MinionVitality,    // value1 = +Max HP มินเนียน % (0.25)
-        ManaFont,          // value1 = +Max Mana, value2 = +Mana Regen
+        SoulFont,          // value1 = +Max Soul, value2 = ลดอัตราการลดลงของ Soul %
         BaseArchitect,     // value1 = +Max HP คริสตัล, value2 = +เกราะคริสตัล
         SwiftBoots,        // value1 = +ความเร็วผู้เล่น % (0.1)
         SoulHarvester,     // value1 = ลดราคาป้อม % (0.15)
@@ -25,7 +25,7 @@ namespace NecroDefense
         RaiseCooldown,     // value1 = ลดคูลดาวน์สกิล Q %
         ArmySize,          // value1 = +จำนวนกองทัพสูงสุด ทุกชนิดมินเนียน (+1)
         MinionUpgrade,     // value1 = +ATK มินเนียน % (0.1), value2 = +Max HP มินเนียน % (0.1)
-        ManaFontRegenPercent, // value1 = +Max Mana, value2 = +Mana Regen % (0.2 = +20%)
+        SoulFontDrainPercent, // value1 = +Max Soul, value2 = ลด Soul drain % (0.2 = ช้าลง 20%)
         BaseHealFaster     // value1 = ป้อมหลักฮีลเร็วขึ้นกี่วินาที (5 = ทุก 45 -> 40 วิ)
     }
 

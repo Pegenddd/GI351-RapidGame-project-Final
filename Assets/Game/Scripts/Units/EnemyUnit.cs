@@ -54,11 +54,15 @@ namespace NecroDefense
         [SerializeField] private float stuckSkipTime = 1.5f;
 
         [Header("Rewards")]
-        [Tooltip("Souls ที่ได้เมื่อฆ่า")]
+        [Tooltip("Souls (เงินสร้างป้อม) ที่ได้เมื่อฆ่า")]
         [SerializeField] private int soulReward = 2;
         [Tooltip("XP ที่ดรอป (เป็นลูกแก้วให้เดินไปเก็บ)")]
         [SerializeField] private int xpReward = 1;
         [SerializeField] private XpOrb xpOrbPrefab;
+        [Tooltip("Soul ที่ดรอปเป็นลูกแก้วให้เดินไปเก็บ")]
+        [SerializeField] private SoulOrb soulOrbPrefab;
+        [Tooltip("Soul ที่ได้จากลูกแก้ว (หลอด Soul ของผู้เล่น)")]
+        [SerializeField] private int soulOrbValue = 8;
 
         [Header("Raise Dead (ชุบชีวิต)")]
         [Tooltip("ซากศพที่ดรอปตอนตาย")]
@@ -108,6 +112,7 @@ namespace NecroDefense
             shootWhileWalking = stats.shootWhileWalking;
             soulReward = stats.soulReward;
             xpReward = stats.xpReward;
+            soulOrbValue = stats.soulOrbValue;
             raiseChance = stats.raiseChance;
             corpseHarvestSouls = stats.corpseHarvestSouls;
             corpseExpireSouls = stats.corpseExpireSouls;
@@ -386,6 +391,14 @@ namespace NecroDefense
                 {
                     XpOrb orb = Instantiate(xpOrbPrefab, Position, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Pickups));
                     orb.SetValue(xpReward);
+                }
+
+                // Soul orb (เติมหลอด Soul) - เดินไปเก็บ
+                if (soulOrbPrefab != null && soulOrbValue > 0)
+                {
+                    Vector2 dropPos = Position + Random.insideUnitCircle * 0.4f;
+                    SoulOrb orb = Instantiate(soulOrbPrefab, dropPos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Pickups));
+                    orb.SetSoulValue(soulOrbValue);
                 }
 
                 // ตัวที่แตกตัว (Slime ใหญ่): ไม่ทิ้งศพ ให้ตัวเล็กทิ้งแทน

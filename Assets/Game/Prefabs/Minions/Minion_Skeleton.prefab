@@ -1311,7 +1311,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 6c5f188181b67254c9b1f41b32f93b56, type: 2}
   displayName: Skeleton
   icon: {fileID: 21300000, guid: fab6f6b3841510a439232137220b0ddd, type: 3}
-  manaCost: 25
+  soulCost: 25
   sacrificeHealPercent: 10
   selectionRing: {fileID: 5194562067911861234}
   detectionRing: {fileID: 6541539621830898147}

@@ -33,6 +33,7 @@ MonoBehaviour:
   shootWhileWalking: 1
   soulReward: 3
   xpReward: 2
+  soulOrbValue: 10
   raiseChance: 0.3
   corpseHarvestSouls: 3
   corpseExpireSouls: 1

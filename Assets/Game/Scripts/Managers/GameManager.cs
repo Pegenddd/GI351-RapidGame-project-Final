@@ -9,7 +9,7 @@ namespace NecroDefense
     /// ตัวควบคุมหลักของซีน Gameplay
     /// Manager ย่อยทั้งหมดเป็น "ลูก" ของ GameObject นี้ใน Hierarchy:
     ///   GameManager
-    ///    ├ EconomyManager   (Souls / Mana)
+    ///    ├ EconomyManager   (Souls / Soul)
     ///    ├ WaveManager      (เวฟศัตรู 12 เวฟ)
     ///    ├ MinionManager    (Minion Bag / อัญเชิญ / คำสั่ง)
     ///    ├ TowerManager     (สร้าง/อัปเกรด/ขายป้อม)

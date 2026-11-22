@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eff652f2c24e3c242a70ca8351eeb0bd, type: 3}
   m_Name: Card_ManaFont
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.UpgradeCard
-  title: Mana Font
+  title: Soul Font
   category: 2
-  description: +20 Max Mana, +20% Mana regen.
+  description: +20 Max Soul, Soul drains 20% slower.
   effect: 18
   value1: 20
   value2: 0.2

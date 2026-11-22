@@ -106,7 +106,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.XpOrb
   value: 1
+  kind: 0
   magnetRadius: 2.5
   pickupRadius: 0.4
   flySpeed: 9
   lifetime: 40
+  soulColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}

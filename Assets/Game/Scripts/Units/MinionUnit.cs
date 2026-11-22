@@ -18,8 +18,8 @@ namespace NecroDefense
         [SerializeField] private string displayName = "Minion";
         [Tooltip("รูปที่ใช้ใน UI (ว่าง = ใช้รูปของ Body)")]
         [SerializeField] private Sprite icon;
-        [Tooltip("Mana ที่ใช้อัญเชิญ")]
-        [SerializeField] private int manaCost = 10;
+        [Tooltip("Soul ที่ใช้อัญเชิญ")]
+        [SerializeField] private int soulCost = 10;
 
         [Header("Selection")]
         [Tooltip("วงที่โชว์ใต้ตัวตอนถูกเลือก")]
@@ -76,7 +76,7 @@ namespace NecroDefense
 
         public override Team Team => Team.Player;
         public string DisplayName => stats != null ? stats.displayName : displayName;
-        public int ManaCost => stats != null ? stats.manaCost : manaCost;
+        public int SoulCost => stats != null ? stats.soulCost : soulCost;
         public Sprite Icon => icon != null ? icon : (bodyRenderer != null ? bodyRenderer.sprite : null);
         public MinionCommand Command => _command;
 
@@ -85,7 +85,7 @@ namespace NecroDefense
             if (stats == null) return;
             ApplyUnitStats(stats);
             displayName = stats.displayName;
-            manaCost = stats.manaCost;
+            soulCost = stats.soulCost;
             aggroRange = stats.aggroRange;
             chaseLeash = stats.chaseLeash;
             guardRadius = stats.guardRadius;

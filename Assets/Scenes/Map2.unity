@@ -3461,7 +3461,7 @@ GameObject:
   - component: {fileID: 97890907}
   - component: {fileID: 97890906}
   m_Layer: 5
-  m_Name: Mana_Bar
+  m_Name: Soul_Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3503,7 +3503,7 @@ MonoBehaviour:
   fill: {fileID: 602600624}
   label: {fileID: 673425586}
   format: '{1}/{2}'
-  title: Mana
+  title: Soul
   animate: 1
   fillSpeed: 10
   useTrail: 1
@@ -3778,7 +3778,7 @@ GameObject:
   - component: {fileID: 125806905}
   - component: {fileID: 125806904}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9658,7 +9658,7 @@ GameObject:
   - component: {fileID: 325844979}
   - component: {fileID: 325844978}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12407,7 +12407,7 @@ GameObject:
   - component: {fileID: 426263805}
   - component: {fileID: 426263804}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12925,7 +12925,7 @@ GameObject:
   - component: {fileID: 461668728}
   - component: {fileID: 461668727}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17764,7 +17764,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mana
+  m_text: Soul
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}
@@ -18146,7 +18146,7 @@ GameObject:
   - component: {fileID: 694059859}
   - component: {fileID: 694059858}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19069,9 +19069,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.EconomyManager
   startingSouls: 100
-  maxMana: 100
-  startingMana: 100
-  manaRegenPerSecond: 2
+  maxSoul: 100
+  startingSoul: 100
+  soulDrainPerSecond: 1.5
 --- !u!4 &713561473
 Transform:
   m_ObjectHideFlags: 0
@@ -23983,7 +23983,7 @@ GameObject:
   - component: {fileID: 875506903}
   - component: {fileID: 875506902}
   m_Layer: 5
-  m_Name: Mana_Icon
+  m_Name: Soul_Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38413,7 +38413,7 @@ GameObject:
   - component: {fileID: 1612932415}
   - component: {fileID: 1612932414}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42404,7 +42404,7 @@ GameObject:
   - component: {fileID: 1758193632}
   - component: {fileID: 1758193631}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45566,7 +45566,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.PlayerStatusUI
   healthBar: {fileID: 1562936416}
-  manaBar: {fileID: 97890906}
+  soulBar: {fileID: 97890906}
   xpBar: {fileID: 952355650}
   levelText: {fileID: 413296964}
 --- !u!114 &1922317894
@@ -49967,7 +49967,7 @@ GameObject:
   - component: {fileID: 2071414207}
   - component: {fileID: 2071414206}
   m_Layer: 5
-  m_Name: Mana_Badge
+  m_Name: Soul_Badge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

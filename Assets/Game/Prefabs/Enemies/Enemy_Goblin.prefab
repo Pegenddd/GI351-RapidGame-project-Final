@@ -474,6 +474,7 @@ MonoBehaviour:
   soulReward: 3
   xpReward: 2
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}
+  soulOrbPrefab: {fileID: 4581923019842104924, guid: 8e45cf1293a12ab40bfa182f49d21c9a, type: 3}
   corpsePrefab: {fileID: 3678099141589912850, guid: b90db5d4a6c0a4d4d8bb3f4caf9bcb7b, type: 3}
   minionPrefab: {fileID: 6964816936015354112, guid: 05018ba19f92bb3468ebd8a2531be348, type: 3}
   raiseChance: 0.5

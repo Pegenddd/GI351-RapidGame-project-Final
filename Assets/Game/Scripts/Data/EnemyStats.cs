@@ -28,6 +28,8 @@ namespace NecroDefense
         public int soulReward = 2;
         [Tooltip("XP ที่ดรอป")]
         public int xpReward = 1;
+        [Tooltip("Soul ที่ดรอปเป็นลูกแก้ว (หลอด Soul ของผู้เล่น)")]
+        public int soulOrbValue = 8;
         [Tooltip("โอกาสชุบชีวิตสำเร็จ (0.3 = 30%)")]
         [Range(0f, 1f)] public float raiseChance = 0.3f;
 

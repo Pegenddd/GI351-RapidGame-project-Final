@@ -410,8 +410,8 @@ namespace NecroDefense.EditorTools
             SerializedObject so = new SerializedObject(bar);
             Image fill = so.FindProperty("fill").objectReferenceValue as Image;
             string n = bar.name;
-            // HP = แดงเลือด, Mana = ขาว, XP = เทา, ฐาน = ขาวกระดูก
-            Color c = n.StartsWith("Mana") ? new Color(0.86f, 0.86f, 0.86f, 1f)
+            // HP = แดงเลือด, Soul = ม่วง, XP = เทา, ฐาน = ขาวกระดูก
+            Color c = n.StartsWith("Soul") ? new Color(0.72f, 0.45f, 1f, 1f)
                     : n.StartsWith("XP") ? new Color(0.55f, 0.55f, 0.56f, 1f)
                     : n.StartsWith("Base") ? UITheme.Bone
                     : UITheme.Red;

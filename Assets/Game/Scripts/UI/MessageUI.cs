@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace NecroDefense
 {
-    /// <summary>ข้อความแจ้งเตือนกลางจอ (เช่น "Not enough Mana") แล้วค่อยๆ จางหาย</summary>
+    /// <summary>ข้อความแจ้งเตือนกลางจอ (เช่น "Not enough Soul") แล้วค่อยๆ จางหาย</summary>
     public class MessageUI : MonoBehaviour
     {
         [SerializeField] private TMP_Text text;

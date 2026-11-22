@@ -23,7 +23,7 @@ MonoBehaviour:
   attackInterval: 1.6
   areaRadius: 1.6
   canAttackFlying: 0
-  manaCost: 60
+  soulCost: 60
   aggroRange: 3
   chaseLeash: 5
   guardRadius: 3

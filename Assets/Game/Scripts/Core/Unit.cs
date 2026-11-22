@@ -132,6 +132,16 @@ namespace NecroDefense
         /// <summary>โดนตีจริง (ไม่นับพิษ) - คลาสลูกใช้เล่นเสียง/เอฟเฟกต์</summary>
         protected virtual void OnDamaged(float amount) { }
 
+        /// <summary>
+        /// ลดเลือดแบบไม่หักเกราะและไม่กระพริบ (ใช้กับหลอด Soul หมด)
+        /// ยังนับเป็นการตายปกติ: เลือดหมด -> OnDeath
+        /// </summary>
+        public void DrainHealth(float amount)
+        {
+            if (amount <= 0f || !IsAlive) return;
+            ApplyRawDamage(amount, false);
+        }
+
         public void Heal(float amount)
         {
             if (!IsAlive || amount <= 0f) return;

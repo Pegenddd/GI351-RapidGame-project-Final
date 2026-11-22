@@ -16,12 +16,12 @@ namespace NecroDefense.EditorTools
         private static readonly string[] EnemyCols =
         {
             "displayName", "maxHealth", "armor", "moveSpeed", "attackDamage", "attackInterval", "attackRange", "areaRadius",
-            "aggroRange", "priorityChaseRange", "soulReward", "xpReward", "raiseChance", "corpseHarvestSouls", "corpseExpireSouls", "splitCount",
+            "aggroRange", "priorityChaseRange", "soulReward", "xpReward", "soulOrbValue", "raiseChance", "corpseHarvestSouls", "corpseExpireSouls", "splitCount",
             "isFlying", "canAttackFlying", "attackPlayer", "attackMinions", "attackMainBase", "priority", "onlyMinionsOnLane", "shootWhileWalking", "attackStyle"
         };
         private static readonly string[] MinionCols =
         {
-            "displayName", "manaCost", "maxHealth", "armor", "moveSpeed", "attackDamage", "attackInterval", "attackRange", "areaRadius",
+            "displayName", "soulCost", "maxHealth", "armor", "moveSpeed", "attackDamage", "attackInterval", "attackRange", "areaRadius",
             "aggroRange", "chaseLeash", "guardRadius", "followDistance", "isFlying", "canAttackFlying", "attackStyle"
         };
         private static readonly string[] TowerLevelCols =
@@ -34,11 +34,11 @@ namespace NecroDefense.EditorTools
         {
             { "displayName", "Name" }, { "maxHealth", "HP" }, { "armor", "Armor" }, { "moveSpeed", "Speed" },
             { "attackDamage", "DMG" }, { "attackInterval", "Sec/Hit" }, { "attackRange", "Range" }, { "areaRadius", "AoE" },
-            { "aggroRange", "Sight" }, { "priorityChaseRange", "Chase" }, { "soulReward", "Souls" }, { "xpReward", "XP" },
+            { "aggroRange", "Sight" }, { "priorityChaseRange", "Chase" }, { "soulReward", "Souls" }, { "xpReward", "XP" }, { "soulOrbValue", "Soul ◆" },
             { "raiseChance", "Raise %" }, { "corpseHarvestSouls", "Corpse ◆" }, { "corpseExpireSouls", "Expire ◆" }, { "splitCount", "Split" }, { "isFlying", "Fly" }, { "canAttackFlying", "Hit Fly" },
             { "attackPlayer", "→Player" }, { "attackMinions", "→Minion" }, { "attackMainBase", "→Base" }, { "priority", "Priority" },
             { "onlyMinionsOnLane", "Lane:Min" }, { "shootWhileWalking", "Walk+Shoot" }, { "attackStyle", "Style" },
-            { "manaCost", "Mana" }, { "chaseLeash", "Leash" }, { "guardRadius", "Guard" }, { "followDistance", "Follow" },
+            { "soulCost", "Soul" }, { "chaseLeash", "Leash" }, { "guardRadius", "Guard" }, { "followDistance", "Follow" },
             { "label", "Tier" }, { "cost", "Cost" }, { "damage", "DMG" },
             { "range", "Range" }, { "targetsPerShot", "Shots" }, { "slowPercent", "Slow" }, { "slowDuration", "Slow s" },
             { "chainTargets", "Chain" }, { "soulCaptureChance", "Capture" }, { "poisonPoolChance", "Poison" },
