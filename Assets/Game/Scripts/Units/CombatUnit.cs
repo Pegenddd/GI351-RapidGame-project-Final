@@ -26,6 +26,10 @@ namespace NecroDefense
         [SerializeField] protected float areaRadius = 1.5f;
         [Tooltip("กระสุน (ใช้เมื่อ Attack Style = Ranged)")]
         [SerializeField] protected Projectile projectilePrefab;
+        [Tooltip("ปล่อยกระสุนหลังเริ่มท่าตีกี่วินาที (ให้ตรงกับจังหวะขว้าง/ยิงในท่าตี) 0 = ทันที")]
+        [SerializeField] protected float projectileDelay = 0f;
+        [Tooltip("จุดปล่อยกระสุน เทียบกับตัว (x กลับด้านตามทิศที่หัน) เช่น มือที่ชูเหนือหัว")]
+        [SerializeField] protected Vector2 projectileSpawnOffset = Vector2.zero;
         [Tooltip("ตีตัวบินได้ไหม")]
         [SerializeField] protected bool canAttackFlying = true;
         [Tooltip("เอฟเฟกต์ตอนทุบพื้น (ไม่ใส่ก็ได้)")]
@@ -211,11 +215,35 @@ namespace NecroDefense
             if (rb != null) rb.linearVelocity = Vector2.zero;
         }
 
+        [Header("Facing (หันซ้าย-ขวา)")]
+        [Tooltip("หันซ้าย-ขวาตามทิศที่เดิน/ตี (ปิด = หันตามรูปที่วาดตลอด ไม่กลับด้าน)")]
+        [SerializeField] protected bool flipToFace = true;
+        [Tooltip("ไม่หันกลับถ้าเป้า/จุดหมายอยู่เกือบตรงขึ้น-ลง (กันหันซ้าย-ขวาสลับไปมาตอนเดินทางตั้ง) - ยิ่งมากยิ่งหันยาก")]
+        [SerializeField] protected float faceDeadZone = 0.35f;
+        [Tooltip("หันกลับได้ไม่ถี่กว่านี้ (วินาที)")]
+        [SerializeField] protected float faceMinHoldTime = 0.3f;
+        private float _lastFaceFlipTime = -10f;
+
         protected void FaceTowards(Vector2 point)
         {
+            if (!flipToFace)
+            {
+                if (visualRoot != null && visualRoot.localScale.x < 0f)
+                {
+                    Vector3 s = visualRoot.localScale; s.x = -s.x; visualRoot.localScale = s;
+                }
+                else if (visualRoot == null && bodyRenderer != null) bodyRenderer.flipX = false;
+                return;
+            }
             float dx = point.x - Position.x;
-            if (Mathf.Abs(dx) <= 0.01f) return;
+            float dy = point.y - Position.y;
+            // จุดหมายเกือบตรงขึ้น-ลง หรือเพิ่งหันไป -> หันเหมือนเดิม
+            if (Mathf.Abs(dx) <= Mathf.Max(0.05f, Mathf.Abs(dy) * faceDeadZone)) return;
             bool left = dx < 0f;
+            bool nowLeft = visualRoot != null ? visualRoot.localScale.x < 0f : (bodyRenderer != null && bodyRenderer.flipX);
+            if (left == nowLeft) return;
+            if (Time.time - _lastFaceFlipTime < faceMinHoldTime) return;
+            _lastFaceFlipTime = Time.time;
             if (visualRoot != null)
             {
                 Vector3 sc = visualRoot.localScale;
@@ -254,10 +282,26 @@ namespace NecroDefense
                         target.TakeDamage(dmg);
                         break;
                     }
-                    Projectile p = Instantiate(projectilePrefab, Position, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
-                    p.Launch(Team, target, dmg, canAttackFlying);
+                    if (projectileDelay > 0f) StartCoroutine(FireProjectileLater(target, dmg));
+                    else FireProjectile(target, dmg);
                     break;
             }
+        }
+
+        private System.Collections.IEnumerator FireProjectileLater(Unit target, float dmg)
+        {
+            yield return new WaitForSeconds(projectileDelay);
+            if (!IsAlive || target == null || !target.IsAlive) yield break;
+            FireProjectile(target, dmg);
+        }
+
+        private void FireProjectile(Unit target, float dmg)
+        {
+            bool left = visualRoot != null ? visualRoot.localScale.x < 0f : (bodyRenderer != null && bodyRenderer.flipX);
+            Vector2 off = projectileSpawnOffset;
+            if (left) off.x = -off.x;
+            Projectile p = Instantiate(projectilePrefab, Position + off, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Projectiles));
+            p.Launch(Team, target, dmg, canAttackFlying);
         }
 
         protected override void OnDeath()

@@ -291,7 +291,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8371408617814268557
 Transform:
   m_ObjectHideFlags: 0
@@ -683,6 +683,98 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1 &4781806375832293590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2320886511383954311}
+  - component: {fileID: 7703663992239324222}
+  m_Layer: 0
+  m_Name: Body_Animated
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2320886511383954311
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4781806375832293590}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.030000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5901854139183860250}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &7703663992239324222
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4781806375832293590}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 21300000, guid: a20c9fa32b089a242919bb191158af86, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 1
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.9403333, y: 0.78}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!1 &4873806904752773917
 GameObject:
   m_ObjectHideFlags: 0
@@ -714,6 +806,7 @@ Transform:
   m_Children:
   - {fileID: 8371408617814268557}
   - {fileID: 5847982090756317013}
+  - {fileID: 2320886511383954311}
   m_Father: {fileID: 8698677303692922263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5996899664528155103
@@ -912,6 +1005,7 @@ GameObject:
   - component: {fileID: 5598349602890148417}
   - component: {fileID: 3999236106515658078}
   - component: {fileID: 726217086811671798}
+  - component: {fileID: 8236298275236661263}
   m_Layer: 0
   m_Name: Enemy_Slime
   m_TagString: Untagged
@@ -1017,7 +1111,7 @@ MonoBehaviour:
   armor: 0
   bodyRadius: 0.35
   isFlying: 0
-  bodyRenderer: {fileID: 5826611151562908133}
+  bodyRenderer: {fileID: 7703663992239324222}
   visualRoot: {fileID: 5901854139183860250}
   healthBar: {fileID: 7573512741896561585}
   hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
@@ -1029,8 +1123,14 @@ MonoBehaviour:
   attackInterval: 1
   areaRadius: 1.5
   projectilePrefab: {fileID: 0}
+  projectileDelay: 0
+  projectileSpawnOffset: {x: 0, y: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  soundKey: 
+  flipToFace: 1
+  faceDeadZone: 0.35
+  faceMinHoldTime: 0.3
   stats: {fileID: 11400000, guid: 7d0063d3229b91d45a9ad9e5a9ae674a, type: 2}
   displayName: Slime
   attackPlayer: 0
@@ -1045,17 +1145,49 @@ MonoBehaviour:
   waypointReachDistance: 0.5
   passThroughOtherEnemies: 1
   separationStrength: 1.2
+  passThroughMinions: 1
+  ignoreBusyMinions: 1
   stuckSkipTime: 1.5
   soulReward: 2
   xpReward: 1
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}
   soulOrbPrefab: {fileID: 4581923019842104924, guid: 8e45cf1293a12ab40bfa182f49d21c9a, type: 3}
+  soulOrbValue: 8
   corpsePrefab: {fileID: 3678099141589912850, guid: b90db5d4a6c0a4d4d8bb3f4caf9bcb7b, type: 3}
   minionPrefab: {fileID: 3379064651620771003, guid: 049f02ab527abeb4fbcf327360cebf0e, type: 3}
   raiseChance: 0.3
+  corpseHarvestSouls: 3
+  corpseExpireSouls: 1
   splitPrefab: {fileID: 4250298372006238618, guid: 4ac2ae6860828524ca15f8ed2388f833, type: 3}
   splitCount: 2
   splitSpread: 0.5
+  dropCorpseWhenSplitting: 0
+--- !u!114 &8236298275236661263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6414047210871633335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a2ba8aad6703940ab49dea945285d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.SpriteFrameAnimator
+  target: {fileID: 7703663992239324222}
+  walkFrames:
+  - {fileID: 21300000, guid: a20c9fa32b089a242919bb191158af86, type: 3}
+  - {fileID: 21300000, guid: 8b022748ebd185a4ca2b3161db3b0642, type: 3}
+  - {fileID: 21300000, guid: 3af13dfc2a442af4bba9c1c1af8e472f, type: 3}
+  - {fileID: 21300000, guid: ee35614279861734b88e2464da95424b, type: 3}
+  walkFps: 7
+  moveThreshold: 0.05
+  idleFrame: {fileID: 0}
+  attackFrames:
+  - {fileID: 21300000, guid: 8b022748ebd185a4ca2b3161db3b0642, type: 3}
+  - {fileID: 21300000, guid: ee35614279861734b88e2464da95424b, type: 3}
+  - {fileID: 21300000, guid: a20c9fa32b089a242919bb191158af86, type: 3}
+  attackFps: 10
 --- !u!1 &7112072650910076081
 GameObject:
   m_ObjectHideFlags: 0
@@ -1304,7 +1436,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5847982090756317013
 Transform:
   m_ObjectHideFlags: 0

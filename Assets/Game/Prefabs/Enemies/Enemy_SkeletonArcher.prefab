@@ -215,6 +215,7 @@ Transform:
   m_Children:
   - {fileID: 4295742354595724290}
   - {fileID: 6738964148871376056}
+  - {fileID: 2060398696912221528}
   m_Father: {fileID: 8384424805246646695}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1252149222306026288
@@ -232,7 +233,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4295742354595724290
 Transform:
   m_ObjectHideFlags: 0
@@ -268,6 +269,7 @@ GameObject:
   - component: {fileID: 2450812640290395511}
   - component: {fileID: 3229296452792860223}
   - component: {fileID: 2113323119889962654}
+  - component: {fileID: 1196773717133972784}
   m_Layer: 0
   m_Name: Enemy_SkeletonArcher
   m_TagString: Untagged
@@ -285,7 +287,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6885438829112334368}
@@ -373,7 +375,7 @@ MonoBehaviour:
   armor: 0
   bodyRadius: 0.3
   isFlying: 0
-  bodyRenderer: {fileID: 2774945024520729098}
+  bodyRenderer: {fileID: 3885062435849828100}
   visualRoot: {fileID: 1380678144182469692}
   healthBar: {fileID: 837354512664261448}
   hitFlashColor: {r: 1, g: 0.14999998, b: 0.14999998, a: 0.45}
@@ -384,9 +386,15 @@ MonoBehaviour:
   attackRange: 5
   attackInterval: 1.4
   areaRadius: 1.5
-  projectilePrefab: {fileID: 1517003644495182365, guid: d5673e5cc95a6884eac8b0429dc7919e, type: 3}
+  projectilePrefab: {fileID: 1517003644495182365, guid: 61b158f015f5a8743bb0ff0dbd281167, type: 3}
+  projectileDelay: 0.22
+  projectileSpawnOffset: {x: -0.18, y: 0.55}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  soundKey: 
+  flipToFace: 1
+  faceDeadZone: 0.35
+  faceMinHoldTime: 0.3
   stats: {fileID: 11400000, guid: 219b2771e881ade4b833c243645e7f53, type: 2}
   displayName: Skeleton Archer
   attackPlayer: 0
@@ -401,17 +409,49 @@ MonoBehaviour:
   waypointReachDistance: 0.5
   passThroughOtherEnemies: 1
   separationStrength: 1.2
+  passThroughMinions: 1
+  ignoreBusyMinions: 1
   stuckSkipTime: 1.5
   soulReward: 3
   xpReward: 2
   xpOrbPrefab: {fileID: 5815976901474413509, guid: 7ad78e0ac03ee224eb8e804fb3d291f7, type: 3}
   soulOrbPrefab: {fileID: 4581923019842104924, guid: 8e45cf1293a12ab40bfa182f49d21c9a, type: 3}
+  soulOrbValue: 8
   corpsePrefab: {fileID: 3678099141589912850, guid: b90db5d4a6c0a4d4d8bb3f4caf9bcb7b, type: 3}
   minionPrefab: {fileID: 7119111452116994504, guid: ce0b77a745ef9b949ac060c2bded3e1e, type: 3}
   raiseChance: 0.3
+  corpseHarvestSouls: 3
+  corpseExpireSouls: 1
   splitPrefab: {fileID: 0}
   splitCount: 0
   splitSpread: 0.5
+  dropCorpseWhenSplitting: 0
+--- !u!114 &1196773717133972784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2509149716833837530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a2ba8aad6703940ab49dea945285d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.SpriteFrameAnimator
+  target: {fileID: 3885062435849828100}
+  walkFrames:
+  - {fileID: 21300000, guid: 79aceda7d099ec2468c595b67a98c608, type: 3}
+  - {fileID: 21300000, guid: a5edc5ed78619c84c82db4f6db0345e5, type: 3}
+  - {fileID: 21300000, guid: 1fbe8ce35c9ffdc4c80c999b8b67dbd5, type: 3}
+  - {fileID: 21300000, guid: a5edc5ed78619c84c82db4f6db0345e5, type: 3}
+  walkFps: 7
+  moveThreshold: 0.05
+  idleFrame: {fileID: 0}
+  attackFrames:
+  - {fileID: 21300000, guid: dec62308281e69949831dd322aac645a, type: 3}
+  - {fileID: 21300000, guid: dec62308281e69949831dd322aac645a, type: 3}
+  - {fileID: 21300000, guid: 79aceda7d099ec2468c595b67a98c608, type: 3}
+  attackFps: 8
 --- !u!1 &3155973661080634698
 GameObject:
   m_ObjectHideFlags: 0
@@ -1104,6 +1144,98 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.WorldHealthBar
   fill: {fileID: 5945665953947182916}
   hideWhenFull: 1
+--- !u!1 &7184332770676823214
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2060398696912221528}
+  - component: {fileID: 3885062435849828100}
+  m_Layer: 0
+  m_Name: Body_Animated
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2060398696912221528
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7184332770676823214}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.09500003, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1380678144182469692}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &3885062435849828100
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7184332770676823214}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 21300000, guid: 79aceda7d099ec2468c595b67a98c608, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.8020833, y: 1.25}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!1 &7706629094085885299
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,7 +1252,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6738964148871376056
 Transform:
   m_ObjectHideFlags: 0

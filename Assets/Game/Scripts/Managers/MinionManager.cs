@@ -58,6 +58,11 @@ namespace NecroDefense
         [SerializeField] private int maxActiveMinions = 30;
         [SerializeField] private RingEffect summonEffect;
 
+        [Header("Summon FX (เอฟเฟกต์ตอนเรียกลูกน้อง)")]
+        [Tooltip("ใช้เอฟเฟกต์ลำแสง + โดม + ลูกน้องผุดจากพื้น (ปิด = ใช้ Summon Effect วงแหวนแบบเดิม)")]
+        [SerializeField] private bool useSummonFX = true;
+        [SerializeField] private SummonFX.Settings summonFX = new SummonFX.Settings();
+
         [Header("Command")]
         [Tooltip("คำสั่งเริ่มต้นของมินเนียนที่เพิ่งอัญเชิญ")]
         [SerializeField] private MinionCommand defaultCommand = MinionCommand.SelfDefense;
@@ -334,7 +339,8 @@ namespace NecroDefense
             m.SetCommand(defaultCommand);
 
             if (playEffect) Sfx.At(m.SoundKey == "Giant" ? "SFX_Minion_Summon_Giant" : "SFX_Minion_Summon", pos);
-            if (playEffect && summonEffect != null)
+            if (playEffect && useSummonFX) SummonFX.Play(pos, m, summonFX);
+            else if (playEffect && summonEffect != null)
             {
                 RingEffect fx = Instantiate(summonEffect, pos, Quaternion.identity, GameManager.GetFolder(SpawnFolder.Effects));
                 fx.Play(0.8f);

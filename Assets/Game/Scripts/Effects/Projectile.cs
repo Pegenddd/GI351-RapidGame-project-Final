@@ -110,7 +110,9 @@ namespace NecroDefense
                 _direction = (_target.Position - (Vector2)transform.position).normalized;
 
             transform.position += (Vector3)(_direction * speed * dt);
-            if (rotateToDirection)
+            if (spinSpeed != 0f)
+                transform.rotation = Quaternion.Euler(0f, 0f, transform.eulerAngles.z + spinSpeed * dt); // หมุนติ้ว (มีดขว้าง)
+            else if (rotateToDirection)
                 transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg);
 
             Unit hit = Registry.FindNearestHostile(transform.position, _team, hitRadius, _canHitFlying);

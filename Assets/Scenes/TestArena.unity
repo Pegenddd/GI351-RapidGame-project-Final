@@ -3404,6 +3404,7 @@ MonoBehaviour:
   maxSoul: 100
   startingSoul: 100
   soulDrainPerSecond: 1.5
+  emptySoulHealthDrainPerSecond: 3
 --- !u!4 &146630398
 Transform:
   m_ObjectHideFlags: 0
@@ -6272,6 +6273,15 @@ MonoBehaviour:
   label: {fileID: 120372908}
   format: '{1}/{2}'
   title: Soul
+  animate: 1
+  fillSpeed: 10
+  useTrail: 1
+  trail: {fileID: 0}
+  trailColor: {r: 1, g: 1, b: 1, a: 0.4}
+  trailDelay: 0.35
+  trailSpeed: 0.9
+  lowPulseBelow: 0
+  lowPulseColor: {r: 1, g: 0.55, b: 0.55, a: 1}
 --- !u!114 &305707271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16535,6 +16545,15 @@ MonoBehaviour:
   label: {fileID: 721381114}
   format: '{1}/{2}'
   title: XP
+  animate: 1
+  fillSpeed: 10
+  useTrail: 1
+  trail: {fileID: 0}
+  trailColor: {r: 1, g: 1, b: 1, a: 0.4}
+  trailDelay: 0.35
+  trailSpeed: 0.9
+  lowPulseBelow: 0
+  lowPulseColor: {r: 1, g: 0.55, b: 0.55, a: 1}
 --- !u!114 &812232953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17906,7 +17925,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -22001,6 +22020,7 @@ MonoBehaviour:
   text: {fileID: 1053424889}
   showTime: 1.6
   fadeTime: 0.4
+  errorColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!114 &1053424889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29301,6 +29321,15 @@ MonoBehaviour:
   label: {fileID: 67320938}
   format: '{1}/{2}'
   title: Base
+  animate: 1
+  fillSpeed: 10
+  useTrail: 1
+  trail: {fileID: 0}
+  trailColor: {r: 1, g: 1, b: 1, a: 0.4}
+  trailDelay: 0.35
+  trailSpeed: 0.9
+  lowPulseBelow: 0
+  lowPulseColor: {r: 1, g: 0.55, b: 0.55, a: 1}
 --- !u!114 &1362614961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29612,6 +29641,8 @@ MonoBehaviour:
   soulBar: {fileID: 305707270}
   xpBar: {fileID: 812232952}
   levelText: {fileID: 860536337}
+  overrideSoulColor: 0
+  soulColor: {r: 0.72, g: 0.45, b: 1, a: 1}
 --- !u!114 &1369870747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29724,7 +29755,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4280690406
   m_fontColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -29737,7 +29768,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -38259,6 +38290,15 @@ MonoBehaviour:
   label: {fileID: 136265533}
   format: '{1}/{2}'
   title: HP
+  animate: 1
+  fillSpeed: 10
+  useTrail: 1
+  trail: {fileID: 0}
+  trailColor: {r: 1, g: 1, b: 1, a: 0.4}
+  trailDelay: 0.35
+  trailSpeed: 0.9
+  lowPulseBelow: 0
+  lowPulseColor: {r: 1, g: 0.55, b: 0.55, a: 1}
 --- !u!114 &1786137069
 MonoBehaviour:
   m_ObjectHideFlags: 0

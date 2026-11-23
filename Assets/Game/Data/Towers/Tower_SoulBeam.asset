@@ -21,7 +21,7 @@ MonoBehaviour:
   - label: Base
     cost: 35
     description: Slows target for 2s.
-    damage: 4
+    damage: 6
     attackInterval: 1
     range: 5
     targetsPerShot: 1
@@ -34,7 +34,7 @@ MonoBehaviour:
   - label: Tier 1
     cost: 25
     description: Slow lasts 3s
-    damage: 5
+    damage: 8
     attackInterval: 1
     range: 5.2
     targetsPerShot: 1
@@ -47,7 +47,7 @@ MonoBehaviour:
   - label: Tier 2
     cost: 40
     description: Beam bounces to 2 targets
-    damage: 6
+    damage: 10
     attackInterval: 0.9
     range: 5.4
     targetsPerShot: 1
@@ -60,7 +60,7 @@ MonoBehaviour:
   - label: Tier 3
     cost: 60
     description: 'Chain Beam: hits up to 3 targets, no damage falloff'
-    damage: 8
+    damage: 12
     attackInterval: 0.9
     range: 5.6
     targetsPerShot: 1

@@ -31,7 +31,7 @@ MonoBehaviour:
   priorityChaseRange: 9
   onlyMinionsOnLane: 1
   shootWhileWalking: 1
-  soulReward: 3
+  soulReward: 2
   xpReward: 2
   soulOrbValue: 10
   raiseChance: 0.3

@@ -18,7 +18,7 @@ MonoBehaviour:
   isFlying: 1
   moveSpeed: 2
   attackStyle: 0
-  attackDamage: 6
+  attackDamage: 3
   attackRange: 0.3
   attackInterval: 0.9
   areaRadius: 1.5

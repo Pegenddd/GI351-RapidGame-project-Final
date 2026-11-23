@@ -54,6 +54,7 @@ namespace NecroDefense
         public bool IsSlowed => _slowTimer > 0f;
         public bool IsPoisoned => _poisonTimer > 0f;
         public SpriteRenderer BodyRenderer => bodyRenderer;
+        public Transform VisualRoot => visualRoot;
         public Transform HealthBarTransform => healthBar != null ? healthBar.transform : null;
         /// <summary>ตัวคูณความเร็วจากการโดน Slow (1 = ปกติ)</summary>
         public float SlowMultiplier => _slowTimer > 0f ? 1f - _slowPercent : 1f;

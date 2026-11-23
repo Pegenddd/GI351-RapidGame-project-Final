@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e103bf60ec6ed774480caa5b25b41af6, type: 3}
+  m_Name: Map2_PathLook
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.PathPaintStyle
+  look: 0
+  zoneSameAsLane: 1
+  dirtColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  dirtMottle: 0.08
+  dirtGrain: 0.03
+  dirtEdgeColor: {r: 0.56, g: 0.56, b: 0.56, a: 1}
+  dirtEdgeWidth: 0.22
+  dirtEdgeRoughness: 0.2
+  pebbleDensity: 0.45
+  pebbleColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
+  pebbleOutline: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  pebbleSize: {x: 0.03, y: 0.07}
+  seed: 7
+  laneMortar: {r: 0.45, g: 0.45, b: 0.45, a: 1}
+  laneStone: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  zoneMortar: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  zoneStone: {r: 0.93, g: 0.93, b: 0.93, a: 1}
+  tileHeightUnits: 3.2
+  borderWidth: 0.04
+  borderColor: {r: 0.22, g: 0.22, b: 0.22, a: 1}
+  edgeShadeWidth: 0.4
+  edgeShadeStrength: 0.1
+  dropShadowWidth: 0.3
+  dropShadowAlpha: 0.38
+  pixelsPerUnit: 64

@@ -32,7 +32,7 @@ MonoBehaviour:
     soulCaptureChance: 0
     poisonPoolChance: 0
   - label: Tier 1
-    cost: 30
+    cost: 40
     description: +Damage, +Radius
     damage: 16
     attackInterval: 2.6
@@ -45,9 +45,9 @@ MonoBehaviour:
     soulCaptureChance: 0
     poisonPoolChance: 0
   - label: Tier 2
-    cost: 45
+    cost: 50
     description: +Damage, +Radius
-    damage: 22
+    damage: 24
     attackInterval: 2.3
     range: 4.9
     targetsPerShot: 1
@@ -58,9 +58,9 @@ MonoBehaviour:
     soulCaptureChance: 0
     poisonPoolChance: 0
   - label: Tier 3
-    cost: 50
+    cost: 70
     description: 'Poison Pool: 70% chance to leave poison for 3s'
-    damage: 25
+    damage: 30
     attackInterval: 2
     range: 5
     targetsPerShot: 1

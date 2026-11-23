@@ -124,20 +124,30 @@ namespace NecroDefense
                 Tower t = slot != null ? slot.CurrentTower : null;
                 if (t == null || !t.BlocksPlayer) continue;
 
-                Vector2 c = t.FootprintCenter;
-                float rx = t.FootprintSize.x * 0.5f + footRadius;
-                float ry = t.FootprintSize.y * 0.5f + footRadius * 0.5f;
-                if (rx <= 0f || ry <= 0f) continue;
-                Vector2 d = new Vector2((feet.x - c.x) / rx, (feet.y - c.y) / ry);
-                float len = d.magnitude;
-                if (len >= 1f) continue;
-                if (len < 0.0001f) d = Vector2.down; else d /= len;
-                Vector2 edge = c + new Vector2(d.x * rx, d.y * ry);
-                Vector2 delta = edge - feet;
-                feet += delta;
-                transform.position += (Vector3)delta;
-                _rb.position = transform.position;
+                PushOutOf(ref feet, t.FootprintCenter, t.FootprintSize);
             }
+            // ของตกแต่งในแมพ (ต้นไม้ / พุ่มไม้ / หิน)
+            for (int i = 0; i < WorldProp.All.Count; i++)
+            {
+                WorldProp p = WorldProp.All[i];
+                if (p != null && p.BlocksPlayer) PushOutOf(ref feet, p.FootprintCenter, p.FootprintSize);
+            }
+        }
+
+        private void PushOutOf(ref Vector2 feet, Vector2 c, Vector2 size)
+        {
+            float rx = size.x * 0.5f + footRadius;
+            float ry = size.y * 0.5f + footRadius * 0.5f;
+            if (rx <= 0f || ry <= 0f) return;
+            Vector2 d = new Vector2((feet.x - c.x) / rx, (feet.y - c.y) / ry);
+            float len = d.magnitude;
+            if (len >= 1f) return;
+            if (len < 0.0001f) d = Vector2.down; else d /= len;
+            Vector2 edge = c + new Vector2(d.x * rx, d.y * ry);
+            Vector2 delta = edge - feet;
+            feet += delta;
+            transform.position += (Vector3)delta;
+            _rb.position = transform.position;
         }
 
         private static Vector2 ReadMoveInput()
