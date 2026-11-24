@@ -31,7 +31,7 @@ namespace NecroDefense
         private CombatUnit _unit;
         private Rigidbody2D _rb;
         private Vector3 _lastPos;
-        private float _walkTime, _attackTime = -1f;
+        private float _walkTime, _attackTime = -1f, _attackHold;
 
         private void Awake()
         {
@@ -51,9 +51,14 @@ namespace NecroDefense
             if (_unit != null) _unit.Attacked -= OnAttacked;
         }
 
-        private void OnAttacked()
+        private void OnAttacked() => PlayAttack();
+
+        /// <summary>เล่นท่าตีครั้งเดียว (เรียกจากโค้ดได้ เช่น ตอนผู้เล่นร่ายสกิล) holdSeconds = ค้างเฟรมสุดท้ายไว้เพิ่ม</summary>
+        public void PlayAttack(float holdSeconds = 0f)
         {
-            if (attackFrames != null && attackFrames.Length > 0) _attackTime = 0f;
+            if (attackFrames == null || attackFrames.Length == 0) return;
+            _attackTime = 0f;
+            _attackHold = Mathf.Max(0f, holdSeconds);
         }
 
         private void LateUpdate()
@@ -71,6 +76,8 @@ namespace NecroDefense
                 _attackTime += dt;
                 int i = Mathf.FloorToInt(_attackTime * Mathf.Max(0.1f, attackFps));
                 if (i < attackFrames.Length) { Show(attackFrames[i]); return; }
+                float end = attackFrames.Length / Mathf.Max(0.1f, attackFps);
+                if (_attackTime < end + _attackHold) { Show(attackFrames[attackFrames.Length - 1]); return; }
                 _attackTime = -1f;
             }
 

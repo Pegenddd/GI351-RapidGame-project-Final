@@ -23,6 +23,8 @@ namespace NecroDefense
         [SerializeField] private float footRadius = 0.18f;
 
         private Rigidbody2D _rb;
+        [Tooltip("รูปตัวละครหันไปทางขวา (ปิด = รูปหันซ้าย ระบบจะกลับด้านให้ตอนเดินขวา)")]
+        [SerializeField] private bool artFacesRight = true;
         private float _moveSpeedBonusPercent;
         private Vector2 _moveInput;
         private float _stepTimer;
@@ -104,7 +106,7 @@ namespace NecroDefense
                 if (_stepTimer <= 0f) { _stepTimer = 0.35f; Sfx.At("SFX_Player_Step", Position, 0.5f); }
             }
             else _stepTimer = 0.1f;
-            if (bodyRenderer != null && Mathf.Abs(_moveInput.x) > 0.01f) bodyRenderer.flipX = _moveInput.x < 0f;
+            if (bodyRenderer != null && Mathf.Abs(_moveInput.x) > 0.01f) bodyRenderer.flipX = artFacesRight ? _moveInput.x < 0f : _moveInput.x > 0f;
         }
 
         private void LateUpdate()

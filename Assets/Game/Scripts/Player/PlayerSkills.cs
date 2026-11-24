@@ -99,6 +99,7 @@ namespace NecroDefense
         private void Awake()
         {
             _player = GetComponent<PlayerNecromancer>();
+            _anim = GetComponentInChildren<SpriteFrameAnimator>();
             if (castBar != null) castBar.SetValue(1f);
             PlayerStats s = _player != null ? _player.Stats : null;
             if (s != null)
@@ -221,6 +222,7 @@ namespace NecroDefense
             }
             if (best == null) return false;
 
+            if (_anim != null) _anim.PlayAttack();
             int r = RollRaise(best);
             if (r == RaiseFailed)
                 GameManager.Instance.UI.ShowMessage("Raise Dead failed (" + Mathf.RoundToInt(Mathf.Clamp01(best.RaiseChance + raiseChanceBonus) * 100f) + "%)");
@@ -295,9 +297,12 @@ namespace NecroDefense
 
         // ---------------- Casting ----------------
 
+        private SpriteFrameAnimator _anim;
+
         /// <summary>เริ่มร่าย: ผู้เล่นหยุดเดิน แล้วค่อยปล่อยสกิลเมื่อครบเวลา</summary>
         private void BeginCast(float castTime, Action action)
         {
+            if (_anim != null) _anim.PlayAttack(castTime); // ท่าชูไม้เท้า → ชี้ ค้างไว้จนร่ายเสร็จ
             if (castTime <= 0f) { action(); return; }
             _castAction = action;
             _castDuration = castTime;

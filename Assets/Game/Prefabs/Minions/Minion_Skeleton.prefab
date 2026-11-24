@@ -48,7 +48,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2077944151253881717
 Transform:
   m_ObjectHideFlags: 0
@@ -742,8 +742,8 @@ Transform:
   m_GameObject: {fileID: 5891633795258868004}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.20069808, y: 0.20069808, z: 1}
+  m_LocalPosition: {x: 0, y: 0.09500003, z: 0}
+  m_LocalScale: {x: 2, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2072471125639638384}
@@ -797,7 +797,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: fab6f6b3841510a439232137220b0ddd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aae95137142294e4391001a9156aad7a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1188,6 +1188,7 @@ GameObject:
   - component: {fileID: 4155601824877691663}
   - component: {fileID: 3191860776408047146}
   - component: {fileID: 7119111452116994504}
+  - component: {fileID: 8455906462666925441}
   m_Layer: 0
   m_Name: Minion_Skeleton
   m_TagString: Untagged
@@ -1306,13 +1307,18 @@ MonoBehaviour:
   attackInterval: 1.2
   areaRadius: 1.5
   projectilePrefab: {fileID: 1778974467967613043, guid: 1034c7387780f694a8e9117b7a23a155, type: 3}
+  projectileDelay: 0
+  projectileSpawnOffset: {x: 0, y: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  soundKey: 
+  flipToFace: 1
+  faceDeadZone: 0.35
+  faceMinHoldTime: 0.3
   stats: {fileID: 11400000, guid: 6c5f188181b67254c9b1f41b32f93b56, type: 2}
   displayName: Skeleton
-  icon: {fileID: 21300000, guid: fab6f6b3841510a439232137220b0ddd, type: 3}
+  icon: {fileID: 21300000, guid: aae95137142294e4391001a9156aad7a, type: 3}
   soulCost: 25
-  sacrificeHealPercent: 10
   selectionRing: {fileID: 5194562067911861234}
   detectionRing: {fileID: 6541539621830898147}
   aggroRange: 6.5
@@ -1321,6 +1327,39 @@ MonoBehaviour:
   guardStandDistance: 2.5
   moveArriveDistance: 0.35
   followDistance: 1.8
+  splitPrefab: {fileID: 0}
+  splitCount: 2
+  splitSpread: 0.5
+  passThroughUnits: 1
+  splitToBlockFreeEnemies: 1
+  surroundSpacing: 55
+  separationStrength: 1
+--- !u!114 &8455906462666925441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8227847379682483321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a2ba8aad6703940ab49dea945285d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.SpriteFrameAnimator
+  target: {fileID: 1743594467340722573}
+  walkFrames:
+  - {fileID: 21300000, guid: aae95137142294e4391001a9156aad7a, type: 3}
+  - {fileID: 21300000, guid: f6d4549fde5bb814da947ff1df822907, type: 3}
+  - {fileID: 21300000, guid: b6f78adc7974ef347b301b61ab6c78f6, type: 3}
+  - {fileID: 21300000, guid: f6d4549fde5bb814da947ff1df822907, type: 3}
+  walkFps: 7
+  moveThreshold: 0.05
+  idleFrame: {fileID: 0}
+  attackFrames:
+  - {fileID: 21300000, guid: 2cecddbd90d8f6a45a82ae1c717feed4, type: 3}
+  - {fileID: 21300000, guid: 2cecddbd90d8f6a45a82ae1c717feed4, type: 3}
+  - {fileID: 21300000, guid: aae95137142294e4391001a9156aad7a, type: 3}
+  attackFps: 8
 --- !u!1 &8655330870091507208
 GameObject:
   m_ObjectHideFlags: 0

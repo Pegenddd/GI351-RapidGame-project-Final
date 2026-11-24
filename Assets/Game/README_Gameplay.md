@@ -171,3 +171,20 @@ UI เน้นไอคอน ข้อความรายละเอีย�
 - เรียกเสียงจากโค้ด: `Sfx.At("SFX_xxx", ตำแหน่ง)` (เสียงในโลก เบาลงตามระยะ) / `Sfx.UI("SFX_UI_xxx")` / `Sfx.Play("SFX_xxx")`
 - เพลงเปลี่ยนเอง: พักเวฟ = MUS_Build, เวฟ 1-4 / 5-8 / 9-12 = Battle Early / Mid / Final, ชนะ/แพ้ = MUS_Victory / MUS_Defeat
 - ป้อมอัปเกรด: `SFX_Tower_Upgrade_T1..T3` ตาม Tier
+
+---
+
+## หน้าเมนูหลัก (Main Menu)
+**ติดตั้ง (ครั้งเดียว):** เมนู **Tools > NecroDefense > Build Main Menu Scene** → Build
+จะสร้างซีน `Assets/Scenes/MainMenu.unity`, ตั้ง Build Settings ให้ MainMenu เป็นซีนแรก → Map2 และเพิ่มปุ่ม **Main Menu** ในหน้า Pause / จบเกม ของ Map2 (กดซ้ำได้ ไม่เพิ่มปุ่มซ้ำ)
+
+| อยากปรับ | ที่ |
+|---|---|
+| ภาพปก | `Assets/Game/Art/Menu/CoverGame.png` (ทับไฟล์ชื่อเดิม) |
+| ซีนที่เข้าตอนกด PLAY | `Canvas_Menu` > **MainMenuUI** > Game Scene Name |
+| ชื่อทีมในหน้า Credits | `Credits_Panel/Card/Body/Credits_Text` |
+| ข้อความปุ่ม / คำอธิบายตอนชี้ | ปุ่มนั้น > Label / **MenuButton** > Hint |
+| ขยายเท่าไร, ความเด้ง, เสียงปุ่ม | ปุ่มนั้น > **MenuButton** (Hover Scale, Stiffness, Damping, Hover/Click Sound) |
+| เถ้าถ่านลอย, ภาพขยับตามเมาส์, แสงแดงกระพริบ | `Canvas_Menu` > **MenuBackgroundFX** |
+| เพลง / เสียงกดเริ่ม | `MUS_Menu`, `SFX_Menu_Hover`, `SFX_Menu_Click`, `SFX_Menu_Start`, `SFX_Menu_Back` |
+| กลับเมนูจากโค้ด | `GameFlow.ToMainMenu()` |

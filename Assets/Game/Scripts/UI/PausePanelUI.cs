@@ -8,11 +8,13 @@ namespace NecroDefense
     {
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button restartButton;
+        [SerializeField] private Button menuButton;   // กลับหน้าเมนูหลัก
 
         private void Awake()
         {
             if (resumeButton != null) resumeButton.onClick.AddListener(() => GameManager.Instance.Resume());
             if (restartButton != null) restartButton.onClick.AddListener(() => GameManager.Instance.RestartGame());
+            if (menuButton != null) menuButton.onClick.AddListener(GameFlow.ToMainMenu);
         }
 
         public void Show()

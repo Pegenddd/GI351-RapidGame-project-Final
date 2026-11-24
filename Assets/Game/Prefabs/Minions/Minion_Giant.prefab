@@ -578,8 +578,8 @@ Transform:
   m_GameObject: {fileID: 4130031041206379701}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3108808, y: 0.3108808, z: 1}
+  m_LocalPosition: {x: 0, y: 0.07999998, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4150915614762498879}
@@ -633,9 +633,9 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 7d0b3d946f9c29143b63a861a5ec5d94, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b2bd61fd4b9d1c74e8ebdba7c0c648a9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 4.31, y: 5.79}
@@ -656,6 +656,7 @@ GameObject:
   - component: {fileID: 928948783356850894}
   - component: {fileID: 4913876003995543646}
   - component: {fileID: 8538096052331886428}
+  - component: {fileID: 77192589229072606}
   m_Layer: 0
   m_Name: Minion_Giant
   m_TagString: Untagged
@@ -774,13 +775,18 @@ MonoBehaviour:
   attackInterval: 1.6
   areaRadius: 1.6
   projectilePrefab: {fileID: 0}
+  projectileDelay: 0
+  projectileSpawnOffset: {x: 0, y: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 5171944064729236294, guid: ee67e3080ffc7e04db46762fefb655ea, type: 3}
+  soundKey: 
+  flipToFace: 1
+  faceDeadZone: 0.35
+  faceMinHoldTime: 0.3
   stats: {fileID: 11400000, guid: 2d8f77a7d638b5949bec90bc44f91093, type: 2}
   displayName: Giant
-  icon: {fileID: 21300000, guid: 7d0b3d946f9c29143b63a861a5ec5d94, type: 3}
+  icon: {fileID: 21300000, guid: b2bd61fd4b9d1c74e8ebdba7c0c648a9, type: 3}
   soulCost: 60
-  sacrificeHealPercent: 20
   selectionRing: {fileID: 295862504021360816}
   detectionRing: {fileID: 1650584069198313898}
   aggroRange: 5
@@ -789,6 +795,40 @@ MonoBehaviour:
   guardStandDistance: 2.5
   moveArriveDistance: 0.35
   followDistance: 1.8
+  splitPrefab: {fileID: 0}
+  splitCount: 2
+  splitSpread: 0.5
+  passThroughUnits: 1
+  splitToBlockFreeEnemies: 1
+  surroundSpacing: 55
+  separationStrength: 1
+--- !u!114 &77192589229072606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165305424436447245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a2ba8aad6703940ab49dea945285d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.SpriteFrameAnimator
+  target: {fileID: 3521274645097712320}
+  walkFrames:
+  - {fileID: 21300000, guid: b2bd61fd4b9d1c74e8ebdba7c0c648a9, type: 3}
+  - {fileID: 21300000, guid: 9942e3dd9b4e3cb4aa8c456cc68eca91, type: 3}
+  - {fileID: 21300000, guid: 7fe0a77adebbedb49b30a74451e59a65, type: 3}
+  - {fileID: 21300000, guid: f20418a547f99e145864f75465f54684, type: 3}
+  walkFps: 5
+  moveThreshold: 0.05
+  idleFrame: {fileID: 0}
+  attackFrames:
+  - {fileID: 21300000, guid: f20418a547f99e145864f75465f54684, type: 3}
+  - {fileID: 21300000, guid: f20418a547f99e145864f75465f54684, type: 3}
+  - {fileID: 21300000, guid: 9942e3dd9b4e3cb4aa8c456cc68eca91, type: 3}
+  - {fileID: 21300000, guid: b2bd61fd4b9d1c74e8ebdba7c0c648a9, type: 3}
+  attackFps: 8
 --- !u!1 &4357250831157788359
 GameObject:
   m_ObjectHideFlags: 0
@@ -1529,7 +1569,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5104904120914844455
 Transform:
   m_ObjectHideFlags: 0

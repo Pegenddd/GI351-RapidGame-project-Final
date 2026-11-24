@@ -442,8 +442,8 @@ Transform:
   m_GameObject: {fileID: 2633597185325352398}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.19144145, y: 0.19144145, z: 1}
+  m_LocalPosition: {x: 0, y: -0.030000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 399430907769065844}
@@ -497,9 +497,9 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 6f1e82bb4b221ef4582761e658d25e3c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6b41ccd964a448548aeeb028c6ea7682, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 4.44, y: 3.26}
@@ -523,7 +523,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8066681265440116708
 Transform:
   m_ObjectHideFlags: 0
@@ -651,6 +651,7 @@ GameObject:
   - component: {fileID: 8235957889311964615}
   - component: {fileID: 3750109330682810994}
   - component: {fileID: 3379064651620771003}
+  - component: {fileID: 3334347539661860130}
   m_Layer: 0
   m_Name: Minion_Slime
   m_TagString: Untagged
@@ -769,11 +770,17 @@ MonoBehaviour:
   attackInterval: 1
   areaRadius: 1.5
   projectilePrefab: {fileID: 0}
+  projectileDelay: 0
+  projectileSpawnOffset: {x: 0, y: 0}
   canAttackFlying: 1
   areaAttackEffect: {fileID: 0}
+  soundKey: 
+  flipToFace: 1
+  faceDeadZone: 0.35
+  faceMinHoldTime: 0.3
   stats: {fileID: 11400000, guid: 6492803a695a1c44aaba7ee6198f9f9e, type: 2}
   displayName: Slime
-  icon: {fileID: 21300000, guid: 6f1e82bb4b221ef4582761e658d25e3c, type: 3}
+  icon: {fileID: 21300000, guid: 6b41ccd964a448548aeeb028c6ea7682, type: 3}
   soulCost: 10
   selectionRing: {fileID: 4656619202593781152}
   detectionRing: {fileID: 1198531501619482449}
@@ -790,6 +797,32 @@ MonoBehaviour:
   splitToBlockFreeEnemies: 1
   surroundSpacing: 55
   separationStrength: 1
+--- !u!114 &3334347539661860130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3079833573977321273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81a2ba8aad6703940ab49dea945285d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NecroDefense.SpriteFrameAnimator
+  target: {fileID: 3785602686924942844}
+  walkFrames:
+  - {fileID: 21300000, guid: 6b41ccd964a448548aeeb028c6ea7682, type: 3}
+  - {fileID: 21300000, guid: 3edb3c54edfd80249a138ecbf25b68e1, type: 3}
+  - {fileID: 21300000, guid: de6a4b27e7315f746a2b880705d1fd8f, type: 3}
+  - {fileID: 21300000, guid: e9dde1c57c24dec43b849ad95e4fae3b, type: 3}
+  walkFps: 7
+  moveThreshold: 0.05
+  idleFrame: {fileID: 0}
+  attackFrames:
+  - {fileID: 21300000, guid: 3edb3c54edfd80249a138ecbf25b68e1, type: 3}
+  - {fileID: 21300000, guid: e9dde1c57c24dec43b849ad95e4fae3b, type: 3}
+  - {fileID: 21300000, guid: 6b41ccd964a448548aeeb028c6ea7682, type: 3}
+  attackFps: 10
 --- !u!1 &3266197587277555394
 GameObject:
   m_ObjectHideFlags: 0

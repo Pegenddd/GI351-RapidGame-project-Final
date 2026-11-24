@@ -13,9 +13,13 @@ namespace NecroDefense
     [DisallowMultipleComponent]
     public class StatusEffectVisual : MonoBehaviour
     {
-        [Header("สี")]
-        public Color slowColor = new Color(0.55f, 0.85f, 1f, 1f);
-        public Color poisonColor = new Color(1f, 0.22f, 0.33f, 1f);
+        [Header("สี (ขาว-ดำ-เทา ให้เข้ากับธีม)")]
+        [Tooltip("Slow = ขาวนิ่ง (เกล็ดน้ำแข็งร่วงลง)")]
+        public Color slowColor = new Color(0.96f, 0.96f, 0.95f, 1f);
+        [Tooltip("พิษ = เทาเข้ม กระพริบมืด-สว่าง (ฟองลอยขึ้น)")]
+        public Color poisonColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+        [Tooltip("พิษกระพริบแรงแค่ไหน (0 = ไม่กระพริบ)")]
+        [Range(0f, 1f)] public float poisonPulse = 0.5f;
 
         [Header("ไอคอนบนหัว")]
         public bool showIcons = true;
@@ -36,7 +40,15 @@ namespace NecroDefense
         private SpriteRenderer _body;
         private readonly List<SpriteRenderer> _outlines = new List<SpriteRenderer>();
         private readonly List<Color> _outlineBase = new List<Color>();
-        private SpriteRenderer _aura;              // ใช้แทนเส้นขอบ ถ้ายูนิตไม่มีเส้นขอบ
+        private SpriteRenderer _aura;              // ใช้แทนเส้นขอบ ถ้ายูนิตไม่มีเส้นขอบ และไม่มี shader เงา
+        private SpriteRenderer _glow;              // เงาเรืองรอบตัว (ตามรูปตัวที่กำลังเล่นท่า)
+        private static Material _silhouetteMat;
+        private static bool _silhouetteTried;
+
+        [Header("เงาเรืองรอบตัว (ใช้เมื่อยูนิตไม่มีเส้นขอบ)")]
+        [Tooltip("ขนาดเงาเทียบกับตัว (1.1 = ใหญ่กว่าตัว 10%)")]
+        public float glowScale = 1.12f;
+        [Range(0f, 1f)] public float glowAlpha = 0.85f;
         private Transform _iconRoot;
         private SpriteRenderer _slowIcon, _poisonIcon;
         private float _blend;                      // 0 = ไม่มีสถานะ, 1 = สีเต็ม
@@ -64,7 +76,7 @@ namespace NecroDefense
             _body = _unit != null ? _unit.BodyRenderer : null;
             foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>(true))
             {
-                if (!sr.name.StartsWith("Outline")) continue;
+                if (!sr.name.StartsWith("Outline") || !sr.gameObject.activeInHierarchy) continue; // เส้นขอบที่ถูกปิดไว้ (ภาพใหม่) ไม่นับ
                 _outlines.Add(sr);
                 _outlineBase.Add(sr.color);
             }
@@ -118,8 +130,8 @@ namespace NecroDefense
             Color status = slow && poison
                 ? (Mathf.Repeat(Time.time, 0.8f) < 0.4f ? slowColor : poisonColor)
                 : poison ? poisonColor : slowColor;
-            float pulse = poison ? 0.75f + 0.25f * Mathf.Sin(Time.time * 9f) : 1f;
-            Color glow = new Color(status.r * pulse, status.g * pulse, status.b * pulse, 1f);
+            float pulse = poison ? 1f + poisonPulse * Mathf.Sin(Time.time * 7f) : 1f;
+            Color glow = new Color(Mathf.Clamp01(status.r * pulse), Mathf.Clamp01(status.g * pulse), Mathf.Clamp01(status.b * pulse), 1f);
 
             if (_outlines.Count > 0)
             {
@@ -152,6 +164,7 @@ namespace NecroDefense
 
         private void UpdateAura(Color glow, float dt)
         {
+            if (UpdateGlow(glow)) return;
             if (_blend <= 0f && _aura == null) return;
             if (_aura == null)
             {
@@ -269,8 +282,47 @@ namespace NecroDefense
             }
         }
 
+        /// <summary>เงารูปเดียวกับตัว (สีเดียวทึบ) อยู่ด้านหลัง ขยายนิดหน่อย = เส้นขอบเรือง ใช้ได้กับภาพที่เล่นท่า</summary>
+        private bool UpdateGlow(Color glow)
+        {
+            if (_body == null) return false;
+            if (_glow == null)
+            {
+                if (_blend <= 0f) return true;
+                Material m = SilhouetteMaterial();
+                if (m == null) return false;
+                _glow = MakeRenderer("StatusGlow", _body.transform, _body.sprite, _body.sortingOrder - 1);
+                _glow.sharedMaterial = m;
+                _glow.sortingLayerID = _body.sortingLayerID;
+            }
+            bool on = _blend > 0.01f && _body.enabled && _body.gameObject.activeInHierarchy;
+            _glow.enabled = on;
+            if (!on) return true;
+            _glow.sprite = _body.sprite;
+            _glow.sortingOrder = _body.sortingOrder - 1;
+            float pulse = 1f + 0.03f * Mathf.Sin(Time.time * 6f);
+            float sx = glowScale * pulse * (_body.flipX ? -1f : 1f);
+            _glow.transform.localScale = new Vector3(sx, glowScale * pulse, 1f);
+            _glow.transform.localPosition = Vector3.zero;
+            Color c = glow;
+            c.a = glowAlpha * _blend;
+            _glow.color = c;
+            return true;
+        }
+
+        private static Material SilhouetteMaterial()
+        {
+            if (_silhouetteTried) return _silhouetteMat;
+            _silhouetteTried = true;
+            Shader sh = Resources.Load<Shader>("Shaders/NecroSpriteSilhouette");
+            if (sh == null) sh = Shader.Find("NecroDefense/SpriteSilhouette");
+            if (sh != null) _silhouetteMat = new Material(sh) { name = "StatusSilhouette" };
+            return _silhouetteMat;
+        }
+
         private void OnDisable()
         {
+            if (_glow != null) _glow.enabled = false;
             for (int i = 0; i < _outlines.Count; i++)
                 if (_outlines[i] != null) _outlines[i].color = _outlineBase[i];
         }

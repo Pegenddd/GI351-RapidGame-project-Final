@@ -10,12 +10,14 @@ namespace NecroDefense
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text detailText;
         [SerializeField] private Button restartButton;
+        [SerializeField] private Button menuButton;   // กลับหน้าเมนูหลัก
         [SerializeField] private string victoryTitle = "VICTORY";
         [SerializeField] private string defeatTitle = "DEFEAT";
 
         private void Awake()
         {
             if (restartButton != null) restartButton.onClick.AddListener(() => GameManager.Instance.RestartGame());
+            if (menuButton != null) menuButton.onClick.AddListener(GameFlow.ToMainMenu);
         }
 
         public void Show(bool victory)
